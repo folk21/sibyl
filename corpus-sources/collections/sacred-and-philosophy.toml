@@ -1,0 +1,10 @@
+schema_version = 1
+id = "sacred-and-philosophy"
+description = "Optional philosophy and sacred-text candidates; runtime filtering remains independent of retrieval mechanics."
+enabled_by_default = false
+works = [
+  "marcus-aurelius-meditations",
+  "bible-king-james-version",
+  "bhagavad-gita-song-celestial",
+  "laozi-tao-te-ching-legge"
+]

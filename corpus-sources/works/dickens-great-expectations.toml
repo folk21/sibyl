@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "dickens-great-expectations"
+author = "Charles Dickens"
+title = "Great Expectations"
+category = "literature"
+original_language = "en"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "dickens-great-expectations-pg-1400"
+language = "en"
+role = "original"
+source_family = "project_gutenberg"
+source_name = "Project Gutenberg"
+source_uri = "https://www.gutenberg.org/ebooks/1400"
+source_locator = "Project Gutenberg eBook #1400; pin the exact downloaded artifact/hash before approval."
+rights_status = "review_required"
+rights_jurisdiction = "US,RU,EU"
+rights_notes = "Project Gutenberg marks the eBook public domain in the USA; verify intended distribution jurisdictions and retained source-wrapper terms before enabling."
+provenance = "Seed candidate for original-language ingestion followed by labelled build-time Russian machine translation."

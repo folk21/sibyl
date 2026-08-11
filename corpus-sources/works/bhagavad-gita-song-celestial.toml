@@ -1,0 +1,23 @@
+schema_version = 1
+work_id = "bhagavad-gita-song-celestial"
+author = "Traditional attribution"
+title = "Bhagavad-Gita (The Song Celestial)"
+category = "sacred_text"
+original_language = "sa"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "bhagavad-gita-song-celestial-pg-2388"
+language = "en"
+role = "human_translation"
+translator = "Edwin Arnold"
+source_family = "project_gutenberg"
+source_name = "Project Gutenberg"
+source_uri = "https://www.gutenberg.org/ebooks/2388"
+source_locator = "Project Gutenberg eBook #2388; pin the exact downloaded artifact/hash before approval."
+rights_status = "review_required"
+rights_jurisdiction = "US,RU,EU"
+rights_notes = "Review both the ancient/traditional source and this concrete English translation/digital edition before enabling."
+provenance = "Seed candidate for philosophy/sacred-text retrieval with an explicitly labelled Russian machine translation."

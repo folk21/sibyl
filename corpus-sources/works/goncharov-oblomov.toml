@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "goncharov-oblomov"
+author = "Иван Гончаров"
+title = "Обломов"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "goncharov-oblomov-ru-wikisource"
+language = "ru"
+role = "original"
+source_family = "russian_wikisource"
+source_name = "Russian Wikisource"
+source_uri = "https://ru.wikisource.org/wiki/%D0%9E%D0%B1%D0%BB%D0%BE%D0%BC%D0%BE%D0%B2_(%D0%93%D0%BE%D0%BD%D1%87%D0%B0%D1%80%D0%BE%D0%B2)"
+source_locator = "Candidate work page; pin a concrete edition and revision before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Confirm the concrete edition, digital-source reuse terms, and target-distribution rights before enabling."
+provenance = "Seed candidate for the initial Russian-language Sibyl corpus."

@@ -1,0 +1,18 @@
+schema_version = 1
+id = "foreign-classics-ru"
+description = "Foreign classics sourced in English and intended for labelled build-time Russian machine translation."
+enabled_by_default = true
+works = [
+  "austen-pride-and-prejudice",
+  "bronte-jane-eyre",
+  "bronte-wuthering-heights",
+  "shelley-frankenstein",
+  "carroll-alice-in-wonderland",
+  "melville-moby-dick",
+  "dickens-great-expectations",
+  "dickens-tale-of-two-cities",
+  "wilde-dorian-gray",
+  "doyle-adventures-of-sherlock-holmes",
+  "twain-huckleberry-finn",
+  "stoker-dracula"
+]

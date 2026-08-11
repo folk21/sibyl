@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "gogol-government-inspector"
+author = "Николай Гоголь"
+title = "Ревизор"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "gogol-government-inspector-ru-wikisource"
+language = "ru"
+role = "original"
+source_family = "russian_wikisource"
+source_name = "Russian Wikisource"
+source_uri = "https://ru.wikisource.org/wiki/%D0%A0%D0%B5%D0%B2%D0%B8%D0%B7%D0%BE%D1%80_(%D0%93%D0%BE%D0%B3%D0%BE%D0%BB%D1%8C)"
+source_locator = "Candidate work page; pin a concrete edition and revision before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Confirm the concrete edition, digital-source reuse terms, and target-distribution rights before enabling."
+provenance = "Seed candidate for the initial Russian-language Sibyl corpus."

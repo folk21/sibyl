@@ -1,0 +1,23 @@
+schema_version = 1
+work_id = "laozi-tao-te-ching-legge"
+author = "Laozi"
+title = "Tao Te Ching"
+category = "sacred_text"
+original_language = "zh"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "laozi-tao-te-ching-legge-pg-216"
+language = "en"
+role = "human_translation"
+translator = "James Legge"
+source_family = "project_gutenberg"
+source_name = "Project Gutenberg"
+source_uri = "https://www.gutenberg.org/ebooks/216"
+source_locator = "Project Gutenberg eBook #216; pin the exact downloaded artifact/hash before approval."
+rights_status = "review_required"
+rights_jurisdiction = "US,RU,EU"
+rights_notes = "Review both the ancient/traditional source and this concrete English translation/digital edition before enabling."
+provenance = "Seed candidate for philosophy/sacred-text retrieval with an explicitly labelled Russian machine translation."

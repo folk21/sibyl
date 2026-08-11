@@ -1,0 +1,20 @@
+[corpus]
+format_version = 2
+language = "en"
+
+[passages]
+# Passage boundaries are paragraph-aware. These values are preferences and hard validation limits.
+min_words = 8
+preferred_words = 45
+max_words = 120
+overlap_paragraphs = 1
+
+[hints]
+# The first repository version uses deterministic local hints.
+hints_per_passage = 2
+
+[embeddings]
+# "hash" is a deterministic development provider and is not intended for production semantic quality.
+provider = "hash"
+dimensions = 32
+normalize = true

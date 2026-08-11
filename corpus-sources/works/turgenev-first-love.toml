@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "turgenev-first-love"
+author = "Иван Тургенев"
+title = "Первая любовь"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "turgenev-first-love-ru-wikisource"
+language = "ru"
+role = "original"
+source_family = "russian_wikisource"
+source_name = "Russian Wikisource"
+source_uri = "https://ru.wikisource.org/wiki/%D0%9F%D0%B5%D1%80%D0%B2%D0%B0%D1%8F_%D0%BB%D1%8E%D0%B1%D0%BE%D0%B2%D1%8C_(%D0%A2%D1%83%D1%80%D0%B3%D0%B5%D0%BD%D0%B5%D0%B2)"
+source_locator = "Candidate work page; pin a concrete edition and revision before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Confirm the concrete edition, digital-source reuse terms, and target-distribution rights before enabling."
+provenance = "Seed candidate for the initial Russian-language Sibyl corpus."

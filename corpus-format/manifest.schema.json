@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sibyl.local/schema/corpus-manifest-v2.json",
+  "title": "Sibyl Corpus Manifest v2",
+  "type": "object",
+  "required": [
+    "format_version",
+    "language",
+    "embedding",
+    "counts",
+    "artifacts"
+  ],
+  "properties": {
+    "format_version": {
+      "const": 2
+    },
+    "language": {
+      "type": "string",
+      "minLength": 2
+    },
+    "embedding": {
+      "type": "object",
+      "required": [
+        "provider",
+        "dimensions",
+        "normalize"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "normalize": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "works",
+        "passages",
+        "hints"
+      ],
+      "properties": {
+        "works": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hints": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "corpus",
+        "vectors"
+      ],
+      "properties": {
+        "corpus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vectors": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "target_language": {
+          "type": "string",
+          "minLength": 2
+        },
+        "source_languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2
+          },
+          "uniqueItems": true
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "literature",
+              "philosophy",
+              "sacred_text"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

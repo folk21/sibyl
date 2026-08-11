@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "doyle-adventures-of-sherlock-holmes"
+author = "Arthur Conan Doyle"
+title = "The Adventures of Sherlock Holmes"
+category = "literature"
+original_language = "en"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "doyle-adventures-of-sherlock-holmes-pg-1661"
+language = "en"
+role = "original"
+source_family = "project_gutenberg"
+source_name = "Project Gutenberg"
+source_uri = "https://www.gutenberg.org/ebooks/1661"
+source_locator = "Project Gutenberg eBook #1661; pin the exact downloaded artifact/hash before approval."
+rights_status = "review_required"
+rights_jurisdiction = "US,RU,EU"
+rights_notes = "Project Gutenberg marks the eBook public domain in the USA; verify intended distribution jurisdictions and retained source-wrapper terms before enabling."
+provenance = "Seed candidate for original-language ingestion followed by labelled build-time Russian machine translation."

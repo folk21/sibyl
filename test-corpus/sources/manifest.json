@@ -1,0 +1,16 @@
+{
+  "works": [
+    {
+      "id": "synthetic-road",
+      "author": "Synthetic fixture",
+      "title": "The Road",
+      "file": "road.txt"
+    },
+    {
+      "id": "synthetic-room",
+      "author": "Synthetic fixture",
+      "title": "The Room",
+      "file": "room.txt"
+    }
+  ]
+}

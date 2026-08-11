@@ -1,0 +1,39 @@
+# IDE and OS
+.idea/
+*.iml
+.DS_Store
+
+# Gradle / Kotlin
+.gradle/
+**/build/
+**/.kotlin/
+mobile/local.properties
+mobile/.gradle-dist/
+
+# Xcode
+**/DerivedData/
+**/*.xcuserdata/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+corpus-builder/.venv/
+corpus-builder/dist/
+**/*.egg-info/
+
+# Corpus data and generated artifacts
+corpus-builder/data/raw/
+corpus-builder/data/work/
+corpus-builder/data/output/
+*.usearch
+*.onnx
+*.safetensors
+*.gguf
+
+# Local environment
+.env
+.env.*
+!.env.example

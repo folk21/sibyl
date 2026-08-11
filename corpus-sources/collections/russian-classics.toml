@@ -1,0 +1,30 @@
+schema_version = 1
+id = "russian-classics"
+description = "Russian classics in Russian candidate source versions."
+enabled_by_default = true
+works = [
+  "pushkin-captains-daughter",
+  "pushkin-queen-of-spades",
+  "pushkin-eugene-onegin",
+  "lermontov-hero-of-our-time",
+  "gogol-dead-souls",
+  "gogol-overcoat",
+  "gogol-nose",
+  "gogol-government-inspector",
+  "turgenev-fathers-and-sons",
+  "turgenev-first-love",
+  "goncharov-oblomov",
+  "dostoevsky-crime-and-punishment",
+  "dostoevsky-brothers-karamazov",
+  "dostoevsky-idiot",
+  "dostoevsky-notes-from-underground",
+  "tolstoy-war-and-peace",
+  "tolstoy-anna-karenina",
+  "tolstoy-death-of-ivan-ilyich",
+  "chekhov-ward-no-6",
+  "chekhov-lady-with-the-dog",
+  "chekhov-cherry-orchard",
+  "saltykov-shchedrin-golovlyov-family",
+  "ostrovsky-storm",
+  "leskov-lady-macbeth-mtsensk"
+]

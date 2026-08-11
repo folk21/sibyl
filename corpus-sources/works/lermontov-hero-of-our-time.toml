@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "lermontov-hero-of-our-time"
+author = "Михаил Лермонтов"
+title = "Герой нашего времени"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "lermontov-hero-of-our-time-ru-wikisource"
+language = "ru"
+role = "original"
+source_family = "russian_wikisource"
+source_name = "Russian Wikisource"
+source_uri = "https://ru.wikisource.org/wiki/%D0%93%D0%B5%D1%80%D0%BE%D0%B9_%D0%BD%D0%B0%D1%88%D0%B5%D0%B3%D0%BE_%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8_(%D0%9B%D0%B5%D1%80%D0%BC%D0%BE%D0%BD%D1%82%D0%BE%D0%B2)"
+source_locator = "Candidate work page; pin a concrete edition and revision before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Confirm the concrete edition, digital-source reuse terms, and target-distribution rights before enabling."
+provenance = "Seed candidate for the initial Russian-language Sibyl corpus."

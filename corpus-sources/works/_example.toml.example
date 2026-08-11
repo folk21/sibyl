@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "example-work"
+author = "Example Author"
+title = "Example Work"
+category = "literature"
+original_language = "en"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "example-work-source-v1"
+language = "en"
+role = "original"
+source_family = "example_source"
+source_name = "Example Source"
+source_uri = "https://example.invalid/work"
+source_locator = "Candidate source; pin a concrete edition/revision/artifact before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Review the exact text version and distribution rights before enabling."
+provenance = "Explain how this text version was identified and how it can be reproduced."

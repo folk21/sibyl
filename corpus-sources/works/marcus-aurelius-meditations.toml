@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "marcus-aurelius-meditations"
+author = "Marcus Aurelius"
+title = "Meditations"
+category = "philosophy"
+original_language = "grc"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "build_time_machine_translation"
+
+[[text_versions]]
+id = "marcus-aurelius-meditations-pg-2680"
+language = "en"
+role = "human_translation"
+source_family = "project_gutenberg"
+source_name = "Project Gutenberg"
+source_uri = "https://www.gutenberg.org/ebooks/2680"
+source_locator = "Project Gutenberg eBook #2680; pin the exact downloaded artifact/hash before approval."
+rights_status = "review_required"
+rights_jurisdiction = "US,RU,EU"
+rights_notes = "Review both the ancient/traditional source and this concrete English translation/digital edition before enabling."
+provenance = "Seed candidate for philosophy/sacred-text retrieval with an explicitly labelled Russian machine translation."

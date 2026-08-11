@@ -1,0 +1,22 @@
+schema_version = 1
+work_id = "gogol-dead-souls"
+author = "Николай Гоголь"
+title = "Мёртвые души"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "gogol-dead-souls-ru-wikisource"
+language = "ru"
+role = "original"
+source_family = "russian_wikisource"
+source_name = "Russian Wikisource"
+source_uri = "https://ru.wikisource.org/wiki/%D0%9C%D1%91%D1%80%D1%82%D0%B2%D1%8B%D0%B5_%D0%B4%D1%83%D1%88%D0%B8_(%D0%93%D0%BE%D0%B3%D0%BE%D0%BB%D1%8C)"
+source_locator = "Candidate work page; pin a concrete edition and revision before approval."
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Confirm the concrete edition, digital-source reuse terms, and target-distribution rights before enabling."
+provenance = "Seed candidate for the initial Russian-language Sibyl corpus."
