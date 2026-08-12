@@ -51,6 +51,21 @@ def validate_work(path: Path) -> tuple[str, bool]:
         require(isinstance(version.get("language"), str) and version["language"], f"{prefix}: missing language for {version_id}")
         uri = version.get("source_uri")
         require(isinstance(uri, str) and urlparse(uri).scheme in {"http", "https"}, f"{prefix}: invalid source_uri for {version_id}")
+        for hash_field in ("artifact_sha256", "canonical_sha256"):
+            value = version.get(hash_field)
+            if value is not None:
+                require(
+                    isinstance(value, str)
+                    and len(value) == 64
+                    and all(character in "0123456789abcdefABCDEF" for character in value),
+                    f"{prefix}: invalid {hash_field} for {version_id}",
+                )
+        download_uri = version.get("download_uri")
+        if download_uri is not None:
+            require(
+                isinstance(download_uri, str) and urlparse(download_uri).scheme in {"http", "https"},
+                f"{prefix}: invalid download_uri for {version_id}",
+            )
 
     enabled = bool(data.get("enabled", False))
     if enabled:
@@ -59,6 +74,14 @@ def validate_work(path: Path) -> tuple[str, bool]:
             require(version.get("rights_status") == "approved", f"{prefix}: enabled version must have approved rights")
             locator = version.get("source_locator")
             require(isinstance(locator, str) and locator and "Candidate" not in locator, f"{prefix}: enabled version needs a pinned source locator")
+            require(
+                isinstance(version.get("artifact_sha256"), str),
+                f"{prefix}: enabled version needs artifact_sha256",
+            )
+            require(
+                isinstance(version.get("canonical_sha256"), str),
+                f"{prefix}: enabled version needs canonical_sha256",
+            )
 
     return work_id, enabled
 

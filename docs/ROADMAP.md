@@ -17,7 +17,7 @@ Priorities:
 | F-02 | done | P0 | Create Android-first KMP/Compose project with separate Android entry point. |
 | F-03 | done | P0 | Define `EmbeddingEngine`, `VectorIndex`, and deterministic `SelectionEngine` boundaries. |
 | F-04 | done | P0 | Add Python corpus-builder skeleton with staging and validation. |
-| F-05 | done | P0 | Define corpus format v2 with work/text-version/passage/passage-text/hint separation. |
+| F-05 | done | P0 | Define corpus format v3 with work/text-version/passage/passage-text/hint separation plus source artifact/canonical hashes. |
 | F-06 | done | P1 | Consolidate detailed documentation under root `docs/`; keep subproject README/AGENTS only. |
 | F-07 | done | P1 | Add root onboarding/test map and Mermaid architecture diagrams. |
 | F-08 | done | P0 | Add JVM Compose Desktop development harness using the shared UI/runtime code. |
@@ -32,22 +32,24 @@ Priorities:
 | S-02 | done | P0 | Seed 40 candidate works across Russian classics, foreign originals, philosophy, and sacred texts. |
 | S-03 | done | P0 | Add deterministic source-registry validation and collection-reference checks. |
 | S-04 | in_progress | P0 | Review/pin concrete editions or digital revisions and rights metadata for the first usable source subset. |
-| S-05 | todo | P0 | Implement explicit Russian Wikisource fetch/import adapter with source revision/artifact hashing. |
-| S-06 | todo | P0 | Implement explicit Project Gutenberg fetch/import adapter that strips repository wrappers without changing literary text. |
-| S-07 | todo | P0 | Add source artifact cache outside Git and reproducible fetch manifests/checksums. |
+| S-05 | in_progress | P0 | Support Russian Wikisource through reviewed local UTF-8 import + hashing; add safe automatic revision-aware extraction later. |
+| S-06 | done | P0 | Implement explicit Project Gutenberg plain-text fetch adapter with versioned wrapper removal and exact-content preservation. |
+| S-07 | done | P0 | Add local source artifact cache outside Git with raw/canonical SHA-256 metadata and prepared manifests. |
+| S-07a | done | P0 | Add Lib.ru author-page discovery into editable `include` / `exclude` / `review` selection manifests, excluding correspondence by default. |
+| S-07b | done | P0 | Add resilient batch Lib.ru acquisition with TXT → HTML → FB2 fallback, versioned normalizers, per-work failure reporting, batch preparation, and optional candidate registration with pinned hashes. |
 | S-08 | todo | P1 | Add approved historical Russian human translations where preferable to machine translation. |
 | S-09 | todo | P1 | Add build-time machine translation adapter for approved foreign originals; persist provider/model metadata. |
-| S-10 | todo | P1 | Expand reviewed source registry beyond the seed 40 while keeping exact-version provenance. |
+| S-10 | in_progress | P1 | Expand reviewed source registry beyond the seed 40 using catalog discovery + human review while keeping exact-version provenance. |
 | S-11 | todo | P1 | Define sacred-text tradition/version metadata where the distinction matters to users. |
 
 ## Corpus quality and ML preparation
 
 | ID | Status | Priority | Work |
 |---|---|---:|---|
-| C-01 | in_progress | P0 | Improve paragraph/natural-boundary extraction beyond the deterministic development splitter. |
+| C-01 | done | P0 | Add deterministic exact-source passage extraction using paragraph/sentence boundaries with hard max size and word-boundary fallback. |
 | C-02 | todo | P0 | Produce explicit `short` / `standard` / `extended` variants without arbitrary truncation. |
-| C-03 | todo | P0 | Select and lock the first production multilingual embedding model/version. |
-| C-04 | todo | P0 | Add production batch embedding adapter and manifest compatibility metadata. |
+| C-03 | in_progress | P0 | Evaluate `intfloat/multilingual-e5-small` as the first multilingual baseline; production model lock remains pending. |
+| C-04 | done | P0 | Add opt-in Sentence Transformers embeddings with model metadata, batched progress reporting, and resumable per-input embedding cache. |
 | C-05 | todo | P0 | Write a USearch/HNSW-compatible ANN artifact with stable semantic-hint IDs. |
 | C-06 | todo | P1 | Add LLM-assisted semantic hints behind an explicit build-time adapter. |
 | C-07 | todo | P1 | Add passage quality scoring: standalone quality, context dependency, spoiler risk, duplicate/near-duplicate detection. |

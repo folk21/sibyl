@@ -52,7 +52,7 @@ There is no required backend in the core architecture.
 - `corpus-sources/` may contain disabled candidate records while review is incomplete.
 - An enabled production source must pin a concrete edition/revision/artifact and have approved rights/provenance metadata.
 - A public-domain original does not imply a modern translation is reusable.
-- Do not commit large downloaded texts, scans, generated translations, production indexes, or model files.
+- Do not commit large downloaded texts, scans, generated translations, production indexes, model files, or embedding caches. `corpus-builder/data/` is local/generated only; committed fixtures belong under `test-corpus/`.
 
 ## Architecture boundaries
 
@@ -60,6 +60,7 @@ There is no required backend in the core architecture.
 - `corpus-builder/` may depend on format/source declarations but must not execute mobile code.
 - `corpus-format/` owns persisted semantics and must not depend on builder/mobile internals.
 - `corpus-sources/` owns source/version declarations and review state, not passage extraction or ranking.
+- Source discovery manifests are developer review artifacts: discovery may classify candidates but must never approve or publish them automatically.
 - Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`.
 - The JVM Desktop app is a development harness: reuse shared UI/runtime code and do not introduce a REST/backend boundary just to run it locally.
 - UI must not implement ranking, vector-search internals, or corpus parsing.
@@ -108,3 +109,6 @@ Use one owning root document and link to it instead of duplicating detailed cont
 4. From the repository root, run `make check` and focused mobile tests where relevant.
 5. Validate Markdown links and source-registry references.
 6. Full generated archives must use `sibyl/` as the top-level directory.
+7. Name complete repository archives with `FULL` and patch archives with `PATCH`. A patch archive contains only added/modified files under `sibyl/`; deleted paths must be reported explicitly because extracting a ZIP cannot delete them.
+8. When handing off either a full archive or a patch, explicitly report the list of deleted files; write `none` when there are no deletions.
+9. `archive.sh` and `concat_sibyl.sh` must exclude downloaded/generated corpus data, embedding/model caches, virtual environments, build outputs, and local IDE/tool metadata.

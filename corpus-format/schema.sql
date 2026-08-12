@@ -30,6 +30,9 @@ CREATE TABLE text_version (
     edition_year INTEGER,
     source_name TEXT NOT NULL,
     source_uri TEXT,
+    source_locator TEXT,
+    source_artifact_sha256 TEXT,
+    canonical_text_sha256 TEXT,
     rights_status TEXT,
     rights_jurisdiction TEXT,
     provenance TEXT

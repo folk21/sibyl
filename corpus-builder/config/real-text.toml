@@ -1,0 +1,24 @@
+[corpus]
+format_version = 3
+language = "ru"
+
+[passages]
+min_words = 20
+preferred_words = 70
+max_words = 140
+overlap_paragraphs = 1
+
+[hints]
+# First real-corpus milestone indexes the exact passage text itself.
+# LLM semantic hints are a later, independently measurable enhancement.
+provider = "passage_text"
+hints_per_passage = 1
+
+[embeddings]
+provider = "sentence_transformers"
+model_id = "intfloat/multilingual-e5-small"
+dimensions = 384
+normalize = true
+passage_prefix = "passage: "
+batch_size = 32
+cache = true

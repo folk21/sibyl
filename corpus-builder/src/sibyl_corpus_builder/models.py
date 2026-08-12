@@ -17,6 +17,9 @@ class SourceDocument:
     translation_provider: str | None = None
     translation_model: str | None = None
     source_uri: str | None = None
+    source_locator: str | None = None
+    source_artifact_sha256: str | None = None
+    canonical_text_sha256: str | None = None
     rights_status: str | None = None
     rights_jurisdiction: str | None = None
     provenance: str | None = None
@@ -30,6 +33,9 @@ class PassageCandidate:
     ordinal: int
     text: str
     word_count: int
+    source_start: int
+    source_end: int
+    source_locator: str
 
 
 @dataclass(frozen=True)

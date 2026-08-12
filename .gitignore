@@ -1,10 +1,12 @@
 # IDE and OS
 .idea/
+.vscode/
 *.iml
 .DS_Store
 
 # Gradle / Kotlin
 .gradle/
+**/.gradle/
 **/build/
 **/.kotlin/
 mobile/local.properties
@@ -18,20 +20,36 @@ mobile/.gradle-dist/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
 .ruff_cache/
 .venv/
-corpus-builder/.venv/
+.venv-ml/
+**/.venv/
+**/.venv-ml/
 corpus-builder/dist/
 **/*.egg-info/
 
-# Corpus data and generated artifacts
-corpus-builder/data/raw/
-corpus-builder/data/work/
-corpus-builder/data/output/
+# Corpus-builder local/generated data
+# Tiny committed fixtures belong under test-corpus/, never under corpus-builder/data/.
+corpus-builder/data/
+
+# Local ML/model/download caches if created inside the checkout
+.cache/
+**/.cache/
+.huggingface/
+**/.huggingface/
+.torch/
+**/.torch/
+
+# Generated corpus/model artifacts
 *.usearch
 *.onnx
 *.safetensors
 *.gguf
+
+# Generated project snapshots / archives
+sibyl_files.txt
+*.zip
 
 # Local environment
 .env

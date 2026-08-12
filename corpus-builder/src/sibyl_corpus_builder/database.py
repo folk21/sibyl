@@ -36,6 +36,9 @@ CREATE TABLE text_version (
     edition_year INTEGER,
     source_name TEXT NOT NULL,
     source_uri TEXT,
+    source_locator TEXT,
+    source_artifact_sha256 TEXT,
+    canonical_text_sha256 TEXT,
     rights_status TEXT,
     rights_jurisdiction TEXT,
     provenance TEXT
@@ -81,6 +84,7 @@ def create_database(
     format_version: int,
     language: str,
     embedding_provider: str,
+    embedding_model: str | None,
     embedding_dimensions: int,
     documents: list[SourceDocument],
     passages: list[PassageCandidate],
@@ -90,17 +94,18 @@ def create_database(
         path.unlink()
     path.parent.mkdir(parents=True, exist_ok=True)
 
+    metadata = [
+        ("format_version", str(format_version)),
+        ("language", language),
+        ("embedding_provider", embedding_provider),
+        ("embedding_dimensions", str(embedding_dimensions)),
+    ]
+    if embedding_model:
+        metadata.append(("embedding_model", embedding_model))
+
     with sqlite3.connect(path) as connection:
         connection.executescript(SCHEMA)
-        connection.executemany(
-            "INSERT INTO metadata(key, value) VALUES (?, ?)",
-            [
-                ("format_version", str(format_version)),
-                ("language", language),
-                ("embedding_provider", embedding_provider),
-                ("embedding_dimensions", str(embedding_dimensions)),
-            ],
-        )
+        connection.executemany("INSERT INTO metadata(key, value) VALUES (?, ?)", metadata)
 
         for document in documents:
             author_id = f"a_{document.source_id}"
@@ -125,9 +130,10 @@ def create_database(
                 """
                 INSERT INTO text_version(
                     id, work_id, language, role, translator, translation_provider,
-                    translation_model, source_name, source_uri, rights_status,
+                    translation_model, source_name, source_uri, source_locator,
+                    source_artifact_sha256, canonical_text_sha256, rights_status,
                     rights_jurisdiction, provenance
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     document.text_version_id,
@@ -139,6 +145,9 @@ def create_database(
                     document.translation_model,
                     document.source_name,
                     document.source_uri,
+                    document.source_locator,
+                    document.source_artifact_sha256,
+                    document.canonical_text_sha256,
                     document.rights_status,
                     document.rights_jurisdiction,
                     document.provenance,
@@ -149,14 +158,15 @@ def create_database(
             connection.execute(
                 """
                 INSERT INTO passage(
-                    id, work_id, ordinal, source_locator, quality_score, context_dependency, spoiler_risk
+                    id, work_id, ordinal, source_locator, quality_score,
+                    context_dependency, spoiler_risk
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     passage.passage_id,
                     passage.source_id,
                     passage.ordinal,
-                    f"ordinal:{passage.ordinal}",
+                    passage.source_locator,
                     None,
                     None,
                     None,
@@ -174,7 +184,7 @@ def create_database(
                     "standard",
                     passage.text,
                     passage.word_count,
-                    f"ordinal:{passage.ordinal}",
+                    passage.source_locator,
                 ),
             )
 

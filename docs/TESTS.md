@@ -19,7 +19,7 @@ Current coverage:
 | `make check` | Builder tests + corpus-format validation + source-registry validation | Python 3.11+ and builder dev dependencies |
 | `make check-all` | `make check` + Android host tests + desktop JVM shared tests | Python 3.11+, JDK 17+, Android SDK |
 | `make test-corpus-builder` | Python unit/integration tests | Python 3.11+, `pytest` available |
-| `make validate-format` | Validate corpus-format v2 schema/fixtures | Python 3.11+ |
+| `make validate-format` | Validate corpus-format v3 schema/fixtures | Python 3.11+ |
 | `make validate-sources` | Validate source TOML records and collection references | Python 3.11+ |
 | `make smoke-corpus` | Build and validate a temporary synthetic corpus | Python 3.11+ |
 | `make test-mobile` | Run Android shared host tests | JDK 17+, Android SDK |
@@ -51,7 +51,7 @@ Platform inference/index adapters should have focused integration tests. Golden 
 
 ### Corpus builder
 
-Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts.
+Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg.
 
 ### Corpus format
 
@@ -59,7 +59,7 @@ Validate SQL creation, foreign keys, required metadata, text-version roles, mani
 
 ### Source registry
 
-Source records may exist as disabled candidates while review is incomplete. `enabled = true` is stricter: the record must be approved, have approved rights metadata, and identify a pinned source locator instead of a candidate landing page.
+Source records may exist as disabled candidates while review is incomplete. `enabled = true` is stricter: the record must be approved, have approved rights metadata, identify a pinned source locator, and pin both raw-artifact and canonical-text SHA-256 values.
 
 ## Smoke corpus
 
@@ -86,3 +86,6 @@ The following must remain opt-in:
 - build-time translation API calls;
 - LLM-assisted semantic-hint generation;
 - corpus-quality evaluation over large real-text datasets.
+
+
+Corpus-builder tests also cover source-artifact normalization/hashing, prepared-source materialization, and exact source-slice passage extraction. Network fetches and ML model downloads remain outside the default test suite.

@@ -28,3 +28,5 @@ python tools/validate_registry.py
 ```
 
 See root `docs/SOURCES.md` and `docs/TESTS.md`.
+
+- Enabled source versions must pin both raw `artifact_sha256` and normalized `canonical_sha256`; local candidate preparation may use `--allow-unapproved` but its outputs are not publishable.

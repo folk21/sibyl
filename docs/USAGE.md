@@ -2,64 +2,155 @@
 
 ## Interactive development
 
-For day-to-day manual verification, run the JVM Desktop harness from the repository root:
+From the repository root:
 
 ```bash
 make run-desktop
 ```
 
-It opens the same shared Compose `SibylApp()` used by Android. No server or REST layer is involved. Use Android only when platform-specific behavior needs verification.
+The Desktop harness uses the same shared Compose `SibylApp()` as Android and currently remains connected to demo retrieval. The next runtime milestone is loading a prepared real corpus into Desktop.
 
-## Runtime workflow
+## Fastest real-text workflow: discover an author catalog
 
-```mermaid
-flowchart LR
-    Q[Question / state] --> E[Local query embedding]
-    E --> V[Local vector search]
-    V --> C[Multiple plausible candidates]
-    C --> S[Controlled-random selection]
-    S --> P[Exact stored passage]
-    P --> H[Automatic history]
-    P --> M[Optional saved encounter]
-```
+Corpus preparation is intentionally separated from runtime development. For Russian classics, the first convenient batch workflow starts from a Lib.ru/Классика author page.
 
-The current Android and Desktop demo hosts substitute deterministic in-memory retrieval for the production embedding/vector adapters.
+All commands below are run from `corpus-builder/`.
 
-A saved encounter preserves the **question + selected passage**. Automatic history is separate and does not imply the user explicitly saved anything.
-
-## Corpus-builder development workflow
+### 1. Discover works
 
 ```bash
-cd /path/to/sibyl/corpus-builder
-sibyl-corpus build \
-  --config config/example.toml \
-  --source ../test-corpus/sources \
-  --output data/output/demo
-
-sibyl-corpus validate --corpus data/output/demo/corpus.db
+sibyl-corpus discover \
+  --url "http://az.lib.ru/d/dostoewskij_f_m" \
+  --output data/work/dostoevsky-selection.toml
 ```
 
-For a disposable end-to-end fixture build from the repository root:
+The command does not download books. It produces an editable selection manifest with `include`, `exclude`, and `review` decisions. Correspondence/epistolary entries are automatically excluded.
+
+### 2. Review the generated selection
+
+Open:
+
+```text
+data/work/dostoevsky-selection.toml
+```
+
+Change decisions or remove entries. Only `decision = "include"` is processed later. `review` is intentionally not treated as include.
+
+Optionally fill `registry_work_id` for stable permanent IDs before registration.
+
+### 3. Acquire the included works
+
+```bash
+sibyl-corpus acquire \
+  --selection data/work/dostoevsky-selection.toml \
+  --cache data/raw
+```
+
+For Lib.ru, the builder tries source artifacts in this order:
+
+1. TXT exposed or derivable from the work page;
+2. the work-page HTML, extracting only the literary body;
+3. FB2/FB2 ZIP as a final fallback.
+
+The first safely normalized artifact is cached with raw/canonical hashes. Acquisition is per-work: one malformed source does not discard successful books. By default the command writes `data/work/dostoevsky-selection-acquire-report.toml` with `acquired`, `failed`, and `skipped` items. If any included work fails, the command exits non-zero **after** processing the whole selection so the report can be reviewed and the command retried.
+
+### 4. Materialize canonical builder input
+
+```bash
+sibyl-corpus prepare-selection \
+  --selection data/work/dostoevsky-selection.toml \
+  --cache data/raw \
+  --output data/work/dostoevsky
+```
+
+### 5. Review passage candidates
+
+```bash
+sibyl-corpus inspect-passages \
+  --config config/real-text.toml \
+  --source data/work/dostoevsky \
+  --output data/work/dostoevsky-passages.jsonl
+```
+
+Each passage has an exact canonical-text `chars:start:end` locator and a hard `max_words` limit. Long paragraphs are split at sentence boundaries when possible, with a word-boundary fallback rather than mid-character truncation.
+
+### 6. Optionally register the concrete source versions
+
+Once the selection/artifacts are worth keeping in the project registry:
+
+```bash
+sibyl-corpus register \
+  --selection data/work/dostoevsky-selection.toml \
+  --cache data/raw \
+  --registry ../corpus-sources \
+  --collection dostoevsky-libru
+```
+
+This creates disabled candidate records with hashes; it does not approve or enable them. Existing registry works are never overwritten.
+
+### 7. Build semantic vectors and corpus artifacts
+
+Install the opt-in ML dependencies once in a Python 3.11/3.12 environment. On machines whose default Python is newer, use a separate ML virtual environment:
+
+```bash
+python3.12 -m venv .venv-ml
+source .venv-ml/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[ml]'
+```
+
+Python 3.11 is also supported for this environment. The current ML extra is pinned so corpus embeddings are built with a reproducible dependency stack.
+
+Then:
+
+```bash
+sibyl-corpus build \
+  --config config/real-text.toml \
+  --source data/work/dostoevsky \
+  --output data/output/dostoevsky
+
+sibyl-corpus validate --corpus data/output/dostoevsky/corpus.db
+```
+
+The initial real-text configuration uses `multilingual-e5-small` via Sentence Transformers and indexes exact passage text itself. LLM-generated semantic hints are intentionally deferred so their value can be evaluated separately.
+
+During the embedding stage the builder prints cache statistics and a progress bar. Completed batches are stored under `data/work/<prepared-source>/.embedding-cache/`, outside published corpus output. `Ctrl+C` may discard the currently running batch, but previously completed batches remain reusable. Rerun the same `build` command to resume; a fully cached build skips loading the ML model. Changing model/provider/dimensions/normalization/prefix selects a different cache namespace, while changing passage text naturally produces a new text hash.
+
+## Existing single-source workflow
+
+For a registered Project Gutenberg work:
+
+```bash
+sibyl-corpus fetch \
+  --registry ../corpus-sources \
+  --work melville-moby-dick \
+  --cache data/raw \
+  --allow-unapproved
+```
+
+For a reviewed local UTF-8 artifact:
+
+```bash
+sibyl-corpus import-file \
+  --registry ../corpus-sources \
+  --work chekhov-lady-with-the-dog \
+  --file /path/to/reviewed-source.txt \
+  --cache data/raw \
+  --allow-unapproved
+```
+
+Then use `sibyl-corpus prepare` with one or more `--work` arguments.
+
+## Synthetic smoke build
+
+From the repository root:
 
 ```bash
 make smoke-corpus
 ```
 
-## Source-registry workflow
+This path remains deterministic and does not download texts or models.
 
-Before a real work enters a production corpus:
+## Source approval
 
-1. register a candidate in `corpus-sources/`;
-2. validate metadata/collection references;
-3. pin the concrete source edition/artifact/revision;
-4. review rights/provenance;
-5. explicitly enable the source;
-6. fetch/import it through an explicit builder adapter;
-7. build passages/hints/vectors;
-8. validate and publish the corpus package.
-
-See [`SOURCES.md`](SOURCES.md).
-
-## Corpus contract
-
-Builder and mobile communicate through the versioned contract in `corpus-format/`. Do not make an undocumented schema/semantic change in one side only. See [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md).
+Discovery/acquisition is not approval. Before any corpus is distributed, pin the concrete artifact/edition, record raw/canonical hashes, complete rights review, and enable only approved source versions. See [`SOURCES.md`](SOURCES.md).

@@ -30,7 +30,7 @@ Current concepts:
 
 ### `[corpus]`
 
-- `format_version` — target corpus-format version;
+- `format_version` — target corpus-format version (currently `3`);
 - `language` — primary target/display language.
 
 ### `[passages]`
@@ -44,22 +44,32 @@ Production preparation will generate explicit short/standard/extended variants i
 
 ### `[hints]`
 
-- `hints_per_passage` — number of internal retrieval descriptions.
+- `provider` — `deterministic` for tests or `passage_text` for the first real-text retrieval baseline;
+- `hints_per_passage` — number of internal retrieval descriptions. `passage_text` requires `1`.
 
 ### `[embeddings]`
 
-- `provider` — embedding adapter ID (`hash` is development-only);
+- `provider` — embedding adapter ID (`hash` is deterministic development-only; `sentence_transformers` is opt-in build-time ML);
+- `model_id` — required for Sentence Transformers;
 - `dimensions`;
-- `normalize`.
+- `normalize`;
+- `passage_prefix` — model-specific prefix such as `passage: ` for the first E5 evaluation config;
+- `batch_size` — number of missing embedding inputs computed before each durable cache checkpoint;
+- `cache` — enable the local resumable embedding cache. The real-text profile enables it; deterministic fixture builds disable it.
 
 The published manifest must preserve model/provider identity and vector assumptions so mobile can reject incompatible packages.
 
-## Source registry
+## Source discovery and registry
 
-Source records live in `corpus-sources/works/*.toml`; collections live in `corpus-sources/collections/*.toml`. Candidate records are disabled until source/version and rights review are complete.
+Editable discovery manifests live under local `corpus-builder/data/work/` and are not committed. The selection schema uses `include` / `exclude` / `review`; batch acquisition processes only explicit `include`. `registry_work_id` is optional until permanent registration.
+
+Permanent source records live in `corpus-sources/works/*.toml`; collections live in `corpus-sources/collections/*.toml`. Candidate records are disabled until source/version and rights review are complete.
 
 See [`SOURCES.md`](SOURCES.md).
 
 ## Secrets
 
 The default repository path requires no secrets. Future LLM/translation adapters may read environment variables during corpus builds. Never commit credentials, and never require a network secret for the core mobile question-to-passage flow.
+
+
+`corpus-builder/config/real-text.toml` is the first real-corpus evaluation profile. It is intentionally separate from the deterministic default config so `make check` never downloads a model.

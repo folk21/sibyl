@@ -6,10 +6,16 @@ Sibyl is a monorepo with independently buildable mobile and corpus-tooling proje
 
 ## Minimal prerequisites
 
-For repository validation and corpus tooling:
+For repository validation and non-ML corpus tooling:
 
 - Git;
 - Python 3.11+.
+
+For the optional Sentence Transformers embedding environment:
+
+- Python 3.11 or 3.12.
+
+The ML extra is intentionally pinned to a conservative stack that remains usable on Intel macOS. Do not install `.[ml]` from Python 3.13+; create a separate Python 3.11/3.12 virtual environment instead.
 
 For the Desktop development harness:
 
@@ -44,6 +50,22 @@ python -m pip install -e '.[dev]'
 ```
 
 On Windows use `.venv\\Scripts\\activate`.
+
+### Optional ML environment
+
+The regular builder can use Python 3.11+, but the current embedding toolchain is pinned for Python 3.11/3.12 so it remains reproducible on Intel macOS.
+
+If your normal Python is newer, create a separate ML environment. For example on macOS with Python 3.12 installed:
+
+```bash
+cd /path/to/sibyl/corpus-builder
+python3.12 -m venv .venv-ml
+source .venv-ml/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[ml]'
+```
+
+The current pinned ML stack is `numpy==1.26.4`, `torch==2.2.2`, and `sentence-transformers==3.4.1`. Keep these versions aligned unless a dependency upgrade is deliberately tested on all supported corpus-building hosts.
 
 ## Desktop development harness
 

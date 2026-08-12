@@ -32,7 +32,9 @@ A persisted contract change should normally update together:
 
 ## Source changes
 
-Adding a candidate source requires a work record, collection membership, and `make validate-sources` run from the repository root. Enabling a source additionally requires pinned provenance and approved rights metadata.
+For catalog-scale additions, prefer `sibyl-corpus discover` → developer review → resilient `acquire` (review its per-work report) before creating permanent registry records. `register` may then create disabled candidate records with pinned hashes. For individual additions, a work record + collection membership remains valid.
+
+Enabling any source requires pinned provenance and approved rights metadata. Run `make validate-sources` after permanent registry changes.
 
 See [`SOURCES.md`](SOURCES.md).
 
@@ -60,4 +62,14 @@ Production model downloads, large real corpora, external APIs, and GPU jobs are 
 
 ## Generated artifacts
 
-Never commit production `corpus.db`, ANN indexes, ONNX models, downloaded books/scans, generated translations, caches, or transient builder outputs unless a deliberate tiny fixture is documented and reviewed.
+Never commit production `corpus.db`, ANN indexes, ONNX models, downloaded books/scans, generated translations, embedding caches, or transient builder outputs unless a deliberate tiny fixture is documented and reviewed. `corpus-builder/data/` is reserved for local/generated data; committed tiny fixtures belong under `test-corpus/`.
+
+## Repository snapshots
+
+Use `archive.sh` for shareable full ZIP archives and `concat_sibyl.sh` for source-only concatenated text snapshots. Both helper paths exclude `corpus-builder/data/`, local virtual environments, model/download caches, Gradle/Kotlin caches, IDE metadata, and generated build outputs. Keep generated snapshot files outside the repository when practical.
+
+## Archive handoff
+
+- Complete repository archives use `sibyl/` as the top-level directory and include `FULL` in the filename.
+- Patch archives use `sibyl/` as the top-level directory, include `PATCH` in the filename, and contain only added/modified files.
+- ZIP extraction cannot represent deletion semantics; every handoff must explicitly list deleted paths, or state `none`.

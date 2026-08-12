@@ -2,7 +2,7 @@
 
 `corpus-format/` defines the versioned persisted contract between the Python builder and the mobile runtime.
 
-Current format: **2**.
+Current format: **3**.
 
 Canonical files:
 

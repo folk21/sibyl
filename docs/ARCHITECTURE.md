@@ -9,10 +9,14 @@ Sibyl separates expensive corpus preparation from lightweight on-device retrieva
 ```mermaid
 flowchart TB
     subgraph BuildTime[Build time]
+        SU[Author/catalog URL]
+        DS[Discovery + editable selection]
         SR[corpus-sources registry]
-        FI[Explicit fetch / local import]
+        FI[Explicit batch/single-source acquisition]
+        AC[Raw artifact cache + hashes]
+        CN[Canonical text]
         CB[corpus-builder]
-        PE[Passage extraction and variants]
+        PE[Exact passage extraction]
         SH[Semantic hints]
         EM[Embeddings]
         QV[Quality / provenance validation]
@@ -21,7 +25,10 @@ flowchart TB
         VI[(vector index)]
         MF[manifest]
 
-        SR --> FI --> CB
+        SU --> DS --> FI
+        DS -. optional registration .-> SR
+        SR --> FI
+        FI --> AC --> CN --> CB
         CB --> PE
         CB --> SH
         CB --> EM
@@ -97,9 +104,12 @@ Candidate records may exist while review is incomplete. An enabled production re
 
 Owns build-time transformation:
 
-- explicit source loading/import;
-- normalization that preserves literary content;
-- passage boundary detection;
+- explicit source catalog discovery into developer-review manifests;
+- explicit batch/single-source acquisition;
+- source-specific TXT/HTML/FB2/plain-text normalization with deterministic fallback;
+- raw/canonical artifact hashing;
+- versioned normalization that preserves literary content;
+- exact canonical-text passage boundary detection and source locators;
 - prepared length variants;
 - semantic-hint generation;
 - embedding generation;
@@ -179,7 +189,8 @@ Build time:
 - exact production embedding model and tokenizer packaging;
 - read-only corpus database abstraction on mobile;
 - production ANN serialization parameters;
-- source fetcher implementation and source hashing;
+- additional catalog discovery adapters beyond Lib.ru;
+- automated Russian Wikisource extraction beyond reviewed local import;
 - build-time translation provider/model policy;
 - paid corpus package/entitlement design;
 - optional static CDN distribution;

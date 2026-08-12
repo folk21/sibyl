@@ -1,5 +1,5 @@
 [corpus]
-format_version = 2
+format_version = 3
 language = "en"
 
 [passages]
@@ -10,7 +10,8 @@ max_words = 120
 overlap_paragraphs = 1
 
 [hints]
-# The first repository version uses deterministic local hints.
+# Deterministic local hints keep default tests model-free.
+provider = "deterministic"
 hints_per_passage = 2
 
 [embeddings]
@@ -18,3 +19,5 @@ hints_per_passage = 2
 provider = "hash"
 dimensions = 32
 normalize = true
+batch_size = 32
+cache = false

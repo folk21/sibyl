@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sibyl-corpus-builder"
-version = "0.1.0"
+version = "0.4.2"
 description = "Local build-time corpus preparation tool for Sibyl"
 requires-python = ">=3.11"
 dependencies = []
@@ -15,7 +15,9 @@ dev = [
   "ruff>=0.9,<1",
 ]
 ml = [
-  "sentence-transformers>=3.4,<6",
+  "numpy==1.26.4",
+  "torch==2.2.2",
+  "sentence-transformers==3.4.1",
 ]
 
 [project.scripts]

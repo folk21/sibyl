@@ -18,7 +18,8 @@ If this is your first checkout, use this order:
 | Run the full current test suite | Run `make check-all` after configuring JDK and the Android SDK. |
 | Exercise the build-time pipeline | Run `make smoke-corpus` to build and validate the synthetic fixture corpus. |
 | Validate Android integration | Open `mobile/` in Android Studio or build `:androidApp:assembleDebug`. |
-| Add literature | Start in [`corpus-sources/README.md`](corpus-sources/README.md) and [`docs/SOURCES.md`](docs/SOURCES.md). |
+| Prepare real texts | Start with catalog discovery in [`docs/USAGE.md`](docs/USAGE.md) or the focused [`corpus-builder/README.md`](corpus-builder/README.md). |
+| Add/review literature | Use [`corpus-sources/README.md`](corpus-sources/README.md) and [`docs/SOURCES.md`](docs/SOURCES.md). |
 | Change the persisted corpus contract | Read [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) before editing `corpus-format/`. |
 
 Testing is described in one place: [`docs/TESTS.md`](docs/TESTS.md).
@@ -53,7 +54,8 @@ Retrieval returns **multiple sufficiently related candidates**. `SelectionEngine
 
 Requirements for the lightweight repository checks:
 
-- Python 3.11+;
+- Python 3.11+ for the core corpus-builder;
+- Python 3.11 or 3.12 for the optional ML embedding environment;
 - corpus-builder development dependencies.
 
 One-time setup:
@@ -92,7 +94,7 @@ For the fastest manual development loop, run the same shared Compose UI as a loc
 make run-desktop
 ```
 
-This opens `Sibyl Dev` directly on the workstation. It uses the same `SibylApp()` and shared retrieval/selection code as Android, with no REST server and no backend. The current app still uses synthetic demo retrieval data, so no ONNX model or production literary corpus is required yet.
+This opens `Sibyl Dev` directly on the workstation. It uses the same `SibylApp()` and shared retrieval/selection code as Android, with no REST server and no backend. The current app still uses synthetic demo retrieval data. Real-text acquisition/preparation is now available in `corpus-builder/`; wiring those artifacts into Desktop retrieval is the next runtime milestone.
 
 The first Gradle invocation may need network access when the configured Gradle distribution or dependencies are not cached. Compose Desktop is a development harness in the current phase, not a product distribution target.
 
@@ -135,23 +137,27 @@ sibyl-corpus build \
 
 See [`corpus-builder/README.md`](corpus-builder/README.md).
 
+## Real-text preparation
+
+The fastest current workflow for Russian classics starts from a Lib.ru/Классика author page and generates a developer-editable selection before any book is downloaded:
+
+```bash
+cd /path/to/sibyl/corpus-builder
+
+sibyl-corpus discover \
+  --url "http://az.lib.ru/d/dostoewskij_f_m" \
+  --output data/work/dostoevsky-selection.toml
+```
+
+Review the generated `include` / `exclude` / `review` decisions, then acquire only the included works with `sibyl-corpus acquire`. Lib.ru acquisition prefers a TXT artifact, falls back to extracting the literary body from the work HTML page, and uses FB2 only as a final fallback. Each work is isolated: successful artifacts stay cached even if another work fails, and a TOML acquisition report records `acquired` / `failed` / `skipped` results. Correspondence is excluded by default during discovery.
+
+Project Gutenberg single-work fetch and reviewed local UTF-8 import remain available. See [`docs/USAGE.md`](docs/USAGE.md) for the complete `discover → review → acquire → prepare-selection → inspect → build` workflow. Generated source/cache/output data remains local under `corpus-builder/data/`.
+
 ## Literary sources
 
-`corpus-sources/` currently contains **40 seed source candidates**:
+`corpus-sources/` contains the permanent source/provenance/rights registry. The existing 40 seed records remain a review queue, not automatic publication approval.
 
-- 24 Russian classics, primarily starting from Russian Wikisource candidate pages;
-- 12 English-language classics from Project Gutenberg, intended for original-text ingestion and explicitly labelled build-time Russian machine translation if no approved Russian human translation is selected;
-- 4 philosophy/sacred-text candidates.
-
-These records are deliberately `candidate`/`review_required` and disabled. They are a starting queue, **not a claim that every listed digital edition is already approved for product distribution**.
-
-To add another work:
-
-1. add `corpus-sources/works/<work-id>.toml` with source, language, text role, provenance, and rights-review fields;
-2. add the work ID to at least one collection in `corpus-sources/collections/`;
-3. from the repository root, run `make validate-sources`;
-4. before setting `enabled = true`, pin a concrete source artifact/edition/revision and complete the rights review;
-5. once source downloaders are implemented, fetch/import the approved text explicitly and build it through `corpus-builder/`.
+Catalog discovery is intentionally separate from that registry: a developer may discover and process many works locally first, then use `sibyl-corpus register` to persist only the reviewed concrete versions with hashes. Registration never approves/enables a source and never overwrites an existing work.
 
 Detailed policy: [`docs/SOURCES.md`](docs/SOURCES.md).
 
@@ -176,6 +182,12 @@ Displayed literary answers must resolve to exact stored passage text. Generated 
 
 See [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md).
 
+## Repository helper scripts
+
+`archive.sh` creates a shareable `FULL` ZIP with the `sibyl/` root and excludes downloaded corpus data, generated corpus outputs, embedding caches, local model caches, virtual environments, IDE/build caches, and existing archives.
+
+`concat_sibyl.sh` creates a source-only project snapshot using `~/work/python/concat_files_to_txt.py` by default. The output defaults to `../sibyl_files.txt`, outside the repository. Override the helper location with `SIBYL_CONCAT_TOOL=/path/to/concat_files_to_txt.py` or pass an explicit output path as the first argument. Generated/downloaded data and local caches are excluded from the snapshot.
+
 ## Documentation
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system boundaries and data flow.
@@ -184,7 +196,7 @@ See [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md).
 - [`docs/USAGE.md`](docs/USAGE.md) — runtime and corpus workflows.
 - [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) — configuration ownership and current settings.
 - [`docs/SOURCES.md`](docs/SOURCES.md) — source registry, provenance, copyright review, and normalization.
-- [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) — format v2 semantics, validation, and versioning.
+- [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) — format v3 semantics, validation, and versioning.
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — contribution workflow.
 - [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md) — local privacy and content integrity.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — prioritized work with `todo` / `in_progress` / `done` status.
@@ -193,7 +205,7 @@ See [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md).
 
 ## Project status
 
-The repository is an architecture/vertical-slice foundation. The next P0 runtime milestone is real on-device query embedding + ANN retrieval while preserving the existing `EmbeddingEngine`, `VectorIndex`, and `SelectionEngine` boundaries. In parallel, source candidates must be pinned/reviewed before they become an approved development corpus.
+The repository now includes a real-text preparation slice: Lib.ru catalog discovery/review, resilient TXT/HTML/FB2 batch acquisition, explicit single-source acquisition/import, canonical text hashing, exact passage extraction, and opt-in semantic embeddings. The next P0 runtime milestone is loading a small prepared corpus into Desktop with local query embedding + brute-force vector search before introducing ANN scale.
 
 ## License
 

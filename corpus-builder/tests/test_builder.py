@@ -35,7 +35,7 @@ def test_builder_creates_valid_artifacts(tmp_path: Path) -> None:
     config_path.write_text(
         """
 [corpus]
-format_version = 2
+format_version = 3
 language = "en"
 [passages]
 min_words = 5
@@ -57,7 +57,7 @@ normalize = true
     validate_corpus(output / "corpus.db")
 
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["format_version"] == 2
+    assert manifest["format_version"] == 3
     assert manifest["counts"]["passages"] >= 1
 
     with sqlite3.connect(output / "corpus.db") as connection:
