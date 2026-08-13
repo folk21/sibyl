@@ -195,3 +195,19 @@ Build time:
 - paid corpus package/entitlement design;
 - optional static CDN distribution;
 - optional device backup/sync.
+
+## Current Desktop real-corpus slice
+
+The Desktop development harness can now exercise the generated corpus without a backend:
+
+```mermaid
+flowchart LR
+    Q[Question] --> E[ONNX E5 EmbeddingEngine]
+    E --> V[Brute-force vectors.json VectorIndex]
+    V --> R[SQLite CorpusRepository]
+    R --> C[Candidate pool]
+    C --> S[Shared SelectionEngine]
+    S --> U[Shared Compose UI]
+```
+
+The Desktop adapters live in `desktopApp` and depend on JVM-only libraries. `shared` owns only the retrieval contracts and orchestration. `manifest.json` must match the runtime model ID, dimensions, normalization behavior, and E5 `query_prefix`. Brute-force search is intentionally a development implementation for the first small corpora; USearch/HNSW remains a scale optimization rather than a prerequisite for validating product behavior.

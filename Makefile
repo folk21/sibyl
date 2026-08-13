@@ -1,4 +1,4 @@
-.PHONY: help check check-all test-mobile test-desktop run-desktop test-corpus-builder validate-format validate-sources smoke-corpus format-python
+.PHONY: help check check-all test-mobile test-desktop run-desktop run-desktop-real download-runtime-model test-corpus-builder validate-format validate-sources smoke-corpus format-python
 
 help:
 	@echo "Sibyl repository targets:"
@@ -6,7 +6,9 @@ help:
 	@echo "  check-all            Run lightweight checks plus Android and desktop shared tests"
 	@echo "  test-mobile          Run Android shared host tests"
 	@echo "  test-desktop         Run shared tests on the desktop JVM target"
-	@echo "  run-desktop          Run the interactive Compose Desktop development app"
+	@echo "  run-desktop          Run the interactive Compose Desktop demo"
+	@echo "  run-desktop-real     Run Desktop against a built local corpus (CORPUS_DIR/MODEL_DIR)"
+	@echo "  download-runtime-model  Download the local ONNX/tokenizer bundle for real Desktop retrieval"
 	@echo "  test-corpus-builder  Run Python builder tests"
 	@echo "  validate-format      Validate corpus format fixtures"
 	@echo "  validate-sources     Validate source registry records and collections"
@@ -28,6 +30,17 @@ test-desktop:
 
 run-desktop:
 	cd mobile && ./gradlew :desktopApp:run
+
+CORPUS_DIR ?= corpus-builder/data/output/dostoevsky
+MODEL_DIR ?= corpus-builder/data/runtime-models/multilingual-e5-small
+
+run-desktop-real:
+	@test -f "$(CORPUS_DIR)/manifest.json" || (echo "Corpus manifest not found: $(CORPUS_DIR)/manifest.json" && exit 1)
+	@test -f "$(MODEL_DIR)/model-manifest.json" || (echo "Runtime model manifest not found: $(MODEL_DIR)/model-manifest.json" && exit 1)
+	cd mobile && SIBYL_CORPUS_DIR="$(abspath $(CORPUS_DIR))" SIBYL_MODEL_DIR="$(abspath $(MODEL_DIR))" ./gradlew :desktopApp:run
+
+download-runtime-model:
+	cd corpus-builder && PYTHONPATH=src python -m sibyl_corpus_builder.cli download-runtime-model --config config/real-text.toml --output data/runtime-models/multilingual-e5-small
 
 test-corpus-builder:
 	cd corpus-builder && PYTHONPATH=src python -m pytest

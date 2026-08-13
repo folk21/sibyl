@@ -147,8 +147,21 @@ sibyl-corpus validate --corpus data/output/dostoevsky/corpus.db
 ```
 
 `config/real-text.toml` uses the opt-in `sentence_transformers` provider with `intfloat/multilingual-e5-small`. The first run may download model files through Sentence Transformers; default tests never use this provider.
+The config also records the asymmetric E5 prefixes: `passage: ` for indexed passage text and `query: ` for runtime questions. Both are persisted so runtime compatibility can be checked explicitly.
 
-Real-text builds show explicit stages and an embedding progress bar. Completed embedding batches are committed to `data/work/<prepared-source>/.embedding-cache/`. If a build is interrupted, rerunning the same command reuses completed vectors and computes only missing inputs. The cache key includes the embedding provider/model/dimensions/normalization/prefix configuration plus the exact embedding input text hash, so incompatible settings do not silently reuse vectors. A fully cached rebuild does not load the embedding model.
+Real-text builds show explicit stages and an embedding progress bar. Completed embedding batches are committed to `data/work/<prepared-source>/.embedding-cache/`. If a build is interrupted, rerunning the same command reuses completed vectors and computes only missing inputs. The cache key includes the embedding provider/model/dimensions/normalization/passage-prefix configuration plus the exact embedding input text hash, so incompatible settings do not silently reuse vectors. A fully cached rebuild does not load the embedding model.
+
+### Download the Desktop runtime model bundle
+
+The corpus build uses Python/Sentence Transformers, but Desktop inference uses local ONNX Runtime. Download the matching ignored development bundle once:
+
+```bash
+sibyl-corpus download-runtime-model \
+  --config config/real-text.toml \
+  --output data/runtime-models/multilingual-e5-small
+```
+
+The command downloads the official optimized ONNX model and `tokenizer.json`, records SHA-256 hashes and runtime assumptions in `model-manifest.json`, and publishes only after the bundle is complete. This is an explicit network command; imports/default tests never download runtime models.
 
 ## Development fixture
 

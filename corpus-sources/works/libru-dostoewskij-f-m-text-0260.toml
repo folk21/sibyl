@@ -1,0 +1,25 @@
+schema_version = 1
+work_id = "libru-dostoewskij-f-m-text-0260"
+author = "Достоевский Федор Михайлович"
+title = "Дядюшкин сон"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "libru-dostoewskij-f-m-text-0260-libru"
+language = "ru"
+role = "original"
+source_family = "libru"
+source_name = "Lib.ru / Классика"
+source_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0260.shtml"
+source_locator = "Lib.ru work page; resolved html artifact; normalizer=libru_html_v1."
+download_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0260.shtml"
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Author public-domain status does not by itself approve this concrete electronic edition; review source reuse terms before enabling."
+provenance = "Discovered from http://az.lib.ru/d/dostoewskij_f_m/; acquired from the Lib.ru work page as html and normalized with libru_html_v1."
+artifact_sha256 = "09d51e0c8ff0fd9673449e79cd66ad32f1939438b8cc07fbef13174453bca664"
+canonical_sha256 = "b6e6337b6e22466a50035e2d6ed96e74d7bca53d1f905118ad959f493e713bbc"

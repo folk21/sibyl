@@ -21,7 +21,7 @@ Priorities:
 | F-06 | done | P1 | Consolidate detailed documentation under root `docs/`; keep subproject README/AGENTS only. |
 | F-07 | done | P1 | Add root onboarding/test map and Mermaid architecture diagrams. |
 | F-08 | done | P0 | Add JVM Compose Desktop development harness using the shared UI/runtime code. |
-| F-09 | todo | P0 | Wire the Desktop harness to the real local corpus/embedding/vector adapters as those adapters replace demo retrieval. |
+| F-09 | done | P0 | Wire Desktop to a built local corpus using ONNX query embeddings, brute-force development vector search, SQLite passage lookup, and the shared SelectionEngine. |
 | F-10 | todo | P2 | Add an optional retrieval diagnostics CLI if low-level candidate/index inspection becomes cumbersome through the Desktop UI. |
 
 ## Sources and corpus ingestion
@@ -61,7 +61,7 @@ Priorities:
 
 | ID | Status | Priority | Work |
 |---|---|---:|---|
-| A-01 | todo | P0 | Export/package the selected query embedding model for on-device inference. |
+| A-01 | in_progress | P0 | Package the selected query embedding model; Desktop now uses a downloaded ONNX/tokenizer bundle, while Android packaging remains to be implemented. |
 | A-02 | todo | P0 | Implement tokenizer + ONNX Runtime `EmbeddingEngine` on Android. |
 | A-03 | todo | P0 | Implement USearch/HNSW `VectorIndex` Android adapter. |
 | A-04 | todo | P0 | Load a real 500–2,000-passage approved development corpus on device. |

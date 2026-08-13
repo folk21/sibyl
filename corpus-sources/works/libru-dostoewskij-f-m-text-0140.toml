@@ -1,0 +1,25 @@
+schema_version = 1
+work_id = "libru-dostoewskij-f-m-text-0140"
+author = "Достоевский Федор Михайлович"
+title = "Двойник"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "libru-dostoewskij-f-m-text-0140-libru"
+language = "ru"
+role = "original"
+source_family = "libru"
+source_name = "Lib.ru / Классика"
+source_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0140.shtml"
+source_locator = "Lib.ru work page; resolved html artifact; normalizer=libru_html_v1."
+download_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0140.shtml"
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Author public-domain status does not by itself approve this concrete electronic edition; review source reuse terms before enabling."
+provenance = "Discovered from http://az.lib.ru/d/dostoewskij_f_m/; acquired from the Lib.ru work page as html and normalized with libru_html_v1."
+artifact_sha256 = "4d06a7b90fc3ecd42c249b7d88ca1a67d13aceee072ddb43f36352ad20b3bc8c"
+canonical_sha256 = "ac9dd4b759fcb882681dee0b8121b07766aa14c175288da50959cece414cb788"

@@ -1,0 +1,25 @@
+schema_version = 1
+work_id = "libru-dostoewskij-f-m-text-1881-karamazovy"
+author = "Достоевский Федор Михайлович"
+title = "Братья Карамазовы"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "libru-dostoewskij-f-m-text-1881-karamazovy-libru"
+language = "ru"
+role = "original"
+source_family = "libru"
+source_name = "Lib.ru / Классика"
+source_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_1881_karamazovy.shtml"
+source_locator = "Lib.ru work page; resolved html artifact; normalizer=libru_html_v1."
+download_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_1881_karamazovy.shtml"
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Author public-domain status does not by itself approve this concrete electronic edition; review source reuse terms before enabling."
+provenance = "Discovered from http://az.lib.ru/d/dostoewskij_f_m/; acquired from the Lib.ru work page as html and normalized with libru_html_v1."
+artifact_sha256 = "2ad777e0dcc05d250e4bc67e2c37b8f2b5c863279f33501f82ca92bfc7198cbf"
+canonical_sha256 = "388c7dc7b7f6a80f337c6ef42a26c1e6c7729800a46070e1ce74a355c7e50f49"

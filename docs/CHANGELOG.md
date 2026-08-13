@@ -4,6 +4,10 @@
 
 ### Added
 
+- real Desktop retrieval from generated `manifest.json` + `corpus.db` + `vectors.json`, using local ONNX query embeddings, brute-force cosine search, and shared controlled-random selection;
+- explicit E5 `query_prefix` persisted alongside `passage_prefix` and validated at runtime;
+- `download-runtime-model` command for the ignored local `multilingual-e5-small` ONNX/tokenizer development bundle;
+
 - Lib.ru/Классика author-page discovery into editable selection manifests with `include` / `exclude` / `review` decisions and default epistolary exclusion;
 - batch `acquire`, `prepare-selection`, and optional `register` corpus-builder commands;
 - Lib.ru TXT → HTML → FB2 acquisition fallback with versioned `libru_txt_v1`, `libru_html_v1`, and `libru_fb2_v1` normalization;

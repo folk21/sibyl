@@ -1,0 +1,25 @@
+schema_version = 1
+work_id = "libru-dostoewskij-f-m-text-0170"
+author = "Достоевский Федор Михайлович"
+title = "Хозяйка"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "libru-dostoewskij-f-m-text-0170-libru"
+language = "ru"
+role = "original"
+source_family = "libru"
+source_name = "Lib.ru / Классика"
+source_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0170.shtml"
+source_locator = "Lib.ru work page; resolved html artifact; normalizer=libru_html_v1."
+download_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0170.shtml"
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Author public-domain status does not by itself approve this concrete electronic edition; review source reuse terms before enabling."
+provenance = "Discovered from http://az.lib.ru/d/dostoewskij_f_m/; acquired from the Lib.ru work page as html and normalized with libru_html_v1."
+artifact_sha256 = "ea134802275460f04e47cdd0685a42c1be2c50c88a3e6dfb801512400d87058d"
+canonical_sha256 = "0a3b5c83a9318beaf296fda6e7216fd4f7117099dbbef0357952c4ba10d6355b"

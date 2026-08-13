@@ -39,6 +39,12 @@
         },
         "normalize": {
           "type": "boolean"
+        },
+        "passage_prefix": {
+          "type": "string"
+        },
+        "query_prefix": {
+          "type": "string"
         }
       },
       "additionalProperties": true

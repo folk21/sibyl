@@ -48,6 +48,7 @@ hints_per_passage = 2
 provider = "hash"
 dimensions = 8
 normalize = true
+query_prefix = "query: "
 """.strip(),
         encoding="utf-8",
     )
@@ -59,6 +60,7 @@ normalize = true
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["format_version"] == 3
     assert manifest["counts"]["passages"] >= 1
+    assert manifest["embedding"]["query_prefix"] == "query: "
 
     with sqlite3.connect(output / "corpus.db") as connection:
         text = connection.execute("SELECT text FROM passage_text LIMIT 1").fetchone()[0]

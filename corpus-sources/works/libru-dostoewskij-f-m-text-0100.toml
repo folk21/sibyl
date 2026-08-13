@@ -1,0 +1,25 @@
+schema_version = 1
+work_id = "libru-dostoewskij-f-m-text-0100"
+author = "Достоевский Федор Михайлович"
+title = "Братья Карамазовы. Часть 1"
+category = "literature"
+original_language = "ru"
+enabled = false
+review_status = "candidate"
+russian_display_policy = "source_text"
+
+[[text_versions]]
+id = "libru-dostoewskij-f-m-text-0100-libru"
+language = "ru"
+role = "original"
+source_family = "libru"
+source_name = "Lib.ru / Классика"
+source_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0100.shtml"
+source_locator = "Lib.ru work page; resolved html artifact; normalizer=libru_html_v1."
+download_uri = "http://az.lib.ru/d/dostoewskij_f_m/text_0100.shtml"
+rights_status = "review_required"
+rights_jurisdiction = "RU"
+rights_notes = "Author public-domain status does not by itself approve this concrete electronic edition; review source reuse terms before enabling."
+provenance = "Discovered from http://az.lib.ru/d/dostoewskij_f_m/; acquired from the Lib.ru work page as html and normalized with libru_html_v1."
+artifact_sha256 = "04a90601cbdfa7c856cc0ffaa5eb1f9fc14882d3661664010dcfb07b66990589"
+canonical_sha256 = "c923e6945b5d6b43cb2f9929bf44b2fe2628cba70d1d6a5e2645e9d1ade31f1f"

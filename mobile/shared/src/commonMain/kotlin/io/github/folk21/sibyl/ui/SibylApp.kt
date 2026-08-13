@@ -28,27 +28,50 @@ import androidx.compose.ui.unit.dp
 import io.github.folk21.sibyl.demo.DemoRetrievalService
 import io.github.folk21.sibyl.domain.Answer
 import io.github.folk21.sibyl.domain.PassageTextRole
+import io.github.folk21.sibyl.retrieval.RetrievalService
 import io.github.folk21.sibyl.selection.RandomSource
 import io.github.folk21.sibyl.selection.SelectionEngine
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 @Composable
 fun SibylApp() {
+    val retrieval = remember { DemoRetrievalService() }
+    SibylApp(retrievalService = retrieval, isDemo = true)
+}
+
+@Composable
+fun SibylApp(
+    retrievalService: RetrievalService,
+    isDemo: Boolean,
+    runtimeLabel: String? = null,
+) {
     MaterialTheme {
-        val retrieval = remember { DemoRetrievalService() }
+        val retrieval = retrievalService
         val selector = remember { SelectionEngine(RandomSource { kotlin.random.Random.nextDouble() }) }
         val scope = rememberCoroutineScope()
         val history = remember { mutableStateListOf<Answer>() }
         val savedEncounters = remember { mutableStateListOf<Answer>() }
         var question by remember { mutableStateOf("") }
         var answer by remember { mutableStateOf<Answer?>(null) }
+        var retrievalError by remember { mutableStateOf<String?>(null) }
 
         fun requestAnswer() {
             scope.launch {
-                val candidates = retrieval.candidates(question = question, limit = 50)
-                selector.select(question = question, candidates = candidates)?.let { selected ->
-                    answer = selected
-                    history += selected
+                retrievalError = null
+                try {
+                    val candidates = retrieval.candidates(question = question, limit = 50)
+                    val selected = selector.select(question = question, candidates = candidates)
+                    if (selected == null) {
+                        retrievalError = "No sufficiently relevant passage was found."
+                    } else {
+                        answer = selected
+                        history += selected
+                    }
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    retrievalError = error.message ?: "Local retrieval failed."
                 }
             }
         }
@@ -62,10 +85,16 @@ fun SibylApp() {
         ) {
             Text("Sibyl", style = MaterialTheme.typography.headlineLarge)
             Text(
-                "Ask a question. The production version will answer only with stored literary text. " +
-                    "This first build uses clearly labelled synthetic fixtures.",
+                if (isDemo) {
+                    "Ask a question. This demo uses clearly labelled synthetic fixtures."
+                } else {
+                    "Ask a question. Answers are selected from the loaded local corpus."
+                },
                 style = MaterialTheme.typography.bodyMedium,
             )
+            runtimeLabel?.let {
+                Text(it, style = MaterialTheme.typography.labelMedium)
+            }
 
             OutlinedTextField(
                 value = question,
@@ -80,6 +109,10 @@ fun SibylApp() {
                 enabled = question.isNotBlank(),
             ) {
                 Text("Ask the library")
+            }
+
+            retrievalError?.let { message ->
+                Text(message, color = MaterialTheme.colorScheme.error)
             }
 
             answer?.let { current ->
@@ -98,10 +131,12 @@ fun SibylApp() {
                         if (displayText.role == PassageTextRole.MACHINE_TRANSLATION) {
                             Text("Machine translation", style = MaterialTheme.typography.labelSmall)
                         }
-                        Text(
-                            "DEMO: synthetic fixture, not a literary quotation",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
+                        if (isDemo) {
+                            Text(
+                                "DEMO: synthetic fixture, not a literary quotation",
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
                     }
                 }
 
@@ -146,8 +181,8 @@ fun SibylApp() {
 
             Spacer(Modifier.height(8.dp))
             Text(
-                "History and saved encounters are separate in the demo but remain in memory only. " +
-                    "SQLite persistence is the next storage adapter milestone.",
+                "History and saved encounters remain in memory only. " +
+                    "User-state persistence is a later storage adapter milestone.",
                 style = MaterialTheme.typography.bodySmall,
             )
         }

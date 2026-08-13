@@ -47,7 +47,7 @@ Use deterministic injected randomness for selection behavior. When the correspon
 - corpus-format compatibility;
 - language and translation-role selection.
 
-Platform inference/index adapters should have focused integration tests. Golden query embeddings should eventually verify that the mobile encoder matches the embedding model used by the corpus builder.
+Platform inference/index adapters should have focused integration tests. Desktop currently tests manifest compatibility and brute-force cosine ranking without downloading models. A separate opt-in golden embedding test should later compare ONNX query output against the Python Sentence Transformers build stack; default tests must remain model/network-free.
 
 ### Corpus builder
 

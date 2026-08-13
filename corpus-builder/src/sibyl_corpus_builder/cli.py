@@ -13,6 +13,7 @@ from .preparation import (
     prepare_selection_sources,
 )
 from .registration import register_selection
+from .runtime_model import download_runtime_model
 from .source_loader import load_sources
 from .splitter import split_document
 from .validation import validate_corpus
@@ -98,6 +99,13 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--config", type=Path, required=True)
     build.add_argument("--source", type=Path, required=True)
     build.add_argument("--output", type=Path, required=True)
+
+    runtime_model = subparsers.add_parser(
+        "download-runtime-model",
+        help="Download the local ONNX/tokenizer bundle required by Desktop runtime",
+    )
+    runtime_model.add_argument("--config", type=Path, required=True)
+    runtime_model.add_argument("--output", type=Path, required=True)
 
     validate = subparsers.add_parser("validate", help="Validate a corpus database")
     validate.add_argument("--corpus", type=Path, required=True)
@@ -207,6 +215,10 @@ def main() -> None:
         build_corpus(config, args.source, args.output)
         validate_corpus(args.output / "corpus.db")
         print(f"Built and validated corpus in {args.output}")
+    elif args.command == "download-runtime-model":
+        config = load_config(args.config)
+        path = download_runtime_model(config, args.output)
+        print(f"Runtime model bundle is ready: {path}")
     elif args.command == "validate":
         validate_corpus(args.corpus)
         print(f"Corpus is valid: {args.corpus}")

@@ -94,7 +94,16 @@ For the fastest manual development loop, run the same shared Compose UI as a loc
 make run-desktop
 ```
 
-This opens `Sibyl Dev` directly on the workstation. It uses the same `SibylApp()` and shared retrieval/selection code as Android, with no REST server and no backend. The current app still uses synthetic demo retrieval data. Real-text acquisition/preparation is now available in `corpus-builder/`; wiring those artifacts into Desktop retrieval is the next runtime milestone.
+This opens `Sibyl Dev` directly on the workstation in synthetic demo mode. It uses the same `SibylApp()` and shared retrieval/selection code as Android, with no REST server and no backend.
+
+After building a real corpus and downloading the matching runtime model bundle, run real local retrieval with:
+
+```bash
+make download-runtime-model
+make run-desktop-real
+```
+
+The default real-development paths are `corpus-builder/data/output/dostoevsky` and `corpus-builder/data/runtime-models/multilingual-e5-small`. Override them with `CORPUS_DIR=... MODEL_DIR=...`. The Desktop path reads `manifest.json`, `corpus.db`, and `vectors.json` directly, embeds the question locally with ONNX Runtime, performs brute-force cosine search for the current small development corpus, and then reuses the shared `SelectionEngine`.
 
 The first Gradle invocation may need network access when the configured Gradle distribution or dependencies are not cached. Compose Desktop is a development harness in the current phase, not a product distribution target.
 

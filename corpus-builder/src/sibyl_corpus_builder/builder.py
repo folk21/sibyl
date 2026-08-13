@@ -199,6 +199,8 @@ def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> N
             embedding_manifest["model_id"] = config.embeddings.model_id
         if config.embeddings.passage_prefix:
             embedding_manifest["passage_prefix"] = config.embeddings.passage_prefix
+        if config.embeddings.query_prefix:
+            embedding_manifest["query_prefix"] = config.embeddings.query_prefix
 
         manifest = {
             "format_version": config.format_version,

@@ -8,7 +8,7 @@ From the repository root:
 make run-desktop
 ```
 
-The Desktop harness uses the same shared Compose `SibylApp()` as Android and currently remains connected to demo retrieval. The next runtime milestone is loading a prepared real corpus into Desktop.
+The Desktop harness uses the same shared Compose `SibylApp()` as Android. `make run-desktop` keeps the deterministic synthetic demo mode; `make run-desktop-real` loads a built local corpus and matching local ONNX model bundle.
 
 ## Fastest real-text workflow: discover an author catalog
 
@@ -114,7 +114,42 @@ sibyl-corpus validate --corpus data/output/dostoevsky/corpus.db
 
 The initial real-text configuration uses `multilingual-e5-small` via Sentence Transformers and indexes exact passage text itself. LLM-generated semantic hints are intentionally deferred so their value can be evaluated separately.
 
-During the embedding stage the builder prints cache statistics and a progress bar. Completed batches are stored under `data/work/<prepared-source>/.embedding-cache/`, outside published corpus output. `Ctrl+C` may discard the currently running batch, but previously completed batches remain reusable. Rerun the same `build` command to resume; a fully cached build skips loading the ML model. Changing model/provider/dimensions/normalization/prefix selects a different cache namespace, while changing passage text naturally produces a new text hash.
+During the embedding stage the builder prints cache statistics and a progress bar. Completed batches are stored under `data/work/<prepared-source>/.embedding-cache/`, outside published corpus output. `Ctrl+C` may discard the currently running batch, but previously completed batches remain reusable. Rerun the same `build` command to resume; a fully cached build skips loading the ML model. Changing model/provider/dimensions/normalization/passage prefix selects a different cache namespace, while changing passage text naturally produces a new text hash.
+
+### Run the built corpus in Desktop
+
+`multilingual-e5-small` uses asymmetric E5 prefixes: corpus passages are embedded with `passage: ` and runtime questions with `query: `. The current real-text config persists both assumptions in `manifest.json`. If your corpus was built before `query_prefix` was added, rerun the same `build` command; completed passage embeddings are reused from the embedding cache.
+
+Download the runtime-only ONNX/tokenizer bundle once:
+
+```bash
+sibyl-corpus download-runtime-model \
+  --config config/real-text.toml \
+  --output data/runtime-models/multilingual-e5-small
+```
+
+Then, from the repository root:
+
+```bash
+make run-desktop-real
+```
+
+The default paths are:
+
+```text
+corpus-builder/data/output/dostoevsky
+corpus-builder/data/runtime-models/multilingual-e5-small
+```
+
+Override them when needed:
+
+```bash
+make run-desktop-real \
+  CORPUS_DIR=corpus-builder/data/output/other-corpus \
+  MODEL_DIR=corpus-builder/data/runtime-models/multilingual-e5-small
+```
+
+Desktop validates corpus format/model/dimensions/query-prefix compatibility before opening the real retrieval flow. It then uses local ONNX query embedding, brute-force cosine search over `vectors.json`, SQLite passage lookup from `corpus.db`, and the shared controlled-random `SelectionEngine`. No question or passage is sent to a backend.
 
 ## Existing single-source workflow
 

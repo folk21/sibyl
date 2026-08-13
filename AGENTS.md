@@ -61,7 +61,7 @@ There is no required backend in the core architecture.
 - `corpus-format/` owns persisted semantics and must not depend on builder/mobile internals.
 - `corpus-sources/` owns source/version declarations and review state, not passage extraction or ranking.
 - Source discovery manifests are developer review artifacts: discovery may classify candidates but must never approve or publish them automatically.
-- Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`.
+- Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`. The Desktop development harness may use JVM ONNX Runtime, SQLite JDBC, and brute-force vectors for small corpora; these dependencies must not leak into common code.
 - The JVM Desktop app is a development harness: reuse shared UI/runtime code and do not introduce a REST/backend boundary just to run it locally.
 - UI must not implement ranking, vector-search internals, or corpus parsing.
 

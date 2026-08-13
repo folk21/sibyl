@@ -75,7 +75,7 @@ From the repository root:
 make run-desktop
 ```
 
-This runs a JVM Compose Desktop application using the same shared UI/runtime code as Android. No Xcode, iOS simulator, REST server, or backend is required.
+This runs a JVM Compose Desktop application using the same shared UI/runtime code as Android. No Xcode, iOS simulator, REST server, or backend is required. Demo mode requires no model assets. Real-corpus mode additionally uses the JVM ONNX Runtime, a local Hugging Face tokenizer, and SQLite JDBC dependencies resolved by Gradle.
 
 On Intel macOS, treat the Desktop harness as development-only/best-effort: the project uses JVM Desktop (not Kotlin/Native), but the current Compose Multiplatform 1.11.1 support matrix officially lists macOS arm64. Re-run `make run-desktop` after Compose/Skiko upgrades to catch host compatibility changes.
 
@@ -88,6 +88,15 @@ cd /path/to/sibyl/mobile
 
 The first Gradle invocation may download the configured distribution/dependencies when they are not cached.
 
-## Production assets
+## Runtime development assets
 
-Do not add production literary archives, ONNX models, embeddings, ANN indexes, generated translations, or builder work directories to Git. They will be built/downloaded separately once production adapters exist.
+The real Desktop harness expects a built corpus directory and a matching runtime model bundle. Generate them under ignored `corpus-builder/data/` paths:
+
+```bash
+cd /path/to/sibyl/corpus-builder
+sibyl-corpus download-runtime-model \
+  --config config/real-text.toml \
+  --output data/runtime-models/multilingual-e5-small
+```
+
+Do not add literary archives, ONNX models, embeddings, generated corpus databases, generated translations, ANN indexes, or builder work directories to Git. They remain local/generated assets and are also excluded from shareable project archives.

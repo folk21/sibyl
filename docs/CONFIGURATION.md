@@ -53,7 +53,8 @@ Production preparation will generate explicit short/standard/extended variants i
 - `model_id` — required for Sentence Transformers;
 - `dimensions`;
 - `normalize`;
-- `passage_prefix` — model-specific prefix such as `passage: ` for the first E5 evaluation config;
+- `passage_prefix` — model-specific build-time prefix such as `passage: ` for E5 passage embeddings;
+- `query_prefix` — matching runtime query prefix such as `query: `; it is persisted in the corpus manifest and validated by Desktop before local retrieval;
 - `batch_size` — number of missing embedding inputs computed before each durable cache checkpoint;
 - `cache` — enable the local resumable embedding cache. The real-text profile enables it; deterministic fixture builds disable it.
 

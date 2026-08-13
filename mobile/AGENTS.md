@@ -13,7 +13,7 @@ Root `AGENTS.md` also applies.
 - `desktopApp` is a JVM development harness for fast interactive validation on a workstation. It must reuse shared UI/runtime code and must not introduce a local REST/backend layer.
 - iOS is deferred. Do not add/configure iOS targets unless the project explicitly resumes iOS development.
 - Common code must not import Android/desktop platform APIs.
-- ONNX Runtime and ANN/index APIs must stay behind `EmbeddingEngine`/`VectorIndex`-style interfaces.
+- ONNX Runtime and ANN/index APIs must stay behind `EmbeddingEngine`/`VectorIndex`-style interfaces. Desktop currently provides local ONNX + brute-force JSON-vector + SQLite adapters for development; keep their contracts reusable so Android can replace platform storage/index implementations without changing selection/UI.
 - UI must not implement retrieval ranking or corpus parsing.
 
 ## Selection behavior

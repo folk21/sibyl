@@ -24,6 +24,7 @@ class EmbeddingConfig:
     normalize: bool
     model_id: str | None = None
     passage_prefix: str = ""
+    query_prefix: str = ""
     batch_size: int = 32
     cache: bool = True
 
@@ -54,6 +55,7 @@ def load_config(path: Path) -> BuilderConfig:
         normalize=bool(raw_embeddings["normalize"]),
         model_id=raw_embeddings.get("model_id"),
         passage_prefix=str(raw_embeddings.get("passage_prefix", "")),
+        query_prefix=str(raw_embeddings.get("query_prefix", "")),
         batch_size=int(raw_embeddings.get("batch_size", 32)),
         cache=bool(raw_embeddings.get("cache", True)),
     )

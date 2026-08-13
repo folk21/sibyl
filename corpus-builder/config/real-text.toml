@@ -20,5 +20,6 @@ model_id = "intfloat/multilingual-e5-small"
 dimensions = 384
 normalize = true
 passage_prefix = "passage: "
+query_prefix = "query: "
 batch_size = 32
 cache = true

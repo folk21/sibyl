@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -17,6 +18,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(projects.shared)
             implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.djl.huggingface.tokenizers)
+            implementation(libs.onnxruntime)
+            implementation(libs.sqlite.jdbc)
+        }
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

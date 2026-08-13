@@ -10,38 +10,38 @@ The desktop app exists to make daily development fast. It runs the same `SibylAp
 
 ## Current status
 
-The repository runs an end-to-end demo without production ML assets:
+The repository supports both a deterministic demo and a real local Desktop retrieval slice:
 
 ```mermaid
 flowchart LR
-    Q[Question] --> D[DemoRetrievalService]
-    D --> S[SelectionEngine]
-    S --> P[Passage]
-    P --> U[Shared Compose UI]
-    U --> A[Android app]
-    U --> X[Desktop dev app]
-```
-
-Production direction:
-
-```mermaid
-flowchart LR
-    Q[Question] --> E[ONNX EmbeddingEngine]
-    E --> V[USearch VectorIndex]
-    V --> C[Candidate pool]
+    Q[Question] --> E[Desktop ONNX EmbeddingEngine]
+    E --> V[Brute-force vectors.json search]
+    V --> R[SQLite corpus repository]
+    R --> C[Candidate pool]
     C --> S[SelectionEngine]
-    S --> P[corpus.db passage]
+    S --> P[Exact corpus.db passage]
+    P --> U[Shared Compose UI]
 ```
+
+Android still uses demo retrieval until the same runtime contracts receive Android ONNX/index/storage adapters. USearch/HNSW remains a later scale optimization; the Desktop development corpus intentionally uses brute-force cosine search first.
 
 The demo also separates automatic in-memory history from explicitly saved question/passage encounters.
 
 ## Fast development loop
 
-Requirements: JDK 17+. From the repository root:
+Requirements: JDK 17+. From the repository root, demo mode remains:
 
 ```bash
 make run-desktop
 ```
+
+For a generated real corpus and downloaded runtime model bundle:
+
+```bash
+make run-desktop-real
+```
+
+Override the defaults with `CORPUS_DIR=... MODEL_DIR=...`. Real mode validates corpus/model compatibility before opening the UI and performs all query embedding/search locally.
 
 Equivalent direct command from `mobile/`:
 

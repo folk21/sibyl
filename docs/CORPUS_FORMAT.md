@@ -45,7 +45,7 @@ A semantic hint is internal retrieval metadata and the vector identity. The firs
 
 ## Vector artifact
 
-Vectors remain outside SQLite. `manifest.json` records provider/model identity, dimensions, normalization assumptions, and optional passage prefix. The current builder writes `vectors.json`; the production direction is an ANN artifact behind the same hint IDs.
+Vectors remain outside SQLite. `manifest.json` records provider/model identity, dimensions, normalization assumptions, and optional passage/query prefixes. The current builder writes `vectors.json`; the production direction is an ANN artifact behind the same hint IDs.
 
 ## Versioning
 
@@ -62,3 +62,7 @@ make validate-format
 ```
 
 Validation covers schema creation, manifest/version consistency, SQLite foreign keys, and required relational structure. Production validation will later add index/package checksums and model/index compatibility checks.
+
+## Runtime embedding compatibility
+
+For asymmetric embedding models, `embedding.passage_prefix` and `embedding.query_prefix` belong to the persisted manifest assumptions. Runtime adapters must reject incompatible model IDs, dimensions, normalization, or query prefixes.
