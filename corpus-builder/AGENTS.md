@@ -15,9 +15,17 @@ Root `AGENTS.md` also applies.
 - Persist completed embedding batches in a local cache outside published output so interrupted real-text builds can resume without recomputing successful batches. Cache identity must include embedding configuration and exact input text hashes.
 - Production source provenance/rights metadata is mandatory.
 
+## Large-LLM curation
+
+- External large-LLM curation is an explicit developer-controlled build-time step, never an import-time or mobile-runtime dependency.
+- Export bundles may contain full canonical texts only under ignored local `corpus-builder/data/`; committed curation files must contain locators/hashes and question mappings rather than copied books or passage text. Export requires approved rights metadata unless a developer uses the explicit override after separately confirming external-service upload rights.
+- Treat model output as a proposal. Verify `work_id`, `text_version_id`, canonical SHA-256, exact `chars:start:end`, selected-text SHA-256, and question IDs locally before normalizing it as curated metadata.
+- The large model may choose natural passage boundaries independently of the automatic splitter. Do not force every author/work to cover every guided question.
+- Curation strength is an editorial/semantic fit score, not vector cosine similarity.
+
 ## Generated metadata
 
-Semantic hints, summaries, quality scores, and embeddings are internal retrieval metadata. They are never literary quotations.
+Semantic hints, summaries, quality scores, embeddings, and curation mappings are internal retrieval metadata. They are never literary quotations.
 
 ## Adapters
 

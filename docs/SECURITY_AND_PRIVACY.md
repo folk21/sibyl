@@ -33,3 +33,5 @@ Machine translations must remain explicitly labelled in persisted metadata and U
 ## External build-time services
 
 Optional LLM/translation APIs belong to corpus preparation, not core mobile runtime. API keys must stay out of committed configuration and mobile application source.
+
+Large-LLM curation may intentionally export full canonical source texts into an ignored local bundle. Sending that bundle to an external model/service is a separate rights and confidentiality decision: do not upload restricted, private, or insufficiently reviewed text versions merely because local preparation succeeded. The curation exporter requires approved rights metadata by default and any override must be deliberate. User questions/history are never part of this build-time bundle.

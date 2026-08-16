@@ -187,6 +187,7 @@ The intended local directories are:
 
 - `corpus-builder/data/raw/` — acquired raw + canonical source artifacts and checksum metadata;
 - `corpus-builder/data/work/` — discovery selections, deterministic prepared builder input, and review reports;
+- `corpus-builder/data/curation/` — temporary external-LLM curation bundles containing canonical text;
 - `corpus-builder/data/output/` — built corpus artifacts.
 
 All are ignored by Git and excluded from shareable archives.
@@ -196,6 +197,8 @@ All are ignored by Git and excluded from shareable archives.
 A public-domain author/work does not automatically approve a particular electronic edition, editorial apparatus, translation, or source-site reuse terms. Lib.ru itself notes that texts were collected from various open Internet sources/readers and that rights holders can object to some hosted works. Sibyl therefore keeps discovered/acquired Lib.ru versions at `review_required` until the concrete artifact is reviewed for intended distribution.
 
 Rights/status in this engineering registry are not legal advice; ambiguous commercial-distribution cases require appropriate review.
+
+Large-LLM curation is an additional external-use decision. A source that is acceptable for local review is not automatically approved to be uploaded to an external model/service. `export-curation-bundle` therefore requires `rights_status = "approved"` by default; the explicit `--allow-unapproved` override should be used only after separately confirming that the concrete text may be sent to that service.
 
 Useful source-site references:
 

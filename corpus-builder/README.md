@@ -12,14 +12,14 @@ flowchart TD
     R --> A[Acquire included works]
     A --> C[Raw artifact cache + SHA-256]
     C --> N[Canonical text normalization]
-    N --> P[Exact natural-boundary passages]
-    P --> H[Retrieval text / semantic hints]
-    H --> E[Embeddings]
-    E --> W[Corpus writer]
-    W --> V[Validation]
+    N --> P[Automatic passage splitter]
+    P --> E[Embeddings + current runtime corpus]
+    N --> X[Export LLM curation bundle]
+    X --> L[External large-LLM proposal]
+    L --> V[Local exact-text curation validation]
 ```
 
-Importing the package never downloads sources or models. Network/model work happens only through explicit CLI commands/providers.
+Importing the package never downloads sources or models. Network/model work happens only through explicit CLI commands/providers. For the primary start/continue flow across these branches, see [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md).
 
 ## Setup
 
@@ -85,7 +85,37 @@ sibyl-corpus prepare-selection \
   --output data/work/dostoevsky
 ```
 
-Review passage extraction before building vectors:
+## Export prepared works for large-LLM curation
+
+LLM curation starts from the same prepared canonical directory but does **not** require automatic passage splitting first:
+
+```bash
+sibyl-corpus export-curation-bundle \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --output data/curation/dostoevsky-curation-bundle.zip
+```
+
+Export requires approved rights metadata by default. An explicit `--allow-unapproved` override exists for reviewed development cases, but only use it after confirming that the concrete source text may be sent to the external model/service.
+
+After the external large model returns a locator/hash proposal in the project, validate and normalize it locally:
+
+```bash
+sibyl-corpus import-curation \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --input ../corpus-curation/proposals/dostoevsky-v1.json \
+  --output ../corpus-curation/curated/dostoevsky-v1.json
+
+sibyl-corpus validate-curation \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/dostoevsky-v1.json
+```
+
+The proposal/curated JSON stores no literary passage text. Exact text is resolved from the pinned canonical source using `chars:start:end` and verified with SHA-256. Runtime use of curated mappings is intentionally a later milestone. See [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md) for the complete handoff.
+
+For the existing generic retrieval branch, inspect automatic passage extraction before building vectors:
 
 ```bash
 sibyl-corpus inspect-passages \

@@ -12,6 +12,7 @@ Primary scopes:
 - `corpus-builder/` — Python build-time preprocessing;
 - `corpus-format/` — versioned persisted contract;
 - `corpus-sources/` — source/provenance/rights registry;
+- `corpus-curation/` — guided-question catalog and validated LLM curation metadata;
 - `test-corpus/` — synthetic fixtures.
 
 There is no required backend in the core architecture.
@@ -24,7 +25,7 @@ There is no required backend in the core architecture.
 - Give every Kotlin class/interface/enum/data class a meaningful KDoc. For non-obvious runtime, retrieval, persistence, or algorithmic code, explain the responsibility, why the class exists, the main processing order, important invariants/assumptions, and notable fallback/resource-ownership behavior. Keep simple models concise and avoid line-by-line narration.
 - Document substantial public/orchestration methods when their ordering, side effects, compatibility rules, or exact-text guarantees are not obvious from the signature alone.
 - Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`.
-- Each subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
+- Each code subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
 - Do not create separate subproject `docs/` trees or duplicate root architecture/policy content in local implementation guides.
 - Architecture/workflow diagrams should use Mermaid instead of ASCII/pseudo-text diagrams when a diagram is useful.
 - Prefer vertical Mermaid flowcharts (`TD`/`TB`) for sequential pipelines with more than four major blocks. Short chains and relationship/component maps may remain horizontal (`LR`) when that is easier to read. `sequenceDiagram` is exempt because its layout communicates participants and call order differently.
@@ -64,6 +65,7 @@ There is no required backend in the core architecture.
 - `corpus-builder/` may depend on format/source declarations but must not execute mobile code.
 - `corpus-format/` owns persisted semantics and must not depend on builder/mobile internals.
 - `corpus-sources/` owns source/version declarations and review state, not passage extraction or ranking.
+- `corpus-curation/` owns stable guided-question IDs plus small LLM curation locator/hash metadata; it must not store downloaded canonical books or bypass local exact-text validation.
 - Source discovery manifests are developer review artifacts: discovery may classify candidates but must never approve or publish them automatically.
 - Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`. The Desktop development harness may use JVM ONNX Runtime, SQLite JDBC, and brute-force vectors for small corpora; these dependencies must not leak into common code.
 - The JVM Desktop app is a development harness: reuse shared UI/runtime code and do not introduce a REST/backend boundary just to run it locally.
@@ -91,12 +93,13 @@ Use `make check-all` when the Android toolchain is available. Use `make run-desk
 Use one owning root document and link to it instead of duplicating detailed content:
 
 - root `README.md` — project overview, onboarding map, quick start, source-extension hint;
+- `docs/WORKFLOW.md` — primary operational start/continue flow across source preparation, LLM curation, corpus build, and runtime;
 - `docs/CONCEPT.md` — product purpose, user promise, invariants, and non-goals;
 - `docs/ARCHITECTURE.md` — stable system boundaries and data flow;
 - `docs/IMPLEMENTATION.md` — cross-project map of the current concrete implementation;
 - `docs/INSTALLATION.md` — toolchains/setup;
 - `docs/TESTS.md` — test matrix;
-- `docs/USAGE.md` — runtime/build workflows;
+- `docs/USAGE.md` — command-oriented runtime/build reference;
 - `docs/CONFIGURATION.md` — configuration ownership;
 - `docs/SOURCES.md` — source/provenance/rights/normalization policy;
 - `docs/CORPUS_FORMAT.md` — persisted format semantics/versioning/validation;
@@ -108,7 +111,7 @@ Use one owning root document and link to it instead of duplicating detailed cont
 - subproject `IMPLEMENTATION.md` — current modules/classes/libraries and concrete call paths;
 - local `AGENTS.md` — protected rules close to code.
 
-Documentation changes follow one ownership rule: product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`.
+Documentation changes follow one ownership rule: operational start/continue flow belongs in `WORKFLOW.md`; product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`.
 
 ## Repository archive checklist
 

@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - "corpus-builder/**"
+      - "corpus-curation/**"
       - "corpus-format/**"
       - "test-corpus/**"
       - ".github/workflows/corpus-builder.yml"
   pull_request:
     paths:
       - "corpus-builder/**"
+      - "corpus-curation/**"
       - "corpus-format/**"
       - "test-corpus/**"
       - ".github/workflows/corpus-builder.yml"

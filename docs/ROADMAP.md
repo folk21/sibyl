@@ -56,6 +56,8 @@ Priorities:
 | C-08 | todo | P1 | Generate multiple semantic hints per passage to improve metaphorical/lateral retrieval. |
 | C-09 | todo | P1 | Build a qualitative evaluation set of questions and expected plausible passage regions, not single gold answers. |
 | C-10 | todo | P2 | Benchmark corpus/index size, build cost, and retrieval quality for 10k / 50k / 100k+ passage packages. |
+| C-11 | done | P0 | Add the first large-LLM curation infrastructure: 48 stable guided prompts, deterministic canonical-text export bundles, Git-safe locator/hash proposals, and local exact-text import/validation. |
+| C-12 | todo | P0 | Build a merged runtime curated index across authors and route guided question IDs to curated candidate pools while retaining `SelectionEngine` serendipity. |
 
 ## Android retrieval slice
 
@@ -88,6 +90,7 @@ Priorities:
 | P-10 | todo | P1 | Offline installable corpus packages with integrity verification. |
 | P-11 | todo | P2 | Free core corpus (rough target 5k–10k strong passages) and larger paid corpus package(s), without requiring server-side question processing. |
 | P-12 | todo | P2 | Store entitlement/download flow for paid corpus packages. |
+| P-13 | todo | P0 | Add guided-question/state suggestions backed by the curated mapping index while preserving free-form user questions. |
 
 ## Literary interaction modes
 

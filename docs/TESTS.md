@@ -51,7 +51,7 @@ Platform inference/index adapters should have focused integration tests. Desktop
 
 ### Corpus builder
 
-Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg.
+Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg. LLM-curation tests must remain external-model-free: validate the 48-item question catalog, deterministic export bundle construction, rights gating, exact locator/hash import, deterministic curated passage IDs, and rejection of altered canonical slices.
 
 ### Corpus format
 
@@ -85,6 +85,7 @@ The following must remain opt-in:
 - source downloads;
 - build-time translation API calls;
 - LLM-assisted semantic-hint generation;
+- external large-LLM curation calls over real literary text;
 - corpus-quality evaluation over large real-text datasets.
 
 

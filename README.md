@@ -21,6 +21,7 @@ Commands in this README run from the repository root unless the command explicit
 
 | Goal | Read / run |
 |---|---|
+| Know where to start and what to run next | [`docs/WORKFLOW.md`](docs/WORKFLOW.md) |
 | Understand what Sibyl is | [`docs/CONCEPT.md`](docs/CONCEPT.md) |
 | Understand system boundaries | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 | Understand the current code and libraries | [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) |
@@ -36,10 +37,11 @@ Commands in this README run from the repository root unless the command explicit
 - [`corpus-builder/`](corpus-builder/) — Python build-time source preparation and corpus publication.
 - [`corpus-format/`](corpus-format/) — versioned persisted contract shared by builder and runtime.
 - [`corpus-sources/`](corpus-sources/) — Git-tracked source/provenance/rights registry.
+- [`corpus-curation/`](corpus-curation/) — guided-question catalog and Git-safe LLM curation metadata.
 - [`test-corpus/`](test-corpus/) — small synthetic fixtures for deterministic tests.
 - [`docs/`](docs/) — cross-project product, architecture, workflow, and policy documentation.
 
-Each subproject has a local `README.md`, `AGENTS.md`, and `IMPLEMENTATION.md`. The local implementation guide maps concrete files/classes in that subproject without redefining the root architecture.
+Each code subproject has a local `README.md`, `AGENTS.md`, and `IMPLEMENTATION.md`. The local implementation guide maps concrete files/classes in that subproject without redefining the root architecture.
 
 ## Quick verification
 
@@ -93,13 +95,15 @@ Intel macOS currently needs additional native-tokenizer setup for DJL; see [`doc
 
 ## Corpus preparation
 
-A current Lib.ru author workflow is:
+A current Lib.ru author starts with:
 
 ```text
-discover -> review selection -> acquire -> prepare-selection -> inspect-passages -> build -> validate
+discover -> review selection -> acquire -> prepare-selection
 ```
 
-Start with [`corpus-builder/README.md`](corpus-builder/README.md) for focused commands or [`docs/USAGE.md`](docs/USAGE.md) for the end-to-end workflow.
+From the prepared canonical directory, choose the LLM-curation path, the existing `inspect-passages -> build -> validate` generic retrieval path, or both.
+
+Start with [`docs/WORKFLOW.md`](docs/WORKFLOW.md) to choose the end-to-end path, then use [`corpus-builder/README.md`](corpus-builder/README.md) or [`docs/USAGE.md`](docs/USAGE.md) for command details.
 
 Generated/downloaded artifacts live under `corpus-builder/data/` and are intentionally excluded from Git and repository archives.
 
@@ -116,11 +120,12 @@ See [`mobile/README.md`](mobile/README.md).
 
 ## Documentation map
 
+- [`docs/WORKFLOW.md`](docs/WORKFLOW.md) — primary start/continue guide for source preparation, LLM curation, generic corpus builds, and Desktop runtime.
 - [`docs/CONCEPT.md`](docs/CONCEPT.md) — product idea, user promise, invariants, and non-goals.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — stable boundaries and data flows.
 - [`docs/IMPLEMENTATION.md`](docs/IMPLEMENTATION.md) — current technical implementation map.
 - [`docs/INSTALLATION.md`](docs/INSTALLATION.md) — toolchains and local setup.
-- [`docs/USAGE.md`](docs/USAGE.md) — runtime and corpus workflows.
+- [`docs/USAGE.md`](docs/USAGE.md) — command-oriented runtime and corpus reference.
 - [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) — configuration ownership and current settings.
 - [`docs/SOURCES.md`](docs/SOURCES.md) — provenance, rights review, and normalization policy.
 - [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) — format semantics and versioning.

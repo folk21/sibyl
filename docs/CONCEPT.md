@@ -43,6 +43,12 @@ Semantic relevance is therefore a gate and a weight, not the sole decision rule.
 
 Repetition is allowed. Recent passages may receive a lower probability, but they are not permanently blacklisted by default. The goal is discovery, not exhaustive rotation.
 
+## Free-form and guided questions
+
+The reader may always write a free-form question or describe an internal state. Sibyl may also offer a stable curated catalog of everyday/philosophical questions and states for readers who do not know what to ask. Guided prompts are an additional entry point, not a replacement for free-form input.
+
+A guided prompt may use pre-curated passage mappings prepared by a strong build-time model, while free-form input may continue through generic local semantic retrieval. Both paths must still produce multiple plausible candidates, preserve controlled serendipity, and end at exact stored literary text.
+
 ## Questions, history, and saved encounters
 
 Normal history records what the application showed. A saved encounter is more intentional: it preserves the **user question together with the selected passage**.

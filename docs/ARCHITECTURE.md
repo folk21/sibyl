@@ -93,6 +93,14 @@ The build-time pipeline owns:
 
 Importing build-time code must not trigger downloads, remote APIs, or model loading.
 
+### Large-LLM curation boundary
+
+A strong external LLM may be used as an explicit developer-controlled build-time curator. It may read an exported bundle of pinned canonical text versions, choose semantically strong passages with natural boundaries, and associate those passages with stable guided-question IDs. It is not part of mobile/Desktop runtime and is not called implicitly by the corpus-builder package.
+
+The LLM is authoritative only for **curation intent**. It is not authoritative for literary wording. Returned mappings must pin the concrete canonical version and exact character locator/hash; local deterministic tooling re-resolves the slice from canonical text and rejects any mismatch before normalized curation metadata is accepted. Committed curation metadata does not need to copy the literary passage text.
+
+This creates two build-time passage sources that may coexist: automatic natural-boundary candidates for generic free-form retrieval, and LLM-curated passage mappings for prepared guided questions. Both must converge on exact canonical text before they can become runtime data.
+
 ### Corpus source registry
 
 The source registry owns durable declarations about concrete text versions:
@@ -134,14 +142,18 @@ The final display path resolves to stored passage text. Internal semantic hints 
 ```mermaid
 flowchart TD
     S[Concrete source artifact] --> C[Canonical text + hash]
-    C --> P[Exact passages + locators]
-    P --> H[Semantic metadata]
-    H --> E[Embeddings]
-    P --> B[Corpus assembly]
-    E --> B
-    B --> V[Validation]
+    C --> A[Automatic passage preparation]
+    C --> X[Explicit LLM curation export]
+    X --> L[External curator proposal]
+    L --> Q[Local locator/hash validation]
+    A --> H[Semantic metadata + embeddings]
+    H --> B[Corpus assembly]
+    Q --> M[Validated curated mappings]
+    B --> V[Runtime corpus validation]
     V --> O[Published immutable corpus]
 ```
+
+The validated curated-mapping branch is currently prepared for later runtime integration and is not yet included in the published corpus-format artifacts.
 
 A published corpus is treated as generated immutable output. Expensive reusable preparation may be cached, but a corpus release should be assembled and validated as a coherent artifact instead of incrementally mutating a previously published database in place.
 

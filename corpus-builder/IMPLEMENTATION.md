@@ -46,6 +46,16 @@ Each selected work is isolated so one malformed artifact does not discard succes
 
 Prepared source documents are materialized under `data/work/` and later loaded by `source_loader.load_sources()`.
 
+## Large-LLM curation handoff
+
+`curation.py` implements the explicit external-curation boundary without making a remote LLM a package dependency.
+
+`export_curation_bundle()` reads prepared canonical `SourceDocument` values plus `corpus-curation/questions.json`, verifies canonical hashes, and creates a deterministic local ZIP containing a manifest, normalized question catalog, and canonical work text files. The bundle is generated under ignored local data and is intended to be uploaded manually to a strong external model.
+
+`import_curation()` treats returned model metadata as untrusted. It resolves `work_id`/`text_version_id`, checks the pinned canonical SHA-256, resolves the exact `chars:start:end` slice, verifies `text_sha256`, validates guided question IDs/strengths, derives deterministic `cp_...` IDs, and writes normalized Git-safe metadata without copied literary text. `validate_curated_curation()` repeats the same exact-source checks for already normalized files.
+
+The command surface is `export-curation-bundle`, `import-curation`, and `validate-curation`. The current runtime does not consume curated mappings yet; this module establishes the reproducible build-time handoff first.
+
 ## Exact passage extraction
 
 `splitter.py` converts each canonical `SourceDocument` to `PassageCandidate` values.

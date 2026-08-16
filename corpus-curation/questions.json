@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "catalog_id": "sibyl-guided-questions-ru-v1",
+  "language": "ru",
+  "items": [
+    {
+      "id": "change_timing",
+      "kind": "question",
+      "theme": "change_and_choice",
+      "text": "Как понять, что пора что-то менять?"
+    },
+    {
+      "id": "no_right_choice",
+      "kind": "question",
+      "theme": "change_and_choice",
+      "text": "Что делать, если правильного решения не существует?"
+    },
+    {
+      "id": "holding_to_familiar",
+      "kind": "question",
+      "theme": "change_and_choice",
+      "text": "Почему мы держимся за привычное, даже когда оно нам мешает?"
+    },
+    {
+      "id": "starting_over",
+      "kind": "question",
+      "theme": "change_and_choice",
+      "text": "Можно ли начать жизнь заново?"
+    },
+    {
+      "id": "regret_about_past",
+      "kind": "question",
+      "theme": "past_and_guilt",
+      "text": "Стоит ли сожалеть о прошлом?"
+    },
+    {
+      "id": "irreversible_mistake",
+      "kind": "question",
+      "theme": "past_and_guilt",
+      "text": "Как жить с ошибкой, которую уже нельзя исправить?"
+    },
+    {
+      "id": "self_forgiveness",
+      "kind": "question",
+      "theme": "past_and_guilt",
+      "text": "Почему бывает труднее простить себя, чем другого?"
+    },
+    {
+      "id": "consequences_of_mistakes",
+      "kind": "question",
+      "theme": "past_and_guilt",
+      "text": "Всегда ли человек должен расплачиваться за свои ошибки?"
+    },
+    {
+      "id": "understood_or_self",
+      "kind": "question",
+      "theme": "relationships",
+      "text": "Что важнее — быть понятым или быть собой?"
+    },
+    {
+      "id": "love_without_possession",
+      "kind": "question",
+      "theme": "relationships",
+      "text": "Можно ли любить человека и не пытаться им владеть?"
+    },
+    {
+      "id": "jealousy_in_love",
+      "kind": "question",
+      "theme": "relationships",
+      "text": "Почему мы ревнуем и завидуем тем, кого любим?"
+    },
+    {
+      "id": "fight_or_let_go",
+      "kind": "question",
+      "theme": "relationships",
+      "text": "Когда нужно бороться за отношения, а когда — отпустить?"
+    },
+    {
+      "id": "lonely_among_people",
+      "kind": "question",
+      "theme": "loneliness_and_belonging",
+      "text": "Можно ли быть одиноким среди близких людей?"
+    },
+    {
+      "id": "need_other_people",
+      "kind": "question",
+      "theme": "loneliness_and_belonging",
+      "text": "Почему нам так трудно обходиться без других людей?"
+    },
+    {
+      "id": "feeling_out_of_place",
+      "kind": "state",
+      "theme": "loneliness_and_belonging",
+      "text": "Мне кажется, что я нигде не чувствую себя своим."
+    },
+    {
+      "id": "fear_of_closeness",
+      "kind": "question",
+      "theme": "loneliness_and_belonging",
+      "text": "Почему близость иногда пугает сильнее одиночества?"
+    },
+    {
+      "id": "fear_and_action",
+      "kind": "question",
+      "theme": "fear_and_courage",
+      "text": "Можно ли действовать правильно, даже когда очень страшно?"
+    },
+    {
+      "id": "what_is_courage",
+      "kind": "question",
+      "theme": "fear_and_courage",
+      "text": "В чём разница между смелостью и безрассудством?"
+    },
+    {
+      "id": "uncertainty",
+      "kind": "state",
+      "theme": "fear_and_courage",
+      "text": "Я не знаю, что будет дальше, и это меня пугает."
+    },
+    {
+      "id": "risking_failure",
+      "kind": "question",
+      "theme": "fear_and_courage",
+      "text": "Стоит ли рисковать, если можно потерпеть неудачу?"
+    },
+    {
+      "id": "meaning_of_life",
+      "kind": "question",
+      "theme": "meaning_and_values",
+      "text": "Что делает жизнь осмысленной?"
+    },
+    {
+      "id": "what_really_matters",
+      "kind": "question",
+      "theme": "meaning_and_values",
+      "text": "Как понять, что в жизни действительно важно?"
+    },
+    {
+      "id": "success_and_happiness",
+      "kind": "question",
+      "theme": "meaning_and_values",
+      "text": "Почему успех не всегда делает человека счастливым?"
+    },
+    {
+      "id": "wasted_time",
+      "kind": "state",
+      "theme": "meaning_and_values",
+      "text": "Мне кажется, что я потратил слишком много времени не на то."
+    },
+    {
+      "id": "freedom_or_peace",
+      "kind": "question",
+      "theme": "freedom_and_responsibility",
+      "text": "Что важнее — свобода или спокойствие?"
+    },
+    {
+      "id": "burden_of_responsibility",
+      "kind": "question",
+      "theme": "freedom_and_responsibility",
+      "text": "Почему ответственность иногда кажется тяжелее самого выбора?"
+    },
+    {
+      "id": "duty_or_desire",
+      "kind": "question",
+      "theme": "freedom_and_responsibility",
+      "text": "Когда нужно следовать долгу, а когда — собственному желанию?"
+    },
+    {
+      "id": "others_expectations",
+      "kind": "question",
+      "theme": "freedom_and_responsibility",
+      "text": "Сколько места в нашей жизни должны занимать ожидания других людей?"
+    },
+    {
+      "id": "changing_identity",
+      "kind": "question",
+      "theme": "identity_and_self_knowledge",
+      "text": "Остаёмся ли мы собой, когда сильно меняемся?"
+    },
+    {
+      "id": "inner_contradictions",
+      "kind": "question",
+      "theme": "identity_and_self_knowledge",
+      "text": "Почему в одном человеке могут уживаться противоположные желания?"
+    },
+    {
+      "id": "being_authentic",
+      "kind": "question",
+      "theme": "identity_and_self_knowledge",
+      "text": "Как отличить собственное желание от навязанного?"
+    },
+    {
+      "id": "self_deception",
+      "kind": "question",
+      "theme": "identity_and_self_knowledge",
+      "text": "Почему человек иногда предпочитает обманывать самого себя?"
+    },
+    {
+      "id": "hope_or_acceptance",
+      "kind": "question",
+      "theme": "hope_and_despair",
+      "text": "Когда надежда помогает, а когда мешает принять реальность?"
+    },
+    {
+      "id": "no_strength_left",
+      "kind": "state",
+      "theme": "hope_and_despair",
+      "text": "Мне кажется, что у меня больше нет сил продолжать."
+    },
+    {
+      "id": "fear_of_future",
+      "kind": "question",
+      "theme": "hope_and_despair",
+      "text": "Почему будущее пугает даже тогда, когда настоящее нас не устраивает?"
+    },
+    {
+      "id": "possibility_of_change",
+      "kind": "question",
+      "theme": "hope_and_despair",
+      "text": "Что помогает поверить, что всё ещё может измениться?"
+    },
+    {
+      "id": "fear_of_death",
+      "kind": "question",
+      "theme": "death_and_time",
+      "text": "Почему человек боится смерти?"
+    },
+    {
+      "id": "limited_time",
+      "kind": "question",
+      "theme": "death_and_time",
+      "text": "Как меняется жизнь, когда мы по-настоящему чувствуем, что время ограничено?"
+    },
+    {
+      "id": "mortality_and_values",
+      "kind": "question",
+      "theme": "death_and_time",
+      "text": "Помогает ли мысль о смерти понять, что для нас важно?"
+    },
+    {
+      "id": "unfinished_life",
+      "kind": "state",
+      "theme": "death_and_time",
+      "text": "Я боюсь, что не успею сделать то, ради чего стоит жить."
+    },
+    {
+      "id": "meaningful_work",
+      "kind": "question",
+      "theme": "work_money_and_status",
+      "text": "Должна ли работа давать человеку смысл?"
+    },
+    {
+      "id": "money_and_freedom",
+      "kind": "question",
+      "theme": "work_money_and_status",
+      "text": "Делают ли деньги человека свободнее?"
+    },
+    {
+      "id": "ambition",
+      "kind": "question",
+      "theme": "work_money_and_status",
+      "text": "Когда честолюбие помогает расти, а когда начинает разрушать?"
+    },
+    {
+      "id": "comparison_with_others",
+      "kind": "state",
+      "theme": "work_money_and_status",
+      "text": "Мне трудно не сравнивать свою жизнь с чужой."
+    },
+    {
+      "id": "forgiving_someone",
+      "kind": "question",
+      "theme": "forgiveness_and_conflict",
+      "text": "Что значит по-настоящему простить человека?"
+    },
+    {
+      "id": "revenge",
+      "kind": "question",
+      "theme": "forgiveness_and_conflict",
+      "text": "Почему желание отомстить редко приносит облегчение?"
+    },
+    {
+      "id": "living_with_injustice",
+      "kind": "question",
+      "theme": "forgiveness_and_conflict",
+      "text": "Как жить с тем, что справедливость бывает недостижима?"
+    },
+    {
+      "id": "reconciliation",
+      "kind": "question",
+      "theme": "forgiveness_and_conflict",
+      "text": "Можно ли примириться с человеком, не соглашаясь с тем, что он сделал?"
+    }
+  ]
+}

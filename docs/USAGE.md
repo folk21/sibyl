@@ -1,5 +1,7 @@
 # Usage
 
+For the primary **where to start / what to run next** path, begin with [`WORKFLOW.md`](WORKFLOW.md). This document is the command-oriented reference for the individual operations used by that workflow.
+
 ## Interactive development
 
 From the repository root:
@@ -10,7 +12,7 @@ make run-desktop
 
 The Desktop harness uses the same shared Compose `SibylApp()` as Android. `make run-desktop` keeps the deterministic synthetic demo mode; `make run-desktop-real` loads a built local corpus and matching local ONNX model bundle.
 
-## Fastest real-text workflow: discover an author catalog
+## Command reference: prepare a real author catalog
 
 Corpus preparation is intentionally separated from runtime development. For Russian classics, the first convenient batch workflow starts from a Lib.ru/Классика author page.
 
@@ -63,7 +65,37 @@ sibyl-corpus prepare-selection \
   --output data/work/dostoevsky
 ```
 
-### 5. Review passage candidates
+### 5A. Optional large-LLM curation branch
+
+Once `data/work/<author>/` exists, the LLM-curation path branches **before** automatic passage inspection. Export the canonical texts and stable guided questions without running the splitter:
+
+```bash
+sibyl-corpus export-curation-bundle \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --output data/curation/dostoevsky-curation-bundle.zip
+```
+
+The exporter requires approved rights metadata by default. `--allow-unapproved` is available only as an explicit development override after separately confirming that the concrete text may be sent to the external model/service.
+
+After an external large LLM returns a locator/hash proposal in `corpus-curation/proposals/`, validate and normalize it locally:
+
+```bash
+sibyl-corpus import-curation \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --input ../corpus-curation/proposals/dostoevsky-v1.json \
+  --output ../corpus-curation/curated/dostoevsky-v1.json
+
+sibyl-corpus validate-curation \
+  --source data/work/dostoevsky \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/dostoevsky-v1.json
+```
+
+The importer re-resolves the exact canonical character slice and verifies both canonical and selected-text SHA-256 values. The committed curation metadata contains no passage text. See [`WORKFLOW.md`](WORKFLOW.md) for the complete human/LLM/Python handoff and current runtime status.
+
+### 5B. Review automatic passage candidates
 
 ```bash
 sibyl-corpus inspect-passages \

@@ -20,6 +20,7 @@ Concrete class names, libraries, development adapters, and temporary implementat
 | `corpus-builder/` | Python source preparation, passage extraction, embeddings, publication | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
 | `corpus-format/` | Versioned SQLite/manifest persistence contract | [`../corpus-format/IMPLEMENTATION.md`](../corpus-format/IMPLEMENTATION.md) |
 | `corpus-sources/` | Permanent source/provenance/rights registry | [`../corpus-sources/IMPLEMENTATION.md`](../corpus-sources/IMPLEMENTATION.md) |
+| `corpus-curation/` | Guided-question catalog plus Git-safe LLM proposal/validated mapping metadata | [`../corpus-curation/README.md`](../corpus-curation/README.md) |
 | `test-corpus/` | Small synthetic input for deterministic end-to-end checks | [`../test-corpus/IMPLEMENTATION.md`](../test-corpus/IMPLEMENTATION.md) |
 
 ## End-to-end implementation
@@ -45,6 +46,8 @@ flowchart TD
 The command entry point is `sibyl_corpus_builder.cli:main`. The main build orchestration is `builder.build_corpus()`. Exact passage extraction is implemented by `splitter.split_document()`. Build-time embeddings use an `EmbeddingProvider`; the real-text configuration selects `SentenceTransformerEmbeddingProvider` with `intfloat/multilingual-e5-small`.
 
 Completed embeddings are cached under the prepared source directory by `EmbeddingCache`, so an interrupted build can resume without recomputing successful batches. Publication uses a staging directory and replaces the requested output only after validation succeeds.
+
+Prepared canonical sources also support a separate LLM-curation path before automatic splitting. `curation.export_curation_bundle()` creates a deterministic local ZIP containing the 48-item guided-question catalog and concrete canonical text versions. An external large model returns locator/hash proposal metadata; `curation.import_curation()` and `validate_curated_curation()` resolve those locators back against local canonical text and reject hash or question-reference drift. The normalized mapping contains deterministic curated passage IDs but no copied literary text. This mapping is not wired into Desktop/Android runtime yet.
 
 ### Runtime
 

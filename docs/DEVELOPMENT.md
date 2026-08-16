@@ -13,7 +13,7 @@ Before changing code:
 
 ## Documentation ownership
 
-Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`. Subprojects keep:
+Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`. Code subprojects keep:
 
 - `README.md` — local purpose and quick commands;
 - `AGENTS.md` — local invariants and validation rules;
@@ -21,6 +21,7 @@ Cross-project product, architecture, policy, workflow, and compatibility documen
 
 Do not create separate subproject `docs/` trees. Keep ownership explicit:
 
+- operational start/continue flow → `docs/WORKFLOW.md`;
 - product meaning or user promise → `docs/CONCEPT.md`;
 - stable boundaries/responsibilities → `docs/ARCHITECTURE.md`;
 - current classes/libraries/wiring → root or subproject `IMPLEMENTATION.md`.
@@ -41,7 +42,7 @@ For catalog-scale additions, prefer `sibyl-corpus discover` → developer review
 
 Enabling any source requires pinned provenance and approved rights metadata. Run `make validate-sources` after permanent registry changes.
 
-See [`SOURCES.md`](SOURCES.md).
+See [`SOURCES.md`](SOURCES.md) and [`WORKFLOW.md`](WORKFLOW.md).
 
 ## Development loop
 

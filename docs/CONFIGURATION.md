@@ -60,6 +60,12 @@ Production preparation will generate explicit short/standard/extended variants i
 
 The published manifest must preserve model/provider identity and vector assumptions so mobile can reject incompatible packages.
 
+## Guided questions and LLM curation
+
+The stable guided-question product catalog is not builder TOML configuration. It lives in `corpus-curation/questions.json` and has its own `catalog_id`; curation mappings reference stable question IDs. A semantic catalog rewrite requires a new catalog ID rather than silently reinterpreting existing mappings.
+
+LLM curation proposals and normalized mappings live under `corpus-curation/`. Full canonical text exported for the external model belongs only to ignored local `corpus-builder/data/curation/`. See [`WORKFLOW.md`](WORKFLOW.md).
+
 ## Source discovery and registry
 
 Editable discovery manifests live under local `corpus-builder/data/work/` and are not committed. The selection schema uses `include` / `exclude` / `review`; batch acquisition processes only explicit `include`. `registry_work_id` is optional until permanent registration.
