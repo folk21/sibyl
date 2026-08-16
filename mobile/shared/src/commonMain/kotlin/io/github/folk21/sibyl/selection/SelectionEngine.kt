@@ -11,7 +11,13 @@ fun interface RandomSource {
     fun nextDouble(): Double
 }
 
-/** Controls semantic eligibility, weighting shape, and preferred prepared length. */
+/**
+ * Controls semantic eligibility, weighting shape, and preferred prepared passage length.
+ *
+ * The semantic exponent changes how strongly high-similarity candidates are favored after the minimum relevance
+ * gate. Other candidate weights remain independent so history/diversity/quality can influence probability without
+ * replacing semantic relevance or permanently excluding previously seen passages.
+ */
 data class SelectionPolicy(
     val minSemanticScore: Double,
     val semanticExponent: Double,
@@ -26,11 +32,27 @@ data class SelectionPolicy(
     }
 }
 
-/** Selects one eligible passage with controlled randomness instead of top-1 ranking. */
+/**
+ * Selects one eligible passage by weighted random sampling instead of returning the nearest vector match.
+ *
+ * Selection first applies the semantic threshold and passage-level deduplication. Each surviving candidate gets
+ * a non-negative weight composed from semantic relevance, quality, history, and diversity. A random cursor is then
+ * sampled across the cumulative weight range, making more relevant passages more likely while preserving product
+ * serendipity. Injected [RandomSource] keeps the exact choice deterministic in tests.
+ *
+ * The engine never truncates literary text. After a passage is chosen it selects an already prepared length
+ * variant, falling back to STANDARD and then to any available stored variant.
+ */
 class SelectionEngine(
     private val randomSource: RandomSource = RandomSource { Random.nextDouble() },
 ) {
-    /** Filters, weights, samples, and chooses a prepared variant without altering its text. */
+    /**
+     * Applies the selection policy and returns one stored passage encounter, or `null` when nothing is eligible.
+     *
+     * A zero total weight uses the first eligible candidate as a deterministic safety fallback rather than
+     * attempting an invalid random distribution. Literary content is returned through an existing `PassageVariant`
+     * only; this method never creates, summarizes, or truncates passage text.
+     */
     fun select(
         question: String,
         candidates: List<Candidate>,

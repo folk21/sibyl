@@ -5,7 +5,7 @@ Sibyl is local-first. The core literary retrieval workflow must not require tran
 ## Runtime privacy boundary
 
 ```mermaid
-flowchart LR
+flowchart TD
     Q[User question] --> E[Local embedding]
     E --> A[Local ANN search]
     A --> S[Local selection]

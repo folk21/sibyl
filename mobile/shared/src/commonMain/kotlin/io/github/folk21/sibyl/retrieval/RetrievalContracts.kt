@@ -2,7 +2,11 @@ package io.github.folk21.sibyl.retrieval
 
 import io.github.folk21.sibyl.domain.Candidate
 
-/** Encodes runtime query text into the corpus embedding space. */
+/**
+ * Encodes runtime query text into the same vector space used by persisted corpus retrieval metadata.
+ *
+ * Platform adapters own tokenizer/model details; shared retrieval depends only on this stable local contract.
+ */
 interface EmbeddingEngine {
     suspend fun embed(text: String): FloatArray
 }
@@ -13,12 +17,21 @@ data class VectorMatch(
     val score: Double,
 )
 
-/** Retrieves multiple plausible semantic matches rather than a single nearest passage. */
+/**
+ * Retrieves multiple plausible semantic-hint matches from a local vector space.
+ *
+ * Implementations return hint-level matches rather than directly choosing a passage so shared code can deduplicate,
+ * hydrate exact stored text, and preserve a broader candidate pool for controlled-random selection.
+ */
 interface VectorIndex {
     suspend fun search(vector: FloatArray, limit: Int): List<VectorMatch>
 }
 
-/** Produces a ranked candidate pool while leaving final serendipitous choice to selection. */
+/**
+ * Produces a relevance-ranked candidate pool while leaving the final serendipitous choice to selection.
+ *
+ * Callers must not treat the first candidate as the product answer; retrieval and selection are separate by design.
+ */
 interface RetrievalService {
     suspend fun candidates(question: String, limit: Int): List<Candidate>
 }

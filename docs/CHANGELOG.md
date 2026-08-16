@@ -33,6 +33,8 @@
 
 ### Changed
 
+- repository documentation rules now prefer vertical Mermaid flowcharts for sequential pipelines longer than four major blocks, while relationship maps and sequence diagrams keep the layout that best communicates structure;
+- Kotlin documentation now requires meaningful KDoc for every type and more detailed responsibility/algorithm/invariant/resource-lifecycle notes for non-obvious retrieval, selection, inference, persistence, and compatibility code;
 - `archive.sh` and `.gitignore` now exclude all `corpus-builder/data/` downloads/prepared/output/cache content plus local ML/tool caches and generated project snapshots;
 - pinned the optional corpus-builder ML stack to NumPy 1.26.4, PyTorch 2.2.2, and Sentence Transformers 3.4.1, with Python 3.11/3.12 documented for reproducible Intel macOS embedding builds;
 - Lib.ru batch acquisition reports `acquired` / `failed` / `skipped` results and preserves successful cache entries when another work fails;

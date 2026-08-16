@@ -21,10 +21,13 @@ There is no required backend in the core architecture.
 - Write software code, comments, KDoc/docstrings, tests, config comments, examples, README/AGENTS files, and software documentation in English.
 - Literary source text keeps its source language and exact approved wording.
 - Avoid comments that restate code. Document useful contracts/invariants instead.
+- Give every Kotlin class/interface/enum/data class a meaningful KDoc. For non-obvious runtime, retrieval, persistence, or algorithmic code, explain the responsibility, why the class exists, the main processing order, important invariants/assumptions, and notable fallback/resource-ownership behavior. Keep simple models concise and avoid line-by-line narration.
+- Document substantial public/orchestration methods when their ordering, side effects, compatibility rules, or exact-text guarantees are not obvious from the signature alone.
 - Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`.
 - Each subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
 - Do not create separate subproject `docs/` trees or duplicate root architecture/policy content in local implementation guides.
 - Architecture/workflow diagrams should use Mermaid instead of ASCII/pseudo-text diagrams when a diagram is useful.
+- Prefer vertical Mermaid flowcharts (`TD`/`TB`) for sequential pipelines with more than four major blocks. Short chains and relationship/component maps may remain horizontal (`LR`) when that is easier to read. `sequenceDiagram` is exempt because its layout communicates participants and call order differently.
 
 ## Core product invariants
 

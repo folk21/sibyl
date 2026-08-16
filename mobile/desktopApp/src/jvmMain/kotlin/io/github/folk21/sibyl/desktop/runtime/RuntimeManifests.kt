@@ -34,7 +34,12 @@ data class CorpusCountsManifest(
     val hints: Int,
 )
 
-/** Minimal subset of the corpus manifest required by the Desktop reader. */
+/**
+ * Minimal subset of the published corpus manifest required by the Desktop reader.
+ *
+ * Keeping this reader model narrow lets Desktop ignore builder-only metadata while still validating every field that
+ * affects embedding compatibility or artifact location.
+ */
 @Serializable
 data class CorpusManifest(
     @SerialName("format_version") val formatVersion: Int,
@@ -43,7 +48,12 @@ data class CorpusManifest(
     val counts: CorpusCountsManifest,
 )
 
-/** Contract for the downloaded local ONNX model and tokenizer bundle. */
+/**
+ * Runtime contract for a downloaded local ONNX model/tokenizer bundle.
+ *
+ * These fields describe the inference behavior that must match corpus generation; the model files themselves remain
+ * generated local data and are not committed with application source.
+ */
 @Serializable
 data class RuntimeModelManifest(
     @SerialName("schema_version") val schemaVersion: Int,
@@ -71,7 +81,13 @@ fun loadRuntimeModelManifest(modelDir: Path): RuntimeModelManifest {
     return runtimeJson.decodeFromString(Files.readString(path))
 }
 
-/** Rejects corpus/model combinations whose embedding contracts cannot be compared safely. */
+/**
+ * Rejects corpus/model combinations that could produce semantically invalid query vectors.
+ *
+ * The check is intentionally strict: a matching vector dimension alone is insufficient if model identity,
+ * normalization, E5 query prefix, pooling behavior, or persisted corpus format differs. Failing before model/session
+ * startup makes configuration drift explicit instead of returning plausible but unrelated literary passages.
+ */
 fun validateRuntimeCompatibility(corpus: CorpusManifest, model: RuntimeModelManifest) {
     require(corpus.formatVersion == 3) {
         "Unsupported corpus format ${corpus.formatVersion}; Desktop currently supports format 3"

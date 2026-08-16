@@ -114,7 +114,7 @@ See [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md).
 ## Runtime retrieval
 
 ```mermaid
-flowchart LR
+flowchart TD
     Q[Question] --> E[Local query embedding]
     E --> V[Vector retrieval]
     V --> G[Semantic relevance gate]
@@ -132,7 +132,7 @@ The final display path resolves to stored passage text. Internal semantic hints 
 ## Build-time publication
 
 ```mermaid
-flowchart LR
+flowchart TD
     S[Concrete source artifact] --> C[Canonical text + hash]
     C --> P[Exact passages + locators]
     P --> H[Semantic metadata]

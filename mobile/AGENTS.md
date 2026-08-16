@@ -16,6 +16,12 @@ Root `AGENTS.md` also applies.
 - ONNX Runtime and ANN/index APIs must stay behind `EmbeddingEngine`/`VectorIndex`-style interfaces. Desktop currently provides local ONNX + brute-force JSON-vector + SQLite adapters for development; keep their contracts reusable so Android can replace platform storage/index implementations without changing selection/UI.
 - UI must not implement retrieval ranking or corpus parsing.
 
+## Kotlin documentation
+
+- Every Kotlin class/interface/enum/data class must have meaningful KDoc.
+- Keep obvious domain/value types short, but document non-obvious retrieval, selection, inference, persistence, compatibility, and resource-management classes in enough detail to explain the algorithm or call order, the reason for the boundary, important invariants, and relevant fallbacks.
+- Add KDoc to substantial orchestration/public methods when a future maintainer could otherwise miss ordering, exact-text, cleanup, or compatibility behavior. Do not narrate individual statements.
+
 ## Selection behavior
 
 - Never replace controlled random sampling with top-1 retrieval.

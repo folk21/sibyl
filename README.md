@@ -5,7 +5,7 @@ Sibyl is an offline-first literary discovery application. A user asks a question
 The application uses machine learning to find where to look; it does not generate literary quotations.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Q[Question] --> E[Local embedding]
     E --> R[Vector retrieval]
     R --> C[Candidate pool]

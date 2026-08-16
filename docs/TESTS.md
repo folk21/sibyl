@@ -66,7 +66,7 @@ Source records may exist as disabled candidates while review is incomplete. `ena
 `make smoke-corpus` exercises the build pipeline without leaving generated data in the repository:
 
 ```mermaid
-flowchart LR
+flowchart TD
     F[test-corpus fixtures] --> B[corpus-builder]
     B --> D[temporary corpus.db]
     B --> M[temporary manifest]

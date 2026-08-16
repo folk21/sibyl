@@ -40,7 +40,11 @@ data class PassageVariant(
         require(texts.isNotEmpty()) { "Passage variant must contain at least one text version" }
     }
 
-    /** Chooses a preferred language and role without modifying the stored text. */
+    /**
+     * Chooses stored display text by preferred language first, then by original/human/machine role priority.
+     *
+     * The method only selects among existing text versions; it never translates or rewrites a passage at runtime.
+     */
     fun preferredText(language: String = "ru"): PassageText {
         val preferredLanguage = texts.filter { it.language == language }
         return preferredLanguage.minByOrNull { it.role.displayPriority() }

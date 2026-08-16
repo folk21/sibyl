@@ -5,7 +5,7 @@
 ## Pipeline
 
 ```mermaid
-flowchart LR
+flowchart TD
     U[Author/catalog URL] --> D[Discover]
     D --> S[Editable selection.toml]
     S --> R[Developer review]

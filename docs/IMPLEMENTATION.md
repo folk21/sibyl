@@ -29,7 +29,7 @@ The current real-text development path has two phases.
 ### Build time
 
 ```mermaid
-flowchart LR
+flowchart TD
     U[Lib.ru author URL] --> D[sibyl-corpus discover]
     D --> S[selection.toml]
     S --> A[sibyl-corpus acquire]

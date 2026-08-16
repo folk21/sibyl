@@ -10,7 +10,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-/** Loads development vectors from JSON and performs exhaustive cosine-similarity search. */
+/**
+ * Development vector index that loads every semantic-hint vector from `vectors.json` into memory.
+ *
+ * Search is deliberately exhaustive: every stored vector is scored by cosine similarity, sorted, and truncated to
+ * the requested limit. Vector norms are precomputed at load time so repeated queries avoid redundant work. This is
+ * simple and deterministic for small Desktop corpora, but it is intentionally behind `VectorIndex` so a production
+ * ANN implementation can replace the O(N) scan without changing shared retrieval or UI code.
+ */
 class JsonBruteForceVectorIndex(
     vectorsPath: Path,
     private val dimensions: Int,
@@ -24,7 +31,12 @@ class JsonBruteForceVectorIndex(
 
     private val entries: List<Entry> = loadEntries(vectorsPath)
 
-    /** Scores every stored hint vector and returns the strongest matches in descending order. */
+    /**
+     * Scores the query against every stored hint vector and returns the strongest cosine matches.
+     *
+     * Dimension and non-zero-norm checks fail early because silently comparing incompatible embedding spaces would
+     * produce plausible-looking but invalid retrieval results.
+     */
     override suspend fun search(vector: FloatArray, limit: Int): List<VectorMatch> {
         require(vector.size == dimensions) {
             "Query vector has ${vector.size} dimensions; expected $dimensions"
@@ -46,6 +58,7 @@ class JsonBruteForceVectorIndex(
             .toList()
     }
 
+    /** Loads and validates the complete JSON vector artifact once when the index is constructed. */
     private fun loadEntries(path: Path): List<Entry> {
         require(Files.isRegularFile(path)) { "Vector artifact not found: $path" }
         val root = Json.parseToJsonElement(Files.readString(path)).jsonObject

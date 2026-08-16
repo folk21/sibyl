@@ -34,14 +34,28 @@ import io.github.folk21.sibyl.selection.SelectionEngine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-/** Runs the shared application UI with the deterministic synthetic demo retrieval service. */
+/**
+ * Runs the shared application UI with the clearly labelled synthetic demo retrieval service.
+ *
+ * This entry point is intentionally self-contained for previews/Android scaffolding that has not yet wired a real
+ * corpus runtime. Synthetic fixture text remains visibly marked and must never be mistaken for a literary quotation.
+ */
 @Composable
 fun SibylApp() {
     val retrieval = remember { DemoRetrievalService() }
     SibylApp(retrievalService = retrieval, isDemo = true)
 }
 
-/** Runs the shared UI against an injected retrieval service while keeping ranking outside Compose. */
+/**
+ * Runs the shared Compose UI against an injected retrieval implementation.
+ *
+ * Compose owns only interaction state and presentation. A question is delegated to [RetrievalService] for a candidate
+ * pool, then [SelectionEngine] performs the controlled-random final choice. The UI renders the selected stored
+ * `PassageVariant`, keeps temporary in-memory history/saved encounters, and never performs vector ranking or corpus
+ * parsing itself.
+ *
+ * [isDemo] controls synthetic-fixture labelling only; it does not change retrieval or selection semantics.
+ */
 @Composable
 fun SibylApp(
     retrievalService: RetrievalService,
@@ -58,6 +72,7 @@ fun SibylApp(
         var answer by remember { mutableStateOf<Answer?>(null) }
         var retrievalError by remember { mutableStateOf<String?>(null) }
 
+        // Keep the asynchronous request boundary in UI state while retrieval and ranking remain outside Compose.
         fun requestAnswer() {
             scope.launch {
                 retrievalError = null

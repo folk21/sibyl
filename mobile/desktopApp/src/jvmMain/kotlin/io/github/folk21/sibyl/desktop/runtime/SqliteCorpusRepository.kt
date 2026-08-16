@@ -14,7 +14,16 @@ import java.nio.file.Path
 import java.sql.Connection
 import org.sqlite.SQLiteConfig
 
-/** Resolves retrieved hint IDs to exact stored passages in the read-only corpus database. */
+/**
+ * Hydrates semantic-hint matches into exact stored passages from the read-only corpus SQLite database.
+ *
+ * One hint identifies a passage, while one passage may join to several prepared lengths and text versions. The
+ * repository therefore aggregates SQL rows by passage ID and by length/text-version, preserving `passage_text.text`
+ * verbatim. When multiple retrieved hints point to the same passage, the strongest semantic score is retained.
+ *
+ * The connection is opened read-only because runtime retrieval must not mutate published corpus artifacts. Generated
+ * semantic hints are used only for lookup and scoring; they never become display text.
+ */
 class SqliteCorpusRepository(corpusPath: Path) : CorpusRepository, AutoCloseable {
     /** Accumulates text variants while rows for one passage are joined from SQLite. */
     private data class PassageBuilder(
@@ -37,7 +46,13 @@ class SqliteCorpusRepository(corpusPath: Path) : CorpusRepository, AutoCloseable
         connection = config.createConnection("jdbc:sqlite:${corpusPath.toAbsolutePath()}")
     }
 
-    /** Hydrates candidates for retrieved hints while preserving exact passage_text values. */
+    /**
+     * Resolves vector matches to passage candidates and reconstructs all stored display variants in one joined query.
+     *
+     * The query is parameterized by hint IDs, then rows are folded into passage builders. `putIfAbsent` on text-version
+     * IDs avoids duplicate text caused by joins, and no normalization or truncation is applied after SQLite returns the
+     * persisted literary text.
+     */
     override suspend fun resolve(matches: List<VectorMatch>): List<Candidate> {
         if (matches.isEmpty()) return emptyList()
         val scoreByHint = matches.associate { it.hintId to it.score }

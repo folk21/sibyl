@@ -21,7 +21,7 @@ sibyl-corpus -> sibyl_corpus_builder.cli:main
 For the current Lib.ru workflow:
 
 ```mermaid
-flowchart LR
+flowchart TD
     U[Author page URL] --> D[discovery.py]
     D --> L[libru.py parser/classifier]
     L --> S[SelectionManifest]
@@ -86,7 +86,7 @@ This means `Ctrl+C` can lose the current in-flight batch, but completed batches 
 `builder.build_corpus()` is the main build orchestrator:
 
 ```mermaid
-flowchart LR
+flowchart TD
     L[load_sources] --> P[split_document]
     P --> H[HintGenerator]
     H --> E[EmbeddingProvider + cache]

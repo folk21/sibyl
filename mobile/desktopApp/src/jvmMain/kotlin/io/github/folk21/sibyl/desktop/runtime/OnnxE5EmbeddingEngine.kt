@@ -10,7 +10,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.math.sqrt
 
-/** Encodes runtime questions with the local E5 ONNX model and tokenizer. */
+/**
+ * Encodes user questions into the same E5 vector space used by the build-time corpus embeddings.
+ *
+ * Runtime text is prefixed with the configured E5 query prefix before local Hugging Face tokenization. ONNX returns
+ * per-token embeddings; this adapter applies attention-mask-aware mean pooling and optional L2 normalization to match
+ * the build-time Sentence Transformers contract. The model path, dimensions, prefix, pooling, and normalization are
+ * validated through runtime manifests before this class is constructed.
+ *
+ * The tokenizer and ONNX session are native resources owned by this instance and must be closed with the Desktop
+ * runtime. No network access is performed during embedding.
+ */
 class OnnxE5EmbeddingEngine(
     modelPath: Path,
     tokenizerPath: Path,
@@ -34,7 +44,13 @@ class OnnxE5EmbeddingEngine(
             .build()
     }
 
-    /** Tokenizes a query, runs ONNX inference, mean-pools active tokens, and normalizes the result. */
+    /**
+     * Tokenizes [text], performs local ONNX inference, and returns one fixed-size query embedding.
+     *
+     * Only tokens enabled by the attention mask contribute to mean pooling. `token_type_ids` is supplied only when
+     * the exported model declares that input. Every temporary `OnnxTensor` is closed in `finally`, including failure
+     * paths, because repeated questions otherwise leak native memory.
+     */
     override suspend fun embed(text: String): FloatArray {
         val encoding = tokenizer.encode(queryPrefix + text)
         val ids = encoding.ids
@@ -88,6 +104,7 @@ class OnnxE5EmbeddingEngine(
         }
     }
 
+    /** Applies L2 normalization expected by cosine/dot-product compatible E5 retrieval. */
     private fun normalizeInPlace(vector: FloatArray) {
         var sum = 0.0
         for (value in vector) sum += value * value

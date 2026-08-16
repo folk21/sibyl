@@ -6,7 +6,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-/** Owns the Desktop-only resources required for real local corpus retrieval. */
+/**
+ * Owns the Desktop-only resources required for real local corpus retrieval.
+ *
+ * The factory validates corpus/model manifests before opening expensive native resources, then wires the shared
+ * `LocalRetrievalService` to JVM implementations for ONNX query embedding, brute-force vector search, and SQLite
+ * passage hydration. The runtime owns the closeable embedding engine and database connection for the full window
+ * lifetime; partial initialization is cleaned up before an exception escapes.
+ */
 class DesktopRuntime private constructor(
     val retrievalService: RetrievalService,
     val label: String,
@@ -19,7 +26,13 @@ class DesktopRuntime private constructor(
     }
 
     companion object {
-        /** Loads and compatibility-checks a corpus plus its local embedding model bundle. */
+        /**
+         * Loads one published corpus and a compatible local embedding-model bundle.
+         *
+         * Manifest compatibility is checked before inference starts so model ID, dimensions, normalization, E5
+         * query prefix, pooling, and corpus format cannot drift silently. Resource construction is ordered so every
+         * successfully opened resource is closed if a later adapter fails to initialize.
+         */
         fun load(corpusDir: Path, modelDir: Path): DesktopRuntime {
             require(Files.isDirectory(corpusDir)) { "Corpus directory not found: $corpusDir" }
             require(Files.isDirectory(modelDir)) { "Runtime model directory not found: $modelDir" }
@@ -67,7 +80,12 @@ class DesktopRuntime private constructor(
     }
 }
 
-/** Resolved filesystem locations for an optional real-corpus Desktop session. */
+/**
+ * Resolved filesystem locations for an optional real-corpus Desktop session.
+ *
+ * Desktop treats the two paths as an atomic configuration: both must be present for real retrieval, while absence
+ * of both selects the synthetic demo. This avoids accidentally pairing a real corpus with an implicit/default model.
+ */
 data class DesktopRuntimePaths(
     val corpusDir: Path,
     val modelDir: Path,

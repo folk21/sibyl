@@ -7,7 +7,7 @@ Sibyl is an offline-first literary discovery application. A person writes a ques
 The application is not intended to answer in the voice of an author. Its primary result is existing literature, not generated prose.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Q[Question or state] --> R[Related literary region]
     R --> C[Several plausible passages]
     C --> S[Controlled serendipitous choice]
@@ -78,7 +78,7 @@ They do not require a separate semantic engine.
 The core question-to-passage flow is designed to stay on the device:
 
 ```mermaid
-flowchart LR
+flowchart TD
     Q[Question] --> E[Local embedding]
     E --> I[Local vector search]
     I --> S[Local selection]
