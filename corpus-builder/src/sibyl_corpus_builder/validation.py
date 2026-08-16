@@ -3,6 +3,7 @@ from pathlib import Path
 
 
 def validate_corpus(path: Path) -> None:
+    """Validates required corpus metadata, foreign keys, and non-empty persisted content."""
     if not path.is_file():
         raise ValueError(f"Corpus database does not exist: {path}")
 

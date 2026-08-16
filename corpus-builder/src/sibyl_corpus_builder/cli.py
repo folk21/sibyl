@@ -28,6 +28,7 @@ def _approval_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the explicit CLI for discovery, preparation, validation, and publication."""
     parser = argparse.ArgumentParser(prog="sibyl-corpus")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -114,6 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None:
+    """Writes exact extracted passages as JSONL for developer review before publication."""
     config = load_config(config_path)
     records: list[dict[str, object]] = []
     for document in load_sources(source_dir):
@@ -138,6 +140,7 @@ def _inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None
 
 
 def main() -> None:
+    """Dispatches one explicit corpus-builder command without import-time side effects."""
     args = build_parser().parse_args()
     if args.command == "discover":
         manifest = discover_to_file(args.url, args.output)

@@ -6,6 +6,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+/** Owns the Desktop-only resources required for real local corpus retrieval. */
 class DesktopRuntime private constructor(
     val retrievalService: RetrievalService,
     val label: String,
@@ -18,6 +19,7 @@ class DesktopRuntime private constructor(
     }
 
     companion object {
+        /** Loads and compatibility-checks a corpus plus its local embedding model bundle. */
         fun load(corpusDir: Path, modelDir: Path): DesktopRuntime {
             require(Files.isDirectory(corpusDir)) { "Corpus directory not found: $corpusDir" }
             require(Files.isDirectory(modelDir)) { "Runtime model directory not found: $modelDir" }
@@ -65,11 +67,13 @@ class DesktopRuntime private constructor(
     }
 }
 
+/** Resolved filesystem locations for an optional real-corpus Desktop session. */
 data class DesktopRuntimePaths(
     val corpusDir: Path,
     val modelDir: Path,
 ) {
     companion object {
+        /** Returns configured runtime paths, or null when Desktop should use demo mode. */
         fun fromEnvironment(): DesktopRuntimePaths? {
             val corpus = System.getenv("SIBYL_CORPUS_DIR")?.takeIf { it.isNotBlank() }
             val model = System.getenv("SIBYL_MODEL_DIR")?.takeIf { it.isNotBlank() }

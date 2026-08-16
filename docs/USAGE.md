@@ -151,6 +151,8 @@ make run-desktop-real \
 
 Desktop validates corpus format/model/dimensions/query-prefix compatibility before opening the real retrieval flow. It then uses local ONNX query embedding, brute-force cosine search over `vectors.json`, SQLite passage lookup from `corpus.db`, and the shared controlled-random `SelectionEngine`. No question or passage is sent to a backend.
 
+On Intel macOS, export the locally built DJL tokenizer native described in [`INSTALLATION.md`](INSTALLATION.md) before running real mode. Concrete Desktop classes and library responsibilities are mapped in [`../mobile/IMPLEMENTATION.md`](../mobile/IMPLEMENTATION.md).
+
 ## Existing single-source workflow
 
 For a registered Project Gutenberg work:

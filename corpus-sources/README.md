@@ -2,15 +2,11 @@
 
 `corpus-sources/` is the permanent source/provenance/rights registry. It contains metadata only: downloaded books, discovery selections, scans, machine translations, and production corpus artifacts remain outside Git.
 
-## Seed set
+## Registry state
 
-The repository currently includes **40 disabled candidate records**:
+The repository currently includes **84 disabled candidate records** in four collections. This consists of the original 40-record seed review queue plus 44 registered Lib.ru Dostoevsky candidates in `collections/dostoevsky-libru.toml`.
 
-- 24 Russian classics (`collections/russian-classics.toml`);
-- 12 foreign classics from Project Gutenberg (`collections/foreign-classics-ru.toml`);
-- 4 philosophy/sacred-text candidates (`collections/sacred-and-philosophy.toml`).
-
-All seed records are intentionally `review_status = "candidate"`, `rights_status = "review_required"`, and `enabled = false`. They are a review queue, not production approval.
+All current records remain disabled review material rather than production approval; source/version rights and provenance must still satisfy the enabled-source rules before publication.
 
 Validate directly from the corpus-sources directory:
 
@@ -51,4 +47,4 @@ A foreign original may declare `russian_display_policy = "build_time_machine_tra
 
 For local candidate preparation, existing registry sources support an explicit `--allow-unapproved` override; artifacts produced under that override are not publishable.
 
-Detailed policy is in [`../docs/SOURCES.md`](../docs/SOURCES.md). See also [`AGENTS.md`](AGENTS.md).
+Detailed policy is in [`../docs/SOURCES.md`](../docs/SOURCES.md). Current registry layout and validation implementation are described in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). See also [`AGENTS.md`](AGENTS.md).

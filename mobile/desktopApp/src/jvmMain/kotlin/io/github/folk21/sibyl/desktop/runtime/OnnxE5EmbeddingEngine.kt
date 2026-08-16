@@ -10,6 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.math.sqrt
 
+/** Encodes runtime questions with the local E5 ONNX model and tokenizer. */
 class OnnxE5EmbeddingEngine(
     modelPath: Path,
     tokenizerPath: Path,
@@ -33,6 +34,7 @@ class OnnxE5EmbeddingEngine(
             .build()
     }
 
+    /** Tokenizes a query, runs ONNX inference, mean-pools active tokens, and normalizes the result. */
     override suspend fun embed(text: String): FloatArray {
         val encoding = tokenizer.encode(queryPrefix + text)
         val ids = encoding.ids

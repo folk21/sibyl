@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class SourceDocument:
+    """Canonical source text plus provenance needed for deterministic passage extraction."""
+
     source_id: str
     text_version_id: str
     author: str
@@ -27,6 +29,8 @@ class SourceDocument:
 
 @dataclass(frozen=True)
 class PassageCandidate:
+    """An exact character-bounded literary passage prepared for corpus persistence."""
+
     passage_id: str
     source_id: str
     text_version_id: str
@@ -40,6 +44,8 @@ class PassageCandidate:
 
 @dataclass(frozen=True)
 class SemanticHint:
+    """Internal retrieval text linked to a passage and never exposed as a quotation."""
+
     hint_id: str
     passage_id: str
     text: str

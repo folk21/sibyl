@@ -182,6 +182,7 @@ From the repository root, `make smoke-corpus` runs the same idea in a temporary 
 
 ## Detailed docs
 
+- [`IMPLEMENTATION.md`](IMPLEMENTATION.md) — current Python modules, pipeline orchestration, caching, and publication internals.
 - [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md)
 - [`../docs/CONFIGURATION.md`](../docs/CONFIGURATION.md)
 - [`../docs/SOURCES.md`](../docs/SOURCES.md)

@@ -13,4 +13,4 @@ Run the end-to-end fixture build from the repository root:
 make smoke-corpus
 ```
 
-Production literary corpora belong outside this directory and require explicit provenance/rights metadata in `corpus-sources/`.
+Production literary corpora belong outside this directory and require explicit provenance/rights metadata in `corpus-sources/`. See [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for how the fixture participates in smoke builds.

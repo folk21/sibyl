@@ -2,10 +2,12 @@ package io.github.folk21.sibyl.retrieval
 
 import io.github.folk21.sibyl.domain.Candidate
 
+/** Resolves internal vector matches to exact stored literary passage candidates. */
 interface CorpusRepository {
     suspend fun resolve(matches: List<VectorMatch>): List<Candidate>
 }
 
+/** Coordinates local query embedding, vector retrieval, hydration, and passage deduplication. */
 class LocalRetrievalService(
     private val embeddingEngine: EmbeddingEngine,
     private val vectorIndex: VectorIndex,
@@ -16,6 +18,7 @@ class LocalRetrievalService(
         require(retrievalMultiplier > 0) { "retrievalMultiplier must be positive" }
     }
 
+    /** Retrieves a wider hint pool, resolves passages, and keeps the strongest score per passage. */
     override suspend fun candidates(question: String, limit: Int): List<Candidate> {
         require(limit > 0) { "limit must be positive" }
         val queryVector = embeddingEngine.embed(question)

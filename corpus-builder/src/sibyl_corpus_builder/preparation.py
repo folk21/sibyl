@@ -10,6 +10,8 @@ from .source_registry import load_registry_work, require_usable_source
 
 @dataclass(frozen=True)
 class AcquisitionItem:
+    """Records the outcome and artifact metadata for one selected work."""
+
     work_id: str
     title: str
     status: str
@@ -22,6 +24,8 @@ class AcquisitionItem:
 
 @dataclass(frozen=True)
 class AcquisitionReport:
+    """Groups acquired, failed, and skipped work outcomes for a batch run."""
+
     selection_path: Path
     items: tuple[AcquisitionItem, ...]
 
@@ -43,6 +47,7 @@ def _quote(value: str) -> str:
 
 
 def write_acquisition_report(report: AcquisitionReport, path: Path) -> None:
+    """Persists a deterministic batch acquisition report for later review and retry."""
     lines = [
         "schema_version = 1",
         f"selection = {_quote(str(report.selection_path))}",
@@ -102,6 +107,7 @@ def fetch_registry_source(
     version_id: str | None,
     allow_unapproved: bool,
 ) -> Path:
+    """Acquires and caches one concrete registry text version after approval checks."""
     work = load_registry_work(registry_dir, work_id)
     version = work.text_version(version_id)
     require_usable_source(work, version, allow_unapproved=allow_unapproved)
@@ -123,6 +129,7 @@ def import_registry_source(
     file_path: Path,
     allow_unapproved: bool,
 ) -> Path:
+    """Imports a reviewed local UTF-8 artifact as a concrete registry source version."""
     work = load_registry_work(registry_dir, work_id)
     version = work.text_version(version_id)
     require_usable_source(work, version, allow_unapproved=allow_unapproved)
@@ -146,6 +153,7 @@ def prepare_registry_sources(
     output_dir: Path,
     allow_unapproved: bool,
 ) -> None:
+    """Materializes cached registry artifacts as deterministic builder source documents."""
     if not work_ids:
         raise ValueError("At least one --work is required")
 
@@ -259,6 +267,7 @@ def _selection_registry_models(manifest, selected_work):
 def acquire_selection(
     *, selection_path: Path, cache_dir: Path, report_path: Path | None = None
 ) -> AcquisitionReport:
+    """Acquires only explicitly included catalog works and isolates per-work failures."""
     from .selection import load_selection
 
     manifest = load_selection(selection_path)
@@ -319,6 +328,7 @@ def acquire_selection(
 
 
 def prepare_selection_sources(*, selection_path: Path, cache_dir: Path, output_dir: Path) -> None:
+    """Converts acquired selection artifacts into deterministic builder input files."""
     from .selection import load_selection
 
     manifest = load_selection(selection_path)

@@ -8,6 +8,8 @@ from sibyl_corpus_builder.models import SemanticHint
 
 
 class _RecordingProvider:
+    """Records embedding calls so cache resume behavior can be asserted deterministically."""
+
     def __init__(self, *, dimensions: int, fail_after_calls: int | None = None) -> None:
         self._dimensions = dimensions
         self._fail_after_calls = fail_after_calls

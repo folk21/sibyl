@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def validate_sql_schema() -> None:
+    """Executes the canonical SQL schema and verifies its required relational contract."""
     schema = (ROOT / "schema.sql").read_text(encoding="utf-8")
     with sqlite3.connect(":memory:") as connection:
         connection.executescript(schema)
@@ -43,6 +44,7 @@ def validate_sql_schema() -> None:
 
 
 def validate_manifest_schema_document() -> None:
+    """Checks manifest schema requirements and VERSION consistency."""
     document = json.loads((ROOT / "manifest.schema.json").read_text(encoding="utf-8"))
     required = set(document.get("required", []))
     expected = {"format_version", "language", "embedding", "counts", "artifacts"}
@@ -59,6 +61,7 @@ def validate_manifest_schema_document() -> None:
 
 
 def validate_schema() -> None:
+    """Runs all corpus-format self-validation checks."""
     validate_sql_schema()
     validate_manifest_schema_document()
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()

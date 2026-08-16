@@ -8,6 +8,7 @@ import io.github.folk21.sibyl.domain.PassageTextRole
 import io.github.folk21.sibyl.domain.PassageVariant
 import io.github.folk21.sibyl.retrieval.RetrievalService
 
+/** Supplies clearly synthetic candidates for UI development without a real corpus. */
 class DemoRetrievalService : RetrievalService {
     override suspend fun candidates(question: String, limit: Int): List<Candidate> = demoCandidates.take(limit)
 

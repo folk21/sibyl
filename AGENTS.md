@@ -21,8 +21,9 @@ There is no required backend in the core architecture.
 - Write software code, comments, KDoc/docstrings, tests, config comments, examples, README/AGENTS files, and software documentation in English.
 - Literary source text keeps its source language and exact approved wording.
 - Avoid comments that restate code. Document useful contracts/invariants instead.
-- Detailed documentation lives only under root `docs/`.
-- Subprojects keep only `README.md` for local quick start and `AGENTS.md` for local change rules.
+- Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`.
+- Each subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
+- Do not create separate subproject `docs/` trees or duplicate root architecture/policy content in local implementation guides.
 - Architecture/workflow diagrams should use Mermaid instead of ASCII/pseudo-text diagrams when a diagram is useful.
 
 ## Core product invariants
@@ -87,7 +88,9 @@ Use `make check-all` when the Android toolchain is available. Use `make run-desk
 Use one owning root document and link to it instead of duplicating detailed content:
 
 - root `README.md` — project overview, onboarding map, quick start, source-extension hint;
-- `docs/ARCHITECTURE.md` — system boundaries and data flow;
+- `docs/CONCEPT.md` — product purpose, user promise, invariants, and non-goals;
+- `docs/ARCHITECTURE.md` — stable system boundaries and data flow;
+- `docs/IMPLEMENTATION.md` — cross-project map of the current concrete implementation;
 - `docs/INSTALLATION.md` — toolchains/setup;
 - `docs/TESTS.md` — test matrix;
 - `docs/USAGE.md` — runtime/build workflows;
@@ -98,8 +101,11 @@ Use one owning root document and link to it instead of duplicating detailed cont
 - `docs/SECURITY_AND_PRIVACY.md` — privacy/content-integrity rules;
 - `docs/ROADMAP.md` — prioritized work with explicit status;
 - `docs/CHANGELOG.md` — completed repository changes;
-- subproject `README.md` — local overview/commands/file map;
+- subproject `README.md` — local overview and commands;
+- subproject `IMPLEMENTATION.md` — current modules/classes/libraries and concrete call paths;
 - local `AGENTS.md` — protected rules close to code.
+
+Documentation changes follow one ownership rule: product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`.
 
 ## Repository archive checklist
 

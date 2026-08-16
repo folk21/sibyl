@@ -25,6 +25,7 @@ def require(condition: bool, message: str) -> None:
 
 
 def validate_work(path: Path) -> tuple[str, bool]:
+    """Validates one source record, including stricter requirements for enabled content."""
     data = load_toml(path)
     prefix = str(path.relative_to(ROOT))
 
@@ -87,6 +88,7 @@ def validate_work(path: Path) -> tuple[str, bool]:
 
 
 def validate_registry() -> None:
+    """Validates work uniqueness, collection references, and publication readiness constraints."""
     work_files = sorted(WORKS_DIR.glob("*.toml"))
     require(bool(work_files), "no work records found")
 

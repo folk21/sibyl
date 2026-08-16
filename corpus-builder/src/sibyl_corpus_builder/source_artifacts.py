@@ -10,6 +10,8 @@ from .source_registry import RegistryTextVersion, RegistryWork
 
 @dataclass(frozen=True)
 class SourceArtifact:
+    """Cached raw/canonical source pair with hashes and normalizer identity."""
+
     work_id: str
     text_version_id: str
     directory: Path
@@ -54,6 +56,7 @@ def write_source_artifact(
     resolved_uri: str,
     artifact_kind: str | None = None,
 ) -> SourceArtifact:
+    """Caches raw and canonical source bytes with reproducible hashes and metadata."""
     canonical_text, normalizer = canonicalize_text(
         raw,
         version.source_family,
@@ -126,6 +129,7 @@ def write_source_artifact(
 
 
 def read_source_artifact(cache_dir: Path, work_id: str, text_version_id: str) -> SourceArtifact:
+    """Loads a previously cached source artifact and verifies the expected files exist."""
     directory = artifact_directory(cache_dir, work_id, text_version_id)
     metadata_path = directory / "artifact.json"
     canonical_path = directory / "canonical.txt"

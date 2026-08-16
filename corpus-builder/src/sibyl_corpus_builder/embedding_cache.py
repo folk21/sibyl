@@ -32,6 +32,7 @@ class EmbeddingCache:
         self.close()
 
     def get_many(self, keys: list[str]) -> dict[str, list[float]]:
+        """Loads valid cached vectors for the requested exact-text hashes."""
         if not keys:
             return {}
         found: dict[str, list[float]] = {}
@@ -53,6 +54,7 @@ class EmbeddingCache:
         return found
 
     def put_many(self, vectors: dict[str, list[float]]) -> None:
+        """Commits completed embedding vectors so interrupted builds can resume."""
         if not vectors:
             return
         rows = []

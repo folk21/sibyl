@@ -79,6 +79,27 @@ This runs a JVM Compose Desktop application using the same shared UI/runtime cod
 
 On Intel macOS, treat the Desktop harness as development-only/best-effort: the project uses JVM Desktop (not Kotlin/Native), but the current Compose Multiplatform 1.11.1 support matrix officially lists macOS arm64. Re-run `make run-desktop` after Compose/Skiko upgrades to catch host compatibility changes.
 
+### Intel macOS tokenizer native
+
+The current DJL Hugging Face tokenizer artifact does not bundle the required macOS x86_64 native library. For real-corpus Desktop development on an Intel Mac, build the matching DJL tokenizer native once with Rust/Cargo and expose the resulting `libtokenizers.dylib` through `RUST_LIBRARY_PATH` before `make run-desktop-real`. Keep the clone/build output under ignored `corpus-builder/data/runtime-native/`.
+
+A typical local setup is:
+
+```bash
+(
+  mkdir -p corpus-builder/data/runtime-native
+  cd corpus-builder/data/runtime-native
+  git clone --depth 1 --branch v0.36.0 https://github.com/deepjavalibrary/djl.git
+  cd djl/extensions/tokenizers
+  bash build.sh x86_64 cpu
+)
+
+export RUST_LIBRARY_PATH="$PWD/corpus-builder/data/runtime-native/djl/extensions/tokenizers/build/jnilib/osx-x86_64/cpu/libtokenizers.dylib"
+make run-desktop-real
+```
+
+This is a Desktop development-host packaging workaround only; it does not add network processing to the Sibyl query path. See [`../mobile/IMPLEMENTATION.md`](../mobile/IMPLEMENTATION.md) for the runtime call chain.
+
 ## Android
 
 ```bash

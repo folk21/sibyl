@@ -13,12 +13,16 @@ from .config import BuilderConfig
 
 @dataclass(frozen=True)
 class RuntimeModelAsset:
+    """Describes one file required by a local Desktop embedding model bundle."""
+
     name: str
     url: str
 
 
 @dataclass(frozen=True)
 class RuntimeModelSpec:
+    """Defines the runtime embedding bundle compatible with a build-time model configuration."""
+
     model_id: str
     model_file: str
     tokenizer_file: str
@@ -81,6 +85,7 @@ def download_runtime_model(
     output_dir: Path,
     downloader: Callable[[str, Path], None] = _download,
 ) -> Path:
+    """Downloads and atomically publishes the local ONNX/tokenizer bundle for Desktop retrieval."""
     model_id = config.embeddings.model_id
     if model_id is None:
         raise ValueError("embeddings.model_id is required for a runtime model bundle")

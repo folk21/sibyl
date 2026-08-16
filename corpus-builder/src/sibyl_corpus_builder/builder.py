@@ -76,6 +76,7 @@ def _resolve_embeddings(
     hints: list[SemanticHint],
     source_dir: Path,
 ) -> dict[str, list[float]]:
+    """Reuses cached vectors and computes missing embedding batches with visible progress."""
     unique_inputs: dict[str, str] = {}
     hint_keys: dict[str, str] = {}
     for hint in hints:
@@ -141,6 +142,7 @@ def _resolve_embeddings(
 
 
 def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> None:
+    """Builds, validates, and atomically publishes a corpus from prepared source documents."""
     print("[1/5] Loading sources and extracting passages...", flush=True)
     documents = load_sources(source_dir)
     passages = [

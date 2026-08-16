@@ -6,10 +6,12 @@ import io.github.folk21.sibyl.domain.PassageLength
 import kotlin.math.pow
 import kotlin.random.Random
 
+/** Injectable randomness boundary used to make selection deterministic in tests. */
 fun interface RandomSource {
     fun nextDouble(): Double
 }
 
+/** Controls semantic eligibility, weighting shape, and preferred prepared length. */
 data class SelectionPolicy(
     val minSemanticScore: Double,
     val semanticExponent: Double,
@@ -24,9 +26,11 @@ data class SelectionPolicy(
     }
 }
 
+/** Selects one eligible passage with controlled randomness instead of top-1 ranking. */
 class SelectionEngine(
     private val randomSource: RandomSource = RandomSource { Random.nextDouble() },
 ) {
+    /** Filters, weights, samples, and chooses a prepared variant without altering its text. */
     fun select(
         question: String,
         candidates: List<Candidate>,

@@ -9,6 +9,7 @@ _ALLOWED_TEXT_ROLES = {"original", "human_translation", "machine_translation"}
 
 
 def load_sources(source_dir: Path) -> list[SourceDocument]:
+    """Loads prepared canonical source documents while verifying exact-text provenance fields."""
     manifest_path = source_dir / "manifest.json"
     entries = json.loads(manifest_path.read_text(encoding="utf-8"))["works"]
     documents: list[SourceDocument] = []

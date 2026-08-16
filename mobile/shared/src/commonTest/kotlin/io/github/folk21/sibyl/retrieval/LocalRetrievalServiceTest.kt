@@ -10,6 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 
+/** Verifies shared retrieval hydration and passage-level deduplication behavior. */
 class LocalRetrievalServiceTest {
     @Test
     fun deduplicatesPassagesAndKeepsStrongestSemanticScore() = runTest {

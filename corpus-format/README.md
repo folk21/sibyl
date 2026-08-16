@@ -19,4 +19,4 @@ python tools/validate_schema.py
 
 A mobile application may read only format versions it explicitly supports. Builder and mobile assumptions must never drift from this contract.
 
-Detailed semantics, versioning, and validation requirements live in [`../docs/CORPUS_FORMAT.md`](../docs/CORPUS_FORMAT.md). See also [`AGENTS.md`](AGENTS.md).
+Detailed semantics, versioning, and validation requirements live in [`../docs/CORPUS_FORMAT.md`](../docs/CORPUS_FORMAT.md). Concrete writer/reader file mapping is in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). See also [`AGENTS.md`](AGENTS.md).

@@ -23,4 +23,4 @@ Root `AGENTS.md` also applies.
 python tools/validate_schema.py
 ```
 
-See root `docs/CORPUS_FORMAT.md` and `docs/TESTS.md` for detailed semantics and validation expectations.
+See [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for current writer/reader mapping and root `docs/CORPUS_FORMAT.md` / `docs/TESTS.md` for semantics and validation expectations.

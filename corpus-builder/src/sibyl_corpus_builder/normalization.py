@@ -94,6 +94,7 @@ def _inline_text(element: ET.Element) -> str:
 
 
 def canonicalize_fb2(raw: bytes) -> str:
+    """Extracts literary paragraphs from FB2 while preserving their textual wording."""
     payload = _fb2_payload(raw)
     try:
         root = ET.fromstring(payload)
@@ -126,6 +127,8 @@ def canonicalize_fb2(raw: bytes) -> str:
 
 
 class _LibRuHtmlTextParser(HTMLParser):
+    """Extracts literary text blocks from a Lib.ru work page while ignoring site chrome."""
+
     _SKIP = {"head", "script", "style", "form", "select", "option", "noscript"}
     _BLOCKS = {
         "address",
@@ -238,6 +241,7 @@ def _trim_libru_footer(blocks: list[str]) -> list[str]:
 
 
 def canonicalize_libru_html(raw: bytes, work_title: str | None) -> str:
+    """Extracts and trims the literary body of a Lib.ru HTML work page."""
     from .libru import decode_libru_html
 
     parser = _LibRuHtmlTextParser()
@@ -254,6 +258,7 @@ def canonicalize_libru_html(raw: bytes, work_title: str | None) -> str:
 
 
 def canonicalize_libru_txt(raw: bytes, work_title: str | None) -> str:
+    """Normalizes a Lib.ru plain-text artifact and removes recognized site wrappers."""
     text = normalize_newlines(_decode_libru_text(raw))
     stripped = _trim_blank_edge_lines(text)
     if not work_title:
@@ -293,6 +298,7 @@ def canonicalize_text(
     work_title: str | None = None,
     artifact_kind: str | None = None,
 ) -> tuple[str, str]:
+    """Routes a raw artifact through the explicit versioned normalizer for its source family."""
     if source_family == "libru":
         detected_kind = _detect_libru_kind(raw)
         kind = detected_kind if detected_kind != "txt" else (artifact_kind or detected_kind)

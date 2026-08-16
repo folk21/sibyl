@@ -77,6 +77,7 @@ def _collection_toml(collection_id: str, title: str, work_ids: list[str]) -> str
 def register_selection(
     *, selection_path: Path, cache_dir: Path, registry_dir: Path, collection_id: str | None
 ) -> list[Path]:
+    """Writes reviewed acquired selection items as disabled candidate registry records."""
     manifest = load_selection(selection_path)
     included = manifest.included()
     if not included:

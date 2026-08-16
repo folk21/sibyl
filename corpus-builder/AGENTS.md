@@ -35,4 +35,4 @@ Use `pytest` with synthetic fixtures. Cover splitter boundaries, configuration v
 PYTHONPATH=src python -m pytest
 ```
 
-Detailed policies live in root `docs/ARCHITECTURE.md`, `docs/CONFIGURATION.md`, `docs/SOURCES.md`, `docs/CORPUS_FORMAT.md`, and `docs/TESTS.md`.
+Concrete builder modules and call paths live in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). Cross-project policies live in root `docs/ARCHITECTURE.md`, `docs/CONFIGURATION.md`, `docs/SOURCES.md`, `docs/CORPUS_FORMAT.md`, and `docs/TESTS.md`.

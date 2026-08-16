@@ -14,7 +14,9 @@ import java.nio.file.Path
 import java.sql.Connection
 import org.sqlite.SQLiteConfig
 
+/** Resolves retrieved hint IDs to exact stored passages in the read-only corpus database. */
 class SqliteCorpusRepository(corpusPath: Path) : CorpusRepository, AutoCloseable {
+    /** Accumulates text variants while rows for one passage are joined from SQLite. */
     private data class PassageBuilder(
         val id: String,
         val author: String,
@@ -35,6 +37,7 @@ class SqliteCorpusRepository(corpusPath: Path) : CorpusRepository, AutoCloseable
         connection = config.createConnection("jdbc:sqlite:${corpusPath.toAbsolutePath()}")
     }
 
+    /** Hydrates candidates for retrieved hints while preserving exact passage_text values. */
     override suspend fun resolve(matches: List<VectorMatch>): List<Candidate> {
         if (matches.isEmpty()) return emptyList()
         val scoreByHint = matches.associate { it.hintId to it.score }

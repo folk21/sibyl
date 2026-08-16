@@ -5,6 +5,8 @@ import tomllib
 
 @dataclass(frozen=True)
 class PassageConfig:
+    """Controls deterministic passage boundary and overlap sizing."""
+
     min_words: int
     preferred_words: int
     max_words: int
@@ -13,12 +15,16 @@ class PassageConfig:
 
 @dataclass(frozen=True)
 class HintConfig:
+    """Selects the semantic-hint strategy used before embedding."""
+
     provider: str
     hints_per_passage: int
 
 
 @dataclass(frozen=True)
 class EmbeddingConfig:
+    """Defines the build-time embedding contract shared with runtime manifests."""
+
     provider: str
     dimensions: int
     normalize: bool
@@ -31,6 +37,8 @@ class EmbeddingConfig:
 
 @dataclass(frozen=True)
 class BuilderConfig:
+    """Aggregates corpus format, language, passage, hint, and embedding settings."""
+
     format_version: int
     language: str
     passages: PassageConfig
@@ -39,6 +47,7 @@ class BuilderConfig:
 
 
 def load_config(path: Path) -> BuilderConfig:
+    """Loads TOML configuration into typed immutable builder settings and validates it eagerly."""
     with path.open("rb") as handle:
         raw = tomllib.load(handle)
 
@@ -71,6 +80,7 @@ def load_config(path: Path) -> BuilderConfig:
 
 
 def validate_config(config: BuilderConfig) -> None:
+    """Rejects inconsistent passage, hint, or embedding settings before any expensive work."""
     p = config.passages
     if p.min_words <= 0:
         raise ValueError("passages.min_words must be positive")

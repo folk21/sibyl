@@ -62,6 +62,8 @@ _GENRE_NAMES = (
 
 @dataclass(frozen=True)
 class _Anchor:
+    """Captures one parsed Lib.ru link and its surrounding catalog metadata."""
+
     href: str
     label: str
     context: str
@@ -69,11 +71,15 @@ class _Anchor:
 
 @dataclass(frozen=True)
 class LibRuArtifactCandidate:
+    """Describes one ordered Lib.ru artifact candidate for resilient acquisition."""
+
     kind: str
     uri: str
 
 
 class _DocumentParser(HTMLParser):
+    """Collects page metadata and links from a Lib.ru HTML document."""
+
     def __init__(self) -> None:
         super().__init__()
         self.page_title_parts: list[str] = []
@@ -237,6 +243,8 @@ def discover_libru_author_page(url: str, raw_html: bytes) -> SelectionManifest:
 
 
 class _WorkLinkParser(HTMLParser):
+    """Extracts candidate work links and sections from a Lib.ru author catalog page."""
+
     def __init__(self) -> None:
         super().__init__()
         self._href: str | None = None

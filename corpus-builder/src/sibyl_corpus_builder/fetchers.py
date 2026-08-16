@@ -11,12 +11,16 @@ _USER_AGENT = "SibylCorpusBuilder/0.4 (+local build-time corpus preparation)"
 
 @dataclass(frozen=True)
 class FetchedSourceCandidate:
+    """A downloaded source representation that may be normalized into canonical text."""
+
     kind: str
     raw: bytes
     resolved_uri: str
 
 
 class _GutenbergTextLinkParser(HTMLParser):
+    """Extracts plain-text download candidates from a Project Gutenberg work page."""
+
     def __init__(self) -> None:
         super().__init__()
         self._href: str | None = None
@@ -79,6 +83,7 @@ def _discover_gutenberg_text_uri(landing_uri: str) -> str:
 
 
 def iter_text_version_candidates(version: RegistryTextVersion):
+    """Returns source-family-specific acquisition candidates in deterministic fallback order."""
     if version.source_family == "project_gutenberg":
         resolved_uri = version.download_uri or _discover_gutenberg_text_uri(version.source_uri)
         yield FetchedSourceCandidate("txt", _download(resolved_uri), resolved_uri)
@@ -110,10 +115,12 @@ def iter_text_version_candidates(version: RegistryTextVersion):
 
 
 def fetch_text_version_candidates(version: RegistryTextVersion) -> tuple[FetchedSourceCandidate, ...]:
+    """Downloads candidate artifacts while preserving per-candidate failure information."""
     return tuple(iter_text_version_candidates(version))
 
 
 def fetch_text_version(version: RegistryTextVersion) -> tuple[bytes, str]:
+    """Downloads the first usable artifact candidate for a registered text version."""
     try:
         candidate = next(iter_text_version_candidates(version))
     except StopIteration as error:

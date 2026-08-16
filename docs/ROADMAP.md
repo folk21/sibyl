@@ -18,7 +18,7 @@ Priorities:
 | F-03 | done | P0 | Define `EmbeddingEngine`, `VectorIndex`, and deterministic `SelectionEngine` boundaries. |
 | F-04 | done | P0 | Add Python corpus-builder skeleton with staging and validation. |
 | F-05 | done | P0 | Define corpus format v3 with work/text-version/passage/passage-text/hint separation plus source artifact/canonical hashes. |
-| F-06 | done | P1 | Consolidate detailed documentation under root `docs/`; keep subproject README/AGENTS only. |
+| F-06 | done | P1 | Keep cross-project docs under root `docs/` and add focused subproject `IMPLEMENTATION.md` guides without local docs trees. |
 | F-07 | done | P1 | Add root onboarding/test map and Mermaid architecture diagrams. |
 | F-08 | done | P0 | Add JVM Compose Desktop development harness using the shared UI/runtime code. |
 | F-09 | done | P0 | Wire Desktop to a built local corpus using ONNX query embeddings, brute-force development vector search, SQLite passage lookup, and the shared SelectionEngine. |

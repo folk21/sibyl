@@ -10,10 +10,12 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
+/** Loads development vectors from JSON and performs exhaustive cosine-similarity search. */
 class JsonBruteForceVectorIndex(
     vectorsPath: Path,
     private val dimensions: Int,
 ) : VectorIndex {
+    /** Cached vector entry with a precomputed norm for repeated query scoring. */
     private data class Entry(
         val hintId: String,
         val vector: FloatArray,
@@ -22,6 +24,7 @@ class JsonBruteForceVectorIndex(
 
     private val entries: List<Entry> = loadEntries(vectorsPath)
 
+    /** Scores every stored hint vector and returns the strongest matches in descending order. */
     override suspend fun search(vector: FloatArray, limit: Int): List<VectorMatch> {
         require(vector.size == dimensions) {
             "Query vector has ${vector.size} dimensions; expected $dimensions"

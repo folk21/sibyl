@@ -60,4 +60,4 @@ cd /path/to/sibyl/mobile
 ./gradlew :androidApp:assembleDebug
 ```
 
-Use root `docs/TESTS.md` and `docs/ARCHITECTURE.md` for detailed repository policy.
+Use [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for concrete mobile/runtime wiring and root `docs/ARCHITECTURE.md` / `docs/TESTS.md` for cross-project boundaries and validation policy.

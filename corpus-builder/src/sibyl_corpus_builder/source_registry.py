@@ -5,6 +5,8 @@ import tomllib
 
 @dataclass(frozen=True)
 class RegistryTextVersion:
+    """One concrete source text version with provenance, rights, and artifact metadata."""
+
     id: str
     language: str
     role: str
@@ -25,6 +27,8 @@ class RegistryTextVersion:
 
 @dataclass(frozen=True)
 class RegistryWork:
+    """A registry work and its reviewed concrete text versions."""
+
     work_id: str
     author: str
     title: str
@@ -35,6 +39,7 @@ class RegistryWork:
     text_versions: tuple[RegistryTextVersion, ...]
 
     def text_version(self, version_id: str | None = None) -> RegistryTextVersion:
+        """Resolve a text version, requiring an ID when multiple versions exist."""
         if version_id is None:
             if len(self.text_versions) != 1:
                 raise ValueError(
@@ -48,6 +53,7 @@ class RegistryWork:
 
 
 def load_registry_work(registry_dir: Path, work_id: str) -> RegistryWork:
+    """Loads one permanent source-registry record into typed immutable models."""
     path = registry_dir / "works" / f"{work_id}.toml"
     if not path.is_file():
         raise ValueError(f"Unknown registry work: {work_id}")
@@ -93,6 +99,7 @@ def require_usable_source(
     *,
     allow_unapproved: bool,
 ) -> None:
+    """Enforces approval and rights requirements unless local review is explicitly allowed."""
     if allow_unapproved:
         return
     if not work.enabled or work.review_status != "approved" or version.rights_status != "approved":

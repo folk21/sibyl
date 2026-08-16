@@ -4,6 +4,8 @@ from typing import Protocol
 
 
 class EmbeddingProvider(Protocol):
+    """Build-time contract for deterministic or semantic batch embedding providers."""
+
     @property
     def dimensions(self) -> int: ...
 
@@ -88,6 +90,7 @@ class SentenceTransformerEmbeddingProvider:
         return self._model_id
 
     def embed_many(self, texts: list[str], *, batch_size: int) -> list[list[float]]:
+        """Encode passage-prefixed batches and enforce configured vector dimensions."""
         if not texts:
             return []
         vectors = self._model.encode(

@@ -12,6 +12,8 @@ _WORD = re.compile(r"\S+")
 
 @dataclass(frozen=True)
 class _Unit:
+    """A natural text unit with exact character offsets used while assembling passages."""
+
     start: int
     end: int
     word_count: int
@@ -106,6 +108,7 @@ def _natural_units(text: str, max_words: int) -> list[_Unit]:
 
 
 def split_document(document: SourceDocument, config: PassageConfig) -> list[PassageCandidate]:
+    """Builds deterministic natural-boundary passages with exact canonical character locators."""
     units = _natural_units(document.text, config.max_words)
     results: list[PassageCandidate] = []
     index = 0

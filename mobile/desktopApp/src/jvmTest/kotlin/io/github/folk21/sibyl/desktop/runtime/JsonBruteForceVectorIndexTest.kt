@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 
+/** Verifies dimension validation and deterministic brute-force cosine ranking. */
 class JsonBruteForceVectorIndexTest {
     @Test
     fun ranksByCosineSimilarity() = runBlocking {

@@ -9,6 +9,8 @@ _ALLOWED_DECISIONS = {"include", "exclude", "review"}
 
 @dataclass(frozen=True)
 class SelectionWork:
+    """Editable discovery result with an explicit include, exclude, or review decision."""
+
     id: str
     title: str
     source_url: str
@@ -21,6 +23,8 @@ class SelectionWork:
 
 @dataclass(frozen=True)
 class SelectionManifest:
+    """Developer-reviewed catalog selection used by later acquisition commands."""
+
     source_family: str
     source_url: str
     author: str
@@ -43,6 +47,7 @@ def _array(values: tuple[str, ...] | list[str]) -> str:
 
 
 def write_selection(manifest: SelectionManifest, path: Path) -> None:
+    """Writes an editable deterministic TOML selection manifest."""
     lines = [
         "schema_version = 1",
         f"source_family = {_quote(manifest.source_family)}",
@@ -77,6 +82,7 @@ def write_selection(manifest: SelectionManifest, path: Path) -> None:
 
 
 def load_selection(path: Path) -> SelectionManifest:
+    """Loads and validates a developer-reviewed catalog selection manifest."""
     if not path.is_file():
         raise ValueError(f"Selection file does not exist: {path}")
     with path.open("rb") as handle:

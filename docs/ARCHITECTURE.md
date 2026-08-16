@@ -2,127 +2,112 @@
 
 ## Purpose
 
-Sibyl separates expensive corpus preparation from lightweight on-device retrieval. Build-time tooling may use larger models and network adapters explicitly; runtime question processing must remain local by default.
+Sibyl separates expensive corpus preparation from lightweight local retrieval. Build-time tooling may explicitly use network sources and larger models; ordinary question-to-passage processing remains local by default.
+
+This document describes **stable boundaries and responsibilities**. Concrete classes, libraries, filenames, and active development adapters are documented in [`IMPLEMENTATION.md`](IMPLEMENTATION.md).
 
 ## System context
 
 ```mermaid
 flowchart TB
     subgraph BuildTime[Build time]
-        SU[Author/catalog URL]
-        DS[Discovery + editable selection]
-        SR[corpus-sources registry]
-        FI[Explicit batch/single-source acquisition]
-        AC[Raw artifact cache + hashes]
+        SU[Source catalogs / reviewed files]
+        DS[Discovery + explicit review]
+        SR[Source/provenance registry]
+        FI[Explicit acquisition]
         CN[Canonical text]
-        CB[corpus-builder]
-        PE[Exact passage extraction]
-        SH[Semantic hints]
+        PE[Exact passage preparation]
+        SH[Semantic retrieval metadata]
         EM[Embeddings]
-        QV[Quality / provenance validation]
-        CF[corpus-format package]
-        DB[(corpus.db)]
-        VI[(vector index)]
-        MF[manifest]
+        QV[Validation]
+        PA[Published corpus artifacts]
 
-        SU --> DS --> FI
-        DS -. optional registration .-> SR
+        SU --> DS
+        DS --> FI
         SR --> FI
-        FI --> AC --> CN --> CB
-        CB --> PE
-        CB --> SH
-        CB --> EM
-        CB --> QV
-        PE --> CF
-        SH --> CF
-        EM --> CF
-        QV --> CF
-        CF --> DB
-        CF --> VI
-        CF --> MF
+        FI --> CN --> PE
+        PE --> SH --> EM
+        PE --> QV
+        SH --> QV
+        EM --> QV
+        QV --> PA
     end
 
     subgraph Runtime[Local runtime]
-        AAPP[Android app]
-        DAPP[Desktop dev app]
-        UI[Shared Compose UI]
+        HOST[Application host]
+        UI[Shared UI]
         Q[User question]
         EE[EmbeddingEngine]
         VX[VectorIndex]
+        CR[CorpusRepository]
         CP[Candidate pool]
         SE[SelectionEngine]
-        P[Exact Passage]
-        HS[(HistoryStore)]
-        ES[(EncounterStore)]
+        P[Exact stored passage]
+        HS[(History)]
+        ES[(Saved encounters)]
 
-        AAPP --> UI
-        DAPP --> UI
-        UI --> Q
-        Q --> EE --> VX --> CP --> SE --> P
+        HOST --> UI --> Q
+        Q --> EE --> VX --> CR --> CP --> SE --> P
         P --> HS
         P --> ES
     end
 
-    DB -. packaged corpus .-> P
-    VI -. packaged ANN index .-> VX
-    MF -. compatibility metadata .-> EE
+    PA -. local corpus/model package .-> EE
+    PA -. local corpus/index .-> VX
+    PA -. exact passage storage .-> CR
 ```
 
-## Component ownership
+## Architectural layers
 
-### Shared runtime and application hosts
+### Product/application layer
 
-`shared/` owns reusable runtime behavior and Compose UI. `androidApp/` is the product host; `desktopApp/` is a JVM development host for fast manual iteration. Both call the same shared UI/runtime code.
+Application hosts provide platform lifecycle, packaging, filesystem/storage integration, and platform-specific inference/index adapters. Shared UI and domain logic should be reused across hosts when practical.
 
-Runtime behavior includes:
+The UI may ask for candidates and display selected exact text. It must not parse corpus files, execute vector ranking, or silently generate literary answers.
 
-- question input and shared UI;
-- embedding/vector adapter contracts;
-- candidate filtering and deduplication;
-- controlled-random selection;
-- response-length and content filters;
-- history and saved encounters;
-- corpus compatibility checks;
-- local privacy behavior.
+### Shared runtime layer
 
-It does not own source ingestion, rights assessment, passage extraction, semantic-hint generation, or build-time translation generation.
+The reusable runtime owns:
 
-### Corpus sources
+- domain models used by retrieval and presentation;
+- local embedding/index/repository contracts;
+- candidate-pool orchestration and deduplication;
+- controlled-random passage selection;
+- response-length/content preferences;
+- history and saved-encounter semantics.
 
-Owns source/version declarations before preprocessing:
-
-- candidate and approved concrete text-version identity;
-- source provenance/acquisition locator;
-- rights review metadata;
-- work category (`literature`, `philosophy`, `sacred_text`);
-- collection membership;
-- approval state.
-
-Candidate records may exist while review is incomplete. An enabled production record must pin a concrete source version.
+Platform APIs, ONNX runtimes, native ANN implementations, and platform storage remain behind small interfaces.
 
 ### Corpus builder
 
-Owns build-time transformation:
+The build-time pipeline owns:
 
-- explicit source catalog discovery into developer-review manifests;
-- explicit batch/single-source acquisition;
-- source-specific TXT/HTML/FB2/plain-text normalization with deterministic fallback;
-- raw/canonical artifact hashing;
-- versioned normalization that preserves literary content;
-- exact canonical-text passage boundary detection and source locators;
-- prepared length variants;
-- semantic-hint generation;
+- explicit source discovery and acquisition;
+- canonicalization with reproducible provenance;
+- exact passage boundary preparation;
+- internal semantic metadata generation;
 - embedding generation;
-- optional build-time machine translation adapters;
-- quality/deduplication checks;
-- corpus database and vector-index materialization;
-- staging + validation before publication.
+- optional build-time translation generation;
+- quality/consistency checks;
+- publication of runtime corpus artifacts only after validation.
 
-Importing the Python package must not cause network/model side effects.
+Importing build-time code must not trigger downloads, remote APIs, or model loading.
+
+### Corpus source registry
+
+The source registry owns durable declarations about concrete text versions:
+
+- work and text-version identity;
+- source/provenance information;
+- language and translation role;
+- rights-review state;
+- collection membership and publication eligibility.
+
+It does not own passage extraction, embeddings, ranking, or runtime state.
 
 ### Corpus format
 
-Owns persisted compatibility: SQL schema, manifest schema, version, semantics, validation, and compatibility policy. Neither mobile nor builder may redefine it implicitly.
+`corpus-format/` owns persisted semantics and compatibility. Builder writers and runtime readers must follow the same versioned contract. Incompatible changes require a format-version change rather than silent reinterpretation.
 
 See [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md).
 
@@ -130,84 +115,80 @@ See [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md).
 
 ```mermaid
 flowchart LR
-    Q[Question] --> E[Encode]
-    E --> A[ANN top candidate region]
-    A --> G[Semantic relevance gate]
+    Q[Question] --> E[Local query embedding]
+    E --> V[Vector retrieval]
+    V --> G[Semantic relevance gate]
     G --> D[Deduplicate by passage]
-    D --> W[Apply quality / history / diversity / length weights]
-    W --> R[Weighted random sample]
-    R --> T[Choose prepared passage text]
+    D --> W[Quality / history / diversity / filters]
+    W --> R[Controlled-random sample]
+    R --> T[Choose prepared text variant]
     T --> O[Display exact stored text]
 ```
 
-Semantic relevance determines whether a candidate is plausible and influences weight, but it is not the sole decision rule. Repetition is allowed; recency may reduce probability without creating a permanent blacklist.
+Vector retrieval must return multiple plausible matches. Semantic relevance determines eligibility and weight but is not the sole decision rule. Repetition is allowed; recency may reduce probability without creating a permanent blacklist.
 
-## Runtime data concepts
+The final display path resolves to stored passage text. Internal semantic hints or generated metadata do not become quotations.
 
-Core literary concepts:
-
-- `Work`;
-- `TextVersion`;
-- `Passage`;
-- `PassageText`;
-- `SemanticHint`.
-
-Core user concepts:
-
-- `Conversation` / history;
-- `SavedEncounter` preserving the user question and selected passage;
-- `SelectionPreferences`.
-
-Original/human/machine translation and short/standard/extended length are independent dimensions.
-
-## Offline boundary
-
-The core architecture requires no backend. Optional future networking may distribute static corpus/model packages, perform store entitlement checks, or support explicitly enabled sync. Those paths must remain separate from local question processing.
-
-## Technology direction
-
-Applications/runtime:
-
-- Kotlin Multiplatform;
-- Compose Multiplatform;
-- Android product entry point separated from shared code;
-- JVM Compose Desktop development entry point separated from shared code;
-- SQLite/Room for local persistence;
-- ONNX Runtime Mobile for Android query embeddings;
-- desktop development adapters may use JVM-native implementations behind the same interfaces;
-- USearch/HNSW for ANN retrieval.
-
-Build time:
-
-- Python;
-- SQLite;
-- optional Sentence Transformers/LLM/translation adapters;
-- deterministic local adapters for default tests.
-
-## Deferred decisions
-
-- exact production embedding model and tokenizer packaging;
-- read-only corpus database abstraction on mobile;
-- production ANN serialization parameters;
-- additional catalog discovery adapters beyond Lib.ru;
-- automated Russian Wikisource extraction beyond reviewed local import;
-- build-time translation provider/model policy;
-- paid corpus package/entitlement design;
-- optional static CDN distribution;
-- optional device backup/sync.
-
-## Current Desktop real-corpus slice
-
-The Desktop development harness can now exercise the generated corpus without a backend:
+## Build-time publication
 
 ```mermaid
 flowchart LR
-    Q[Question] --> E[ONNX E5 EmbeddingEngine]
-    E --> V[Brute-force vectors.json VectorIndex]
-    V --> R[SQLite CorpusRepository]
-    R --> C[Candidate pool]
-    C --> S[Shared SelectionEngine]
-    S --> U[Shared Compose UI]
+    S[Concrete source artifact] --> C[Canonical text + hash]
+    C --> P[Exact passages + locators]
+    P --> H[Semantic metadata]
+    H --> E[Embeddings]
+    P --> B[Corpus assembly]
+    E --> B
+    B --> V[Validation]
+    V --> O[Published immutable corpus]
 ```
 
-The Desktop adapters live in `desktopApp` and depend on JVM-only libraries. `shared` owns only the retrieval contracts and orchestration. `manifest.json` must match the runtime model ID, dimensions, normalization behavior, and E5 `query_prefix`. Brute-force search is intentionally a development implementation for the first small corpora; USearch/HNSW remains a scale optimization rather than a prerequisite for validating product behavior.
+A published corpus is treated as generated immutable output. Expensive reusable preparation may be cached, but a corpus release should be assembled and validated as a coherent artifact instead of incrementally mutating a previously published database in place.
+
+## Runtime data concepts
+
+Core literary concepts are:
+
+- `Work` — literary/philosophical/sacred work identity;
+- `TextVersion` — original, human translation, or machine translation;
+- `Passage` — semantic location in a work;
+- `PassageText` — exact text for one text version and prepared length;
+- `SemanticHint` — internal retrieval metadata linked to a passage.
+
+Core user concepts include history and `SavedEncounter`, which preserves the user question together with the selected passage.
+
+Text role and response length are independent dimensions.
+
+## Exact-text boundary
+
+Canonicalization and passage preparation must preserve a reproducible relationship to a concrete source version. Passage locators are created at build time, and runtime display reads stored passage text rather than reproducing text from model output.
+
+Machine translations, when used, are persisted as separate text versions and must remain labelled in the UI.
+
+## Offline and privacy boundary
+
+The core architecture requires no backend. User questions, query embeddings, vector search, selection, history, and saved encounters remain local by default.
+
+Optional future networking may distribute static corpus/model packages, perform entitlement checks, or support explicitly enabled sync. Such networking must remain separable from local question processing.
+
+## Platform boundary
+
+Android is the current product target. JVM Desktop is a development host used to exercise the same shared runtime/UI without adding a server boundary. iOS is deferred.
+
+Platform-specific inference, indexing, filesystem, and database technologies may differ as long as they implement the shared contracts and consume the same corpus semantics.
+
+## Architectural invariants
+
+- displayed literary answers are exact stored text;
+- retrieval produces a candidate pool, not only top-1;
+- final selection retains controlled serendipity;
+- randomness is injectable for deterministic tests;
+- response length selects prepared variants and never truncates text arbitrarily;
+- translation role is explicit and persisted;
+- source provenance and rights belong to concrete text versions;
+- build-time generated metadata is never presented as quotation;
+- runtime question processing stays local unless explicitly redesigned.
+
+## Concrete implementation
+
+For the current modules, classes, libraries, call chains, and development limitations, continue with [`IMPLEMENTATION.md`](IMPLEMENTATION.md).

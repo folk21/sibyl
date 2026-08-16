@@ -4,6 +4,8 @@
 
 ### Added
 
+- `docs/CONCEPT.md` for the product idea/user promise and root/subproject `IMPLEMENTATION.md` guides for the current technical realization;
+- concise KDoc/docstrings for production classes and the main orchestration/validation methods across Kotlin and Python code;
 - real Desktop retrieval from generated `manifest.json` + `corpus.db` + `vectors.json`, using local ONNX query embeddings, brute-force cosine search, and shared controlled-random selection;
 - explicit E5 `query_prefix` persisted alongside `passage_prefix` and validated at runtime;
 - `download-runtime-model` command for the ignored local `multilingual-e5-small` ONNX/tokenizer development bundle;
@@ -40,8 +42,8 @@
 - source registry approval now requires pinned raw/canonical checksums for enabled versions;
 - active application development targets are Android plus JVM Desktop; `make test-mobile` runs Android host tests and `make test-desktop` runs shared JVM tests;
 - iOS/Kotlin Native targets are deferred and removed from the active Gradle configuration until iOS development resumes;
-- detailed documentation is consolidated under root `docs/`;
-- subprojects keep only local `README.md` and `AGENTS.md` documentation entry points;
+- cross-project product/architecture/policy documentation remains under root `docs/`, while each subproject now has one focused `IMPLEMENTATION.md` beside its README/AGENTS;
+- `docs/ARCHITECTURE.md` now focuses on stable boundaries, with concrete classes/libraries moved to implementation guides;
 - source registry seed format is TOML so validation can use Python 3.11 `tomllib` without extra dependencies;
 - shareable repository archives now use `sibyl/` as the top-level directory and exclude local Gradle/Python caches, local distributions, and `*.egg-info` metadata;
 - removed the inactive iOS placeholder directory and obsolete Kotlin/Native disabled-target setting while iOS development remains deferred;

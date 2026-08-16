@@ -15,6 +15,7 @@ def _download(url: str) -> bytes:
 
 
 def discover_source(url: str) -> SelectionManifest:
+    """Discovers an editable selection manifest for a supported catalog URL."""
     parsed = urlparse(url)
     host = parsed.netloc.casefold()
     if host in {"az.lib.ru", "lib.ru", "www.lib.ru"}:
@@ -23,6 +24,7 @@ def discover_source(url: str) -> SelectionManifest:
 
 
 def discover_to_file(url: str, output: Path) -> SelectionManifest:
+    """Discovers catalog works and writes the developer-review selection manifest."""
     manifest = discover_source(url)
     write_selection(manifest, output)
     return manifest

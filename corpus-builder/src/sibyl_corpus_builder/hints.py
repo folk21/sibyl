@@ -5,6 +5,8 @@ from .models import PassageCandidate, SemanticHint
 
 
 class HintGenerator(Protocol):
+    """Produces internal retrieval text for an exact stored passage."""
+
     def generate(self, passage: PassageCandidate, count: int) -> list[SemanticHint]: ...
 
 

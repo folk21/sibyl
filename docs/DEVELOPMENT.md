@@ -13,12 +13,17 @@ Before changing code:
 
 ## Documentation ownership
 
-Detailed documentation lives only in root `docs/`. Subprojects keep:
+Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`. Subprojects keep:
 
-- `README.md` — local purpose, quick start, module/file map, links to owning root docs;
-- `AGENTS.md` — local invariants and validation rules.
+- `README.md` — local purpose and quick commands;
+- `AGENTS.md` — local invariants and validation rules;
+- `IMPLEMENTATION.md` — current concrete modules/classes/libraries and call paths.
 
-Do not recreate `mobile/docs/`, `corpus-builder/docs/`, `corpus-format/docs/`, or `corpus-sources/docs/` unless the documentation strategy is intentionally reconsidered.
+Do not create separate subproject `docs/` trees. Keep ownership explicit:
+
+- product meaning or user promise → `docs/CONCEPT.md`;
+- stable boundaries/responsibilities → `docs/ARCHITECTURE.md`;
+- current classes/libraries/wiring → root or subproject `IMPLEMENTATION.md`.
 
 ## Format changes
 

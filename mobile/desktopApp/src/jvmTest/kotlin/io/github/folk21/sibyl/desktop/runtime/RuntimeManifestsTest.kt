@@ -3,6 +3,7 @@ package io.github.folk21.sibyl.desktop.runtime
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+/** Verifies corpus/runtime model compatibility checks used before Desktop startup. */
 class RuntimeManifestsTest {
     @Test
     fun rejectsCorpusWithoutQueryPrefix() {

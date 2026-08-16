@@ -8,6 +8,7 @@ import io.github.folk21.sibyl.desktop.runtime.DesktopRuntime
 import io.github.folk21.sibyl.desktop.runtime.DesktopRuntimePaths
 import io.github.folk21.sibyl.ui.SibylApp
 
+/** Starts Desktop in demo mode or wires a real local runtime from environment paths. */
 fun main() {
     val paths = DesktopRuntimePaths.fromEnvironment()
     val runtime = paths?.let { DesktopRuntime.load(it.corpusDir, it.modelDir) }

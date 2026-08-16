@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 
 private val runtimeJson = Json { ignoreUnknownKeys = true }
 
+/** Embedding compatibility metadata persisted with a published corpus. */
 @Serializable
 data class CorpusEmbeddingManifest(
     val provider: String,
@@ -18,12 +19,14 @@ data class CorpusEmbeddingManifest(
     @SerialName("query_prefix") val queryPrefix: String = "",
 )
 
+/** Relative filenames of runtime corpus artifacts. */
 @Serializable
 data class CorpusArtifactsManifest(
     val corpus: String,
     val vectors: String,
 )
 
+/** Lightweight corpus counts used for diagnostics and the Desktop runtime label. */
 @Serializable
 data class CorpusCountsManifest(
     val works: Int,
@@ -31,6 +34,7 @@ data class CorpusCountsManifest(
     val hints: Int,
 )
 
+/** Minimal subset of the corpus manifest required by the Desktop reader. */
 @Serializable
 data class CorpusManifest(
     @SerialName("format_version") val formatVersion: Int,
@@ -39,6 +43,7 @@ data class CorpusManifest(
     val counts: CorpusCountsManifest,
 )
 
+/** Contract for the downloaded local ONNX model and tokenizer bundle. */
 @Serializable
 data class RuntimeModelManifest(
     @SerialName("schema_version") val schemaVersion: Int,
@@ -52,18 +57,21 @@ data class RuntimeModelManifest(
     @SerialName("max_length") val maxLength: Int,
 )
 
+/** Loads the published corpus manifest from a runtime corpus directory. */
 fun loadCorpusManifest(corpusDir: Path): CorpusManifest {
     val path = corpusDir.resolve("manifest.json")
     require(Files.isRegularFile(path)) { "Corpus manifest not found: $path" }
     return runtimeJson.decodeFromString(Files.readString(path))
 }
 
+/** Loads the local model-bundle manifest used for query embedding. */
 fun loadRuntimeModelManifest(modelDir: Path): RuntimeModelManifest {
     val path = modelDir.resolve("model-manifest.json")
     require(Files.isRegularFile(path)) { "Runtime model manifest not found: $path" }
     return runtimeJson.decodeFromString(Files.readString(path))
 }
 
+/** Rejects corpus/model combinations whose embedding contracts cannot be compared safely. */
 fun validateRuntimeCompatibility(corpus: CorpusManifest, model: RuntimeModelManifest) {
     require(corpus.formatVersion == 3) {
         "Unsupported corpus format ${corpus.formatVersion}; Desktop currently supports format 3"

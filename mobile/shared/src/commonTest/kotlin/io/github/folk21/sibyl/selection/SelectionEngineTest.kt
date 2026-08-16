@@ -10,6 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
+/** Verifies deterministic eligibility, deduplication, and controlled-random selection. */
 class SelectionEngineTest {
     @Test
     fun `filters candidates below semantic threshold`() {

@@ -34,12 +34,14 @@ import io.github.folk21.sibyl.selection.SelectionEngine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
+/** Runs the shared application UI with the deterministic synthetic demo retrieval service. */
 @Composable
 fun SibylApp() {
     val retrieval = remember { DemoRetrievalService() }
     SibylApp(retrievalService = retrieval, isDemo = true)
 }
 
+/** Runs the shared UI against an injected retrieval service while keeping ranking outside Compose. */
 @Composable
 fun SibylApp(
     retrievalService: RetrievalService,

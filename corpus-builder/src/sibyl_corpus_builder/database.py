@@ -90,6 +90,7 @@ def create_database(
     passages: list[PassageCandidate],
     hints: list[SemanticHint],
 ) -> None:
+    """Materializes the format-owned SQLite corpus from exact prepared documents and passages."""
     if path.exists():
         path.unlink()
     path.parent.mkdir(parents=True, exist_ok=True)
