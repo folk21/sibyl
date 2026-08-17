@@ -23,9 +23,9 @@
 - Python architecture regression tests that prevent `corpus-core -> corpus-builder`, root CLI access to feature internals, and cross-feature `_internal` dependencies;
 - source adapters grouped by source family (`sources/adapters/libru`, `sources/adapters/gutenberg`) plus a source-neutral FB2 format adapter;
 - `docs/WORKFLOW.md` as the primary start/continue guide across source preparation, large-LLM curation, generic corpus builds, and Desktop runtime;
-- `corpus-curation/questions.json` with 48 stable Russian guided questions/states plus local rules for Git-safe LLM curation metadata;
+- `corpus-curation/questions.json` with 66 stable Russian guided questions/states plus local rules for Git-safe LLM curation metadata;
 - `export-curation-bundle`, `import-curation`, and `validate-curation` builder commands for deterministic external-LLM handoff and exact canonical locator/hash verification without committing copied passage text;
-- focused curation tests covering the 48-item catalog, reproducible export bundles, exact-slice import, and hash mismatch rejection;
+- focused curation tests covering the 66-item catalog, reproducible export bundles, exact-slice import, and hash mismatch rejection;
 - `docs/CONCEPT.md` for the product idea/user promise and root/subproject `IMPLEMENTATION.md` guides for the current technical realization;
 - concise KDoc/docstrings for production classes and the main orchestration/validation methods across Kotlin and Python code;
 - real Desktop retrieval from generated `manifest.json` + `corpus.db` + `vectors.json`, using local ONNX query embeddings, brute-force cosine search, and shared controlled-random selection;

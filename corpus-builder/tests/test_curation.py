@@ -115,14 +115,14 @@ def _proposal(path: Path, text: str, *, text_hash: str | None = None) -> tuple[i
     return start, end
 
 
-def test_project_guided_question_catalog_has_48_stable_unique_items() -> None:
+def test_project_guided_question_catalog_has_66_stable_unique_items() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     catalog = load_question_catalog(repository_root / "corpus-curation" / "questions.json")
 
     assert catalog.catalog_id == "sibyl-guided-questions-ru-v1"
     assert catalog.language == "ru"
-    assert len(catalog.items) == 48
-    assert len(catalog.ids) == 48
+    assert len(catalog.items) == 66
+    assert len(catalog.ids) == 66
     assert {item.kind for item in catalog.items} == {"question", "state"}
 
 

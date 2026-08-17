@@ -56,7 +56,7 @@ Priorities:
 | C-08 | todo | P1 | Generate multiple semantic hints per passage to improve metaphorical/lateral retrieval. |
 | C-09 | todo | P1 | Build a qualitative evaluation set of questions and expected plausible passage regions, not single gold answers. |
 | C-10 | todo | P2 | Benchmark corpus/index size, build cost, and retrieval quality for 10k / 50k / 100k+ passage packages. |
-| C-11 | done | P0 | Add the first large-LLM curation infrastructure: 48 stable guided prompts, deterministic canonical-text export bundles, Git-safe locator/hash proposals, and local exact-text import/validation. |
+| C-11 | done | P0 | Add the first large-LLM curation infrastructure: 66 stable guided prompts, deterministic canonical-text export bundles, Git-safe locator/hash proposals, and local exact-text import/validation. |
 | C-12 | todo | P0 | Build a merged runtime curated index across authors and route guided question IDs to curated candidate pools while retaining `SelectionEngine` serendipity. |
 
 ## Android retrieval slice

@@ -290,6 +290,114 @@
       "kind": "question",
       "theme": "forgiveness_and_conflict",
       "text": "Можно ли примириться с человеком, не соглашаясь с тем, что он сделал?"
+    },
+    {
+      "id": "laziness",
+      "kind": "question",
+      "theme": "work_and_discipline",
+      "text": "Почему я ленюсь?"
+    },
+    {
+      "id": "overcoming_laziness",
+      "kind": "state",
+      "theme": "work_and_discipline",
+      "text": "Мне трудно заставить себя работать."
+    },
+    {
+      "id": "diligence",
+      "kind": "question",
+      "theme": "work_and_discipline",
+      "text": "Как воспитать в себе трудолюбие?"
+    },
+    {
+      "id": "dignity_of_work",
+      "kind": "question",
+      "theme": "work_and_discipline",
+      "text": "Зачем человеку труд?"
+    },
+    {
+      "id": "value_of_books",
+      "kind": "question",
+      "theme": "books_and_knowledge",
+      "text": "Зачем читать книги?"
+    },
+    {
+      "id": "books_and_inner_life",
+      "kind": "state",
+      "theme": "books_and_knowledge",
+      "text": "Книги меняют внутреннюю жизнь."
+    },
+    {
+      "id": "caring_for_health",
+      "kind": "question",
+      "theme": "health_and_illness",
+      "text": "Почему важно беречь здоровье?"
+    },
+    {
+      "id": "fighting_illness",
+      "kind": "question",
+      "theme": "health_and_illness",
+      "text": "Как не сдаться болезни?"
+    },
+    {
+      "id": "envy_of_others",
+      "kind": "question",
+      "theme": "envy_and_hatred",
+      "text": "Что делать с завистью?"
+    },
+    {
+      "id": "hatred",
+      "kind": "question",
+      "theme": "envy_and_hatred",
+      "text": "Что делать с ненавистью?"
+    },
+    {
+      "id": "finding_my_place",
+      "kind": "question",
+      "theme": "identity_and_direction",
+      "text": "Где моё место в жизни?"
+    },
+    {
+      "id": "inner_core",
+      "kind": "question",
+      "theme": "identity_and_direction",
+      "text": "На что опереться внутри себя?"
+    },
+    {
+      "id": "lost_old_meanings",
+      "kind": "question",
+      "theme": "meaning_after_loss",
+      "text": "Как жить, когда прежние смыслы исчезли?"
+    },
+    {
+      "id": "loss_of_homeland",
+      "kind": "state",
+      "theme": "meaning_after_loss",
+      "text": "Я потерял родину, какой её знал."
+    },
+    {
+      "id": "rejected_by_close_people",
+      "kind": "state",
+      "theme": "meaning_after_loss",
+      "text": "Близкие отвернулись от меня."
+    },
+    {
+      "id": "care_for_nature",
+      "kind": "question",
+      "theme": "nature_and_stewardship",
+      "text": "Почему нужно беречь природу?"
+    },
+    {
+      "id": "future_beyond_my_life",
+      "kind": "question",
+      "theme": "future_and_legacy",
+      "text": "Зачем заботиться о будущем, которого я не увижу?"
+    },
+    {
+      "id": "responsibility_to_next_generations",
+      "kind": "state",
+      "theme": "future_and_legacy",
+      "text": "Мы отвечаем за то, что оставим после себя."
     }
   ]
 }

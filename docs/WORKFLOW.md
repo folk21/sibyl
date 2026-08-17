@@ -131,7 +131,7 @@ The Git-tracked product catalog lives at:
 corpus-curation/questions.json
 ```
 
-The initial catalog contains 48 Russian questions/states with stable IDs and themes. Curation mappings reference IDs rather than copying or rewriting prompt semantics.
+The current catalog contains 66 Russian questions/states with stable IDs and themes. Curation mappings reference IDs rather than copying or rewriting prompt semantics.
 
 Do not silently regenerate this file for each author. A semantic catalog rewrite requires a new `catalog_id` so older curation mappings cannot silently change meaning.
 
@@ -326,7 +326,7 @@ make run-desktop-real \
 
 Implemented in the current curation milestone:
 
-- a stable 48-item guided question/state catalog;
+- a stable 66-item guided question/state catalog;
 - deterministic export of prepared canonical texts for an explicit external large-LLM step;
 - Git-safe LLM proposal metadata with no copied passage text;
 - exact local locator/hash validation and deterministic curated passage IDs;
