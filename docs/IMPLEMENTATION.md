@@ -17,7 +17,8 @@ Concrete class names, libraries, development adapters, and temporary implementat
 | Area | Current responsibility | Detailed implementation |
 |---|---|---|
 | `mobile/` | Shared Kotlin runtime/UI plus Android and JVM Desktop hosts | [`../mobile/IMPLEMENTATION.md`](../mobile/IMPLEMENTATION.md) |
-| `corpus-builder/` | Python source preparation, passage extraction, embeddings, publication | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
+| `corpus-core/` | Shared Python canonical-source contract, hashes, locators, atomic publication | [`../corpus-core/IMPLEMENTATION.md`](../corpus-core/IMPLEMENTATION.md) |
+| `corpus-builder/` | Python source ingestion, automatic corpus build, and large-LLM curation workflow | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
 | `corpus-format/` | Versioned SQLite/manifest persistence contract | [`../corpus-format/IMPLEMENTATION.md`](../corpus-format/IMPLEMENTATION.md) |
 | `corpus-sources/` | Permanent source/provenance/rights registry | [`../corpus-sources/IMPLEMENTATION.md`](../corpus-sources/IMPLEMENTATION.md) |
 | `corpus-curation/` | Guided-question catalog plus Git-safe LLM proposal/validated mapping metadata | [`../corpus-curation/README.md`](../corpus-curation/README.md) |
@@ -43,11 +44,11 @@ flowchart TD
     B --> M[manifest.json]
 ```
 
-The command entry point is `sibyl_corpus_builder.cli:main`. The main build orchestration is `builder.build_corpus()`. Exact passage extraction is implemented by `splitter.split_document()`. Build-time embeddings use an `EmbeddingProvider`; the real-text configuration selects `SentenceTransformerEmbeddingProvider` with `intfloat/multilingual-e5-small`.
+The command entry point is `sibyl_corpus_builder.cli:main`, but the root CLI is now intentionally only a composition layer. Source ingestion is owned by `sibyl_corpus_builder.sources`, automatic corpus publication by `sibyl_corpus_builder.build`, and external large-LLM curation by `sibyl_corpus_builder.curation`. Shared prepared-source contracts and exact hash/locator primitives live in the separate `sibyl_corpus_core` package.
 
-Completed embeddings are cached under the prepared source directory by `EmbeddingCache`, so an interrupted build can resume without recomputing successful batches. Publication uses a staging directory and replaces the requested output only after validation succeeds.
+The automatic build orchestration is `build.api.build_corpus()`. Exact mechanical passage extraction is implemented by `build._internal.splitter.split_document()`. Build-time embeddings use providers under `build._internal`; the real-text configuration selects `SentenceTransformerEmbeddingProvider` with `intfloat/multilingual-e5-small`. Completed embeddings are cached under the prepared source directory so an interrupted build can resume without recomputing successful batches. Publication uses the shared `corpus-core` atomic staging primitive and replaces the requested output only after validation succeeds.
 
-Prepared canonical sources also support a separate LLM-curation path before automatic splitting. `curation.export_curation_bundle()` creates a deterministic local ZIP containing the 48-item guided-question catalog and concrete canonical text versions. An external large model returns locator/hash proposal metadata; `curation.import_curation()` and `validate_curated_curation()` resolve those locators back against local canonical text and reject hash or question-reference drift. The normalized mapping contains deterministic curated passage IDs but no copied literary text. This mapping is not wired into Desktop/Android runtime yet.
+Prepared canonical sources also support a separate LLM-curation path before automatic splitting. `curation.api.export_curation_bundle()` creates a deterministic local ZIP containing the 48-item guided-question catalog and concrete canonical text versions. An external large model returns locator/hash proposal metadata; `curation.api.import_curation()` and `validate_curated_curation()` resolve those locators back against local canonical text and reject hash or question-reference drift. The normalized mapping contains deterministic curated passage IDs but no copied literary text. This mapping is not wired into Desktop/Android runtime yet.
 
 ### Runtime
 

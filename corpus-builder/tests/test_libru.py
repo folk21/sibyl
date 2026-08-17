@@ -4,13 +4,15 @@ from zipfile import ZipFile
 
 import pytest
 
-from sibyl_corpus_builder.libru import (
-    discover_fb2_uri,
-    discover_libru_artifact_candidates,
-    discover_libru_author_page,
+from sibyl_corpus_builder.sources.adapters.libru.discovery import (
+    discover_author_page as discover_libru_author_page,
 )
-from sibyl_corpus_builder.normalization import canonicalize_text
-from sibyl_corpus_builder.selection import load_selection, write_selection
+from sibyl_corpus_builder.sources.adapters.libru.fetch import (
+    discover_artifact_candidates as discover_libru_artifact_candidates,
+    discover_fb2_uri,
+)
+from sibyl_corpus_builder.sources._internal.adapters import canonicalize_source
+from sibyl_corpus_builder.sources.api import load_selection, write_selection
 
 
 _AUTHOR_PAGE = """
@@ -107,7 +109,7 @@ def test_discover_fb2_uri_remains_available_for_diagnostics():
 
 
 def test_libru_html_normalization_extracts_literary_body_and_removes_page_chrome():
-    text, normalizer = canonicalize_text(
+    text, normalizer = canonicalize_source(
         _WORK_PAGE,
         "libru",
         work_title="Преступление и наказание",
@@ -124,7 +126,7 @@ def test_libru_html_normalization_extracts_literary_body_and_removes_page_chrome
 
 
 def test_libru_content_sniff_overrides_misleading_txt_candidate_kind():
-    text, normalizer = canonicalize_text(
+    text, normalizer = canonicalize_source(
         _WORK_PAGE,
         "libru",
         work_title="Преступление и наказание",
@@ -136,7 +138,7 @@ def test_libru_content_sniff_overrides_misleading_txt_candidate_kind():
 
 
 def test_libru_fb2_normalization_uses_primary_body_and_preserves_text():
-    text, normalizer = canonicalize_text(_zip_fb2(), "libru")
+    text, normalizer = canonicalize_source(_zip_fb2(), "libru")
 
     assert normalizer == "libru_fb2_v1"
     assert text == (

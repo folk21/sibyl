@@ -28,13 +28,15 @@ Do not create separate subproject `docs/` trees. Keep ownership explicit:
 
 ## Format changes
 
-A persisted contract change should normally update together:
+A persisted runtime-corpus contract change should normally update together:
 
 - `corpus-format/` schema/manifest/version;
-- `corpus-builder/` writer/validation;
+- `corpus-builder/` writer/validation assumptions that materialize or verify that contract;
 - `mobile/` domain/reader assumptions when applicable;
 - compatibility/focused tests;
 - [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md) and roadmap/changelog as needed.
+
+Update `corpus-core/` only when the same change also affects the shared prepared-source contract or another feature-neutral Python primitive. `corpus-core` deliberately does not own persisted runtime-corpus semantics. Source adapters under `corpus-builder/sources/` likewise change only when source ingestion or prepared-source semantics are affected.
 
 ## Source changes
 
@@ -72,7 +74,7 @@ Never commit production `corpus.db`, ANN indexes, ONNX models, downloaded books/
 
 ## Repository snapshots
 
-Use `archive.sh` for shareable full ZIP archives and `concat_sibyl.sh` for source-only concatenated text snapshots. Both helper paths exclude `corpus-builder/data/`, local virtual environments, model/download caches, Gradle/Kotlin caches, IDE metadata, and generated build outputs. Keep generated snapshot files outside the repository when practical.
+Use `archive.sh` for shareable full ZIP archives and `concat_sibyl.sh` for source-only concatenated text snapshots. Both helper paths exclude `corpus-builder/data/`, local virtual environments, model/download caches, Gradle/Kotlin caches, IDE metadata, and known generated build-output directories. They must preserve the architectural Python source package `corpus-builder/src/sibyl_corpus_builder/build/`; both helpers now validate that this source feature is present in their output. Keep generated snapshot files outside the repository when practical.
 
 ## Archive handoff
 

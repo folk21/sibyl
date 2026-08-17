@@ -7,7 +7,8 @@
 # Gradle / Kotlin
 .gradle/
 **/.gradle/
-**/build/
+/build/
+/mobile/**/build/
 **/.kotlin/
 mobile/local.properties
 mobile/.gradle-dist/
@@ -26,6 +27,9 @@ __pycache__/
 .venv-ml/
 **/.venv/
 **/.venv-ml/
+corpus-core/build/
+corpus-core/dist/
+corpus-builder/build/
 corpus-builder/dist/
 **/*.egg-info/
 

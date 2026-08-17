@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sibyl_corpus_builder.database import SCHEMA
+from sibyl_corpus_builder.build._internal.database import SCHEMA
 
 
 def test_builder_schema_matches_canonical_contract() -> None:

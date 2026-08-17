@@ -1,6 +1,6 @@
-from sibyl_corpus_builder.config import PassageConfig
-from sibyl_corpus_builder.models import SourceDocument
-from sibyl_corpus_builder.splitter import split_document
+from sibyl_corpus_builder.build.config import PassageConfig
+from sibyl_corpus_core.models import SourceDocument
+from sibyl_corpus_builder.build._internal.splitter import split_document
 
 
 def test_splitter_respects_paragraph_boundaries_and_maximum() -> None:

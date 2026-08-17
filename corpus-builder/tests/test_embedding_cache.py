@@ -2,9 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from sibyl_corpus_builder import builder
-from sibyl_corpus_builder.config import BuilderConfig, EmbeddingConfig, HintConfig, PassageConfig
-from sibyl_corpus_builder.models import SemanticHint
+from sibyl_corpus_builder.build._internal import embedding_pipeline
+from sibyl_corpus_builder.build.config import (
+    BuilderConfig,
+    EmbeddingConfig,
+    HintConfig,
+    PassageConfig,
+)
+from sibyl_corpus_builder.build._internal.models import SemanticHint
 
 
 class _RecordingProvider:
@@ -59,16 +64,16 @@ def test_embedding_cache_resumes_after_completed_batches(
     ]
 
     first = _RecordingProvider(dimensions=4, fail_after_calls=1)
-    monkeypatch.setattr(builder, "_embedding_provider", lambda config: first)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", lambda config: first)
 
     with pytest.raises(RuntimeError, match="simulated interruption"):
-        builder._resolve_embeddings(_config(), hints, tmp_path)
+        embedding_pipeline.resolve_embeddings(_config(), hints, tmp_path)
 
     assert first.texts == ["alpha"]
 
     second = _RecordingProvider(dimensions=4)
-    monkeypatch.setattr(builder, "_embedding_provider", lambda config: second)
-    vectors = builder._resolve_embeddings(_config(), hints, tmp_path)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", lambda config: second)
+    vectors = embedding_pipeline.resolve_embeddings(_config(), hints, tmp_path)
 
     assert second.texts == ["beta", "gamma"]
     assert set(vectors) == {"h1", "h2", "h3"}
@@ -81,13 +86,13 @@ def test_embedding_cache_avoids_loading_provider_when_complete(
 ) -> None:
     hints = [SemanticHint(hint_id="h1", passage_id="p1", text="same text")]
     provider = _RecordingProvider(dimensions=4)
-    monkeypatch.setattr(builder, "_embedding_provider", lambda config: provider)
-    builder._resolve_embeddings(_config(), hints, tmp_path)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", lambda config: provider)
+    embedding_pipeline.resolve_embeddings(_config(), hints, tmp_path)
 
     def fail_if_loaded(config):
         raise AssertionError("provider should not be loaded for a complete cache")
 
-    monkeypatch.setattr(builder, "_embedding_provider", fail_if_loaded)
-    vectors = builder._resolve_embeddings(_config(), hints, tmp_path)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", fail_if_loaded)
+    vectors = embedding_pipeline.resolve_embeddings(_config(), hints, tmp_path)
 
     assert vectors["h1"]

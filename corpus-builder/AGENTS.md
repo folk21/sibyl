@@ -1,46 +1,93 @@
 # Corpus builder development rules
 
-Root `AGENTS.md` also applies.
+Root `AGENTS.md` and [`../corpus-core/AGENTS.md`](../corpus-core/AGENTS.md) also apply when shared contracts are involved.
+
+## Package shape
+
+Keep `sibyl_corpus_builder/` root intentionally small:
+
+```text
+__init__.py
+cli.py
+sources/
+build/
+curation/
+```
+
+Do not add new top-level implementation modules without a strong cross-feature orchestration reason. Prefer placing behavior in the owning feature.
+
+### Feature boundaries
+
+- `sources` owns external catalog/source acquisition through deterministic prepared canonical source output.
+- `build` owns the automatic splitter, semantic hints, embeddings, runtime corpus writing/validation, and runtime model bundle.
+- `curation` owns guided-question bundle export and large-LLM proposal import/exact-text validation.
+- `corpus-core` owns only feature-neutral contracts/primitives shared by multiple features.
+
+Each feature should expose intended callers through `api.py`. `command.py` translates argparse values to the public API. Implementation-private helpers belong under that feature's `_internal/` package.
+
+A feature must not import another feature's `_internal` package. Root `cli.py` must not import `_internal` or source adapters directly. Architecture tests enforce these directions.
+
+### `_internal` versus `corpus-core`
+
+Use `_internal` when code is reusable **inside one feature** but still understands that feature's concepts. Use `corpus-core` only when the same contract/primitive makes sense independently of source acquisition, automatic build, and LLM curation.
+
+Do not use either location as a miscellaneous utility bucket.
+
+### Source adapters
+
+Group source-specific behavior by source family:
+
+```text
+sources/adapters/libru/
+    discovery.py
+    fetch.py
+    normalize.py
+
+sources/adapters/gutenberg/
+    fetch.py
+    normalize.py
+```
+
+Cross-source document formats such as FB2 belong under `sources/adapters/formats/`. Add a new source family through one adapter package plus the explicit dispatch mapping in `sources/_internal/adapters.py`.
 
 ## Pipeline invariants
 
 - Importing the package must not download sources/models, call remote APIs, or modify data.
 - Every acquisition/build input must be explicit through source path/registry/configuration. Candidate registry sources require an explicit local-review override.
 - Discovery manifests are editable developer review artifacts. `discover` must not write registry records, acquire texts, or change approval state.
-- Batch acquisition from a selection processes only entries explicitly marked `decision = "include"`; `review` and `exclude` are never acquired implicitly. Per-work failures must be isolated and reported after the batch rather than aborting at the first bad artifact.
+- Batch acquisition from a selection processes only entries explicitly marked `decision = "include"`; per-work failures must be isolated and reported after the batch.
 - Preserve literary text except for versioned, tested non-literary wrapper/newline normalization. Canonical text changes require a normalizer version change.
 - Detect natural boundaries; never publish arbitrary mid-character truncations.
 - Retain raw/canonical SHA-256 metadata and exact canonical-text source locators so every passage is reproducible.
 - Build into staging output and publish only after validation succeeds.
-- Persist completed embedding batches in a local cache outside published output so interrupted real-text builds can resume without recomputing successful batches. Cache identity must include embedding configuration and exact input text hashes.
+- Persist completed embedding batches outside published output so interrupted real-text builds can resume. Cache identity must include embedding configuration and exact input text hashes.
 - Production source provenance/rights metadata is mandatory.
 
 ## Large-LLM curation
 
-- External large-LLM curation is an explicit developer-controlled build-time step, never an import-time or mobile-runtime dependency.
-- Export bundles may contain full canonical texts only under ignored local `corpus-builder/data/`; committed curation files must contain locators/hashes and question mappings rather than copied books or passage text. Export requires approved rights metadata unless a developer uses the explicit override after separately confirming external-service upload rights.
-- Treat model output as a proposal. Verify `work_id`, `text_version_id`, canonical SHA-256, exact `chars:start:end`, selected-text SHA-256, and question IDs locally before normalizing it as curated metadata.
-- The large model may choose natural passage boundaries independently of the automatic splitter. Do not force every author/work to cover every guided question.
-- Curation strength is an editorial/semantic fit score, not vector cosine similarity.
+- `export-curation-bundle` starts from prepared canonical source text, before the automatic splitter.
+- The external LLM may choose semantic relevance and natural boundaries, but it is never authoritative for literary wording.
+- Import/revalidation must resolve each locator against local canonical text and verify canonical/text SHA-256 values.
+- Export bundles may contain full canonical texts only under ignored local `corpus-builder/data/`; committed curation files contain locators/hashes/question mappings instead of copied books/passages.
+- Export requires approved rights metadata unless a developer uses the explicit override after separately confirming external-service upload rights.
 
-## Generated metadata
+## Module documentation
 
-Semantic hints, summaries, quality scores, embeddings, and curation mappings are internal retrieval metadata. They are never literary quotations.
+Every Python package in the builder hierarchy, including `_internal` and source-adapter packages, must have a meaningful `__init__.py` package docstring. Describe where that package sits in the pipeline, what responsibilities it groups, and what adjacent responsibilities it intentionally does not own. Package docstrings are architecture/navigation aids, not inventories of every symbol.
 
-## Adapters
+For non-obvious modules/classes/orchestration methods, documentation must explain **where the code sits in the end-to-end pipeline**, what responsibility it owns, and what adjacent responsibilities it intentionally does not own. Source normalizers, fallback acquisition, preparation, embedding orchestration, publication, and curation validation require this context.
 
-- `HintGenerator` owns internal semantic descriptions.
-- `EmbeddingProvider` owns vector generation.
-- Source discovery/fetch, ML, LLM, translation, and production embedding adapters must be explicit CLI/config choices and never run on package import.
-- Lib.ru acquisition prefers TXT, then work-page HTML, then FB2. Source-specific normalizers must remain versioned and tested; malformed/unsupported candidates must fall through without corrupting a successfully acquired batch.
-- Keep deterministic local adapters for default tests.
+Avoid comments that merely restate individual statements.
 
 ## Tests
 
-Use `pytest` with synthetic fixtures. Cover splitter boundaries, configuration validation, deterministic IDs, database/manifest population, staging/publication behavior, and contract validation.
+Use synthetic fixtures and no implicit network/model access.
 
 ```bash
-PYTHONPATH=src python -m pytest
+make test-corpus-core
+make test-corpus-builder
 ```
 
-Concrete builder modules and call paths live in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). Cross-project policies live in root `docs/ARCHITECTURE.md`, `docs/CONFIGURATION.md`, `docs/SOURCES.md`, `docs/CORPUS_FORMAT.md`, and `docs/TESTS.md`.
+Add focused tests when moving behavior. Keep `test_architecture.py` aligned with dependency/package-documentation rules and `test_repository_hygiene.py` aligned with Git/archive protections for architectural source packages.
+
+Concrete builder modules and call paths live in [`IMPLEMENTATION.md`](IMPLEMENTATION.md). Operational sequencing starts in [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md).

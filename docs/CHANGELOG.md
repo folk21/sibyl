@@ -1,9 +1,27 @@
 # Changelog
 
+## 2026-08-17 — Align Git, CI, and documentation with the Python corpus refactor
+
+- narrowed `.gitignore` build-output rules so Git can track the architectural `sibyl_corpus_builder/build/` source package while still excluding known generated build directories;
+- changed corpus-builder CI to run the repository-owned `make check` contract and to trigger on root hygiene scripts, `.gitignore`, `Makefile`, and source-registry changes covered by that contract;
+- documented package-docstring and repository-hygiene regression coverage and clarified that `corpus-core` does not automatically change with every persisted runtime-format revision;
+- added a regression test preventing broad `**/build/` Git ignore rules from returning.
+
+
+## 2026-08-17 — Preserve Python `build` source feature in repository artifacts
+
+- fixed `archive.sh` and `concat_sibyl.sh` so generated build-output exclusions no longer match `corpus-builder/src/sibyl_corpus_builder/build/`;
+- added output validation to both helpers so a shareable archive/snapshot fails instead of silently omitting the automatic-build feature;
+- added regression tests covering the source-package/archive-hygiene boundary.
+
+
 ## Unreleased
 
 ### Added
 
+- `corpus-core/` as a separate feature-neutral Python subproject owning `SourceDocument`, prepared-source loading, exact hashing/character locators, shared text primitives, and atomic directory publication;
+- Python architecture regression tests that prevent `corpus-core -> corpus-builder`, root CLI access to feature internals, and cross-feature `_internal` dependencies;
+- source adapters grouped by source family (`sources/adapters/libru`, `sources/adapters/gutenberg`) plus a source-neutral FB2 format adapter;
 - `docs/WORKFLOW.md` as the primary start/continue guide across source preparation, large-LLM curation, generic corpus builds, and Desktop runtime;
 - `corpus-curation/questions.json` with 48 stable Russian guided questions/states plus local rules for Git-safe LLM curation metadata;
 - `export-curation-bundle`, `import-curation`, and `validate-curation` builder commands for deterministic external-LLM handoff and exact canonical locator/hash verification without committing copied passage text;
@@ -37,6 +55,11 @@
 
 ### Changed
 
+- every Python package now has a meaningful `__init__.py` package docstring describing its pipeline position, responsibilities, and dependency/ownership boundaries; architecture tests reject missing or placeholder package documentation;
+- refactored `sibyl_corpus_builder` from a flat module set into three explicit features: `sources`, `build`, and `curation`; the package root now contains only `__init__.py`, `cli.py`, and feature packages;
+- root `cli.py` is now a thin composition entry point, while each feature owns its `command.py`, public `api.py`, and implementation-private `_internal` modules;
+- source acquisition/normalization/preparation and automatic build modules now include pipeline-position documentation explaining how each non-obvious stage fits the end-to-end workflow;
+- Python setup/CI/Make targets now install/test both local `corpus-core` and `corpus-builder` distributions;
 - repository documentation rules now prefer vertical Mermaid flowcharts for sequential pipelines longer than four major blocks, while relationship maps and sequence diagrams keep the layout that best communicates structure;
 - Kotlin documentation now requires meaningful KDoc for every type and more detailed responsibility/algorithm/invariant/resource-lifecycle notes for non-obvious retrieval, selection, inference, persistence, and compatibility code;
 - `archive.sh` and `.gitignore` now exclude all `corpus-builder/data/` downloads/prepared/output/cache content plus local ML/tool caches and generated project snapshots;

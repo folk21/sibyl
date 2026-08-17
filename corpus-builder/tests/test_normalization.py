@@ -1,4 +1,4 @@
-from sibyl_corpus_builder.normalization import canonicalize_text
+from sibyl_corpus_builder.sources._internal.adapters import canonicalize_source
 
 
 def test_gutenberg_wrapper_is_removed_without_rewriting_literary_text() -> None:
@@ -12,7 +12,7 @@ def test_gutenberg_wrapper_is_removed_without_rewriting_literary_text() -> None:
         "Footer\r\n"
     ).encode()
 
-    text, normalizer = canonicalize_text(raw, "project_gutenberg")
+    text, normalizer = canonicalize_source(raw, "project_gutenberg")
 
     assert normalizer == "project_gutenberg_v1"
     assert text == "First line.\n\nSecond  line with  spacing.\n"

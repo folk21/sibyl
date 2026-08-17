@@ -29,7 +29,8 @@ fi
   -i .gradle -i '*/.gradle/*' \
   -i .gradle-dist -i '*/.gradle-dist/*' \
   -i .kotlin -i '*/.kotlin/*' \
-  -i build -i '*/build/*' \
+  -i 'mobile/build/*' -i 'mobile/*/build/*' \
+  -i 'corpus-core/build/*' -i 'corpus-builder/build/*' \
   -i target -i '*/target/*' \
   -i dist -i '*/dist/*' \
   -i '*.egg-info' -i '*/*.egg-info/*' \
@@ -45,5 +46,12 @@ fi
   -e .ini -e .toml -e .yaml -e .yml -e .json \
   -e .sh -e .gitignore -e .properties -e .sql -e .xml \
   -e .editorconfig -e Makefile -e VERSION
+
+required_source="sibyl_corpus_builder/build/api.py"
+if ! grep -Fq "$required_source" "$output_path"; then
+  rm -f "$output_path"
+  echo "Snapshot validation failed: required source package entry is missing: $required_source" >&2
+  exit 2
+fi
 
 echo "Created $output_path"

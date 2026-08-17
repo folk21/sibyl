@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from sibyl_corpus_builder.config import load_config
-from sibyl_corpus_builder.runtime_model import download_runtime_model
+from sibyl_corpus_builder.build.config import load_config
+from sibyl_corpus_builder.build.api import download_runtime_model
 
 
 def _config(tmp_path: Path, query_prefix: str = "query: ") -> Path:

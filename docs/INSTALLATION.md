@@ -34,19 +34,22 @@ git clone <repository-url> sibyl
 cd sibyl
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e 'corpus-builder[dev]'
+python -m pip install -e ./corpus-core -e './corpus-builder[dev]'
 make check
 ```
 
 `make check` does not require Android tooling, production models, or downloaded literature. See [`TESTS.md`](TESTS.md).
 
-## Corpus builder development environment
+## Corpus Python development environment
+
+`corpus-builder` depends on the local feature-neutral `sibyl-corpus-core` distribution, so install both editable packages in the same environment.
+
 
 ```bash
 cd /path/to/sibyl/corpus-builder
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[dev]'
+python -m pip install -e ../corpus-core -e '.[dev]'
 ```
 
 On Windows use `.venv\\Scripts\\activate`.
@@ -62,7 +65,7 @@ cd /path/to/sibyl/corpus-builder
 python3.12 -m venv .venv-ml
 source .venv-ml/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[ml]'
+python -m pip install -e ../corpus-core -e '.[ml]'
 ```
 
 The current pinned ML stack is `numpy==1.26.4`, `torch==2.2.2`, and `sentence-transformers==3.4.1`. Keep these versions aligned unless a dependency upgrade is deliberately tested on all supported corpus-building hosts.

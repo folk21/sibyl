@@ -2,9 +2,9 @@ import json
 import sqlite3
 from pathlib import Path
 
-from sibyl_corpus_builder.builder import build_corpus
-from sibyl_corpus_builder.config import load_config
-from sibyl_corpus_builder.validation import validate_corpus
+from sibyl_corpus_builder.build.api import build_corpus
+from sibyl_corpus_builder.build.config import load_config
+from sibyl_corpus_builder.build.api import validate_corpus
 
 
 def test_builder_creates_valid_artifacts(tmp_path: Path) -> None:

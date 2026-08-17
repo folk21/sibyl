@@ -16,9 +16,10 @@ Current coverage:
 
 | Command | Purpose | Prerequisites |
 |---|---|---|
-| `make check` | Builder tests + corpus-format validation + source-registry validation | Python 3.11+ and builder dev dependencies |
+| `make check` | corpus-core + builder behavior/structural tests + corpus-format/source-registry validation | Python 3.11+ and Python corpus dev dependencies |
 | `make check-all` | `make check` + Android host tests + desktop JVM shared tests | Python 3.11+, JDK 17+, Android SDK |
-| `make test-corpus-builder` | Python unit/integration tests | Python 3.11+, `pytest` available |
+| `make test-corpus-core` | Shared Python contract/primitive tests | Python 3.11+, `pytest` available |
+| `make test-corpus-builder` | Builder unit/integration + architecture, package-documentation, and repository-hygiene regression tests | Python 3.11+, `pytest` available |
 | `make validate-format` | Validate corpus-format v3 schema/fixtures | Python 3.11+ |
 | `make validate-sources` | Validate source TOML records and collection references | Python 3.11+ |
 | `make smoke-corpus` | Build and validate a temporary synthetic corpus | Python 3.11+ |
@@ -49,7 +50,13 @@ Use deterministic injected randomness for selection behavior. When the correspon
 
 Platform inference/index adapters should have focused integration tests. Desktop currently tests manifest compatibility and brute-force cosine ranking without downloading models. A separate opt-in golden embedding test should later compare ONNX query output against the Python Sentence Transformers build stack; default tests must remain model/network-free.
 
-### Corpus builder
+### Corpus core and builder
+
+`corpus-core` tests protect shared prepared-source/locator/text contracts. Builder regression tests protect both behavior and the refactored package structure:
+
+- dependency direction: no `corpus-core -> corpus-builder`, root-CLI-to-internals, or cross-feature `_internal` imports;
+- package documentation: every Python package must keep a meaningful `__init__.py` docstring describing its architectural role;
+- repository hygiene: Git ignore rules, archive helpers, and source snapshots must preserve the architectural `sibyl_corpus_builder/build/` source package rather than confusing it with generated build output.
 
 Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg. LLM-curation tests must remain external-model-free: validate the 48-item question catalog, deterministic export bundle construction, rights gating, exact locator/hash import, deterministic curated passage IDs, and rejection of altered canonical slices.
 

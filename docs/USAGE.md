@@ -128,7 +128,7 @@ Install the opt-in ML dependencies once in a Python 3.11/3.12 environment. On ma
 python3.12 -m venv .venv-ml
 source .venv-ml/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[ml]'
+python -m pip install -e ../corpus-core -e '.[ml]'
 ```
 
 Python 3.11 is also supported for this environment. The current ML extra is pinned so corpus embeddings are built with a reproducible dependency stack.

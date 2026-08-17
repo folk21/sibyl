@@ -78,7 +78,21 @@ The reusable runtime owns:
 
 Platform APIs, ONNX runtimes, native ANN implementations, and platform storage remain behind small interfaces.
 
+### Corpus core
+
+`corpus-core/` is the feature-neutral Python boundary shared by build-time corpus features. It owns the canonical prepared-source contract and small deterministic primitives such as exact hashes, character locators, newline/text helpers, and atomic local publication.
+
+It must not know about source-specific sites, automatic embeddings, large-LLM proposal formats, or runtime SQLite schema details. `corpus-format/` remains the owner of persisted runtime corpus semantics.
+
 ### Corpus builder
+
+The build-time Python application is organized as three feature boundaries around `corpus-core`:
+
+- `sources` — external catalogs/artifacts to deterministic prepared canonical sources;
+- `build` — automatic passage splitting, embeddings, and current runtime corpus publication;
+- `curation` — deterministic export to a large LLM and local exact-text validation of returned mappings.
+
+The package root is a thin CLI composition layer. Features expose public APIs and keep implementation-private helpers under their own `_internal` packages. A feature must not depend on another feature's `_internal` implementation. Source-specific parsing/fetching/normalization is grouped under `sources/adapters/<source>/`.
 
 The build-time pipeline owns:
 
@@ -199,7 +213,8 @@ Platform-specific inference, indexing, filesystem, and database technologies may
 - translation role is explicit and persisted;
 - source provenance and rights belong to concrete text versions;
 - build-time generated metadata is never presented as quotation;
-- runtime question processing stays local unless explicitly redesigned.
+- runtime question processing stays local unless explicitly redesigned;
+- build-time Python dependencies flow from feature APIs/internals toward `corpus-core`, never from `corpus-core` back into builder features.
 
 ## Concrete implementation
 

@@ -1,144 +1,215 @@
 # Corpus builder implementation
 
-## Scope
+## Scope and entry point
 
-`corpus-builder/` is a build-time Python application. It discovers/acquires source material, creates deterministic canonical text and passages, produces retrieval metadata/embeddings, and publishes validated runtime artifacts. It is not a server and package import has no network or model side effects.
+`corpus-builder/` is the build-time Python application that composes three explicit features around the shared contracts in [`../corpus-core/`](../corpus-core/):
 
-Stable boundaries and source policy are documented in [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) and [`../docs/SOURCES.md`](../docs/SOURCES.md).
+```mermaid
+flowchart TD
+    CLI[sibyl_corpus_builder.cli] --> S[sources]
+    CLI --> B[build]
+    CLI --> C[curation]
+    S --> P[Prepared canonical sources]
+    P --> B
+    P --> C
+    B --> R[Automatic runtime corpus]
+    C --> M[Validated curated metadata]
+```
 
-## Entry point and configuration
-
-The installed command is:
+The package root intentionally contains only:
 
 ```text
-sibyl-corpus -> sibyl_corpus_builder.cli:main
+sibyl_corpus_builder/
+  __init__.py
+  cli.py
+  sources/
+  build/
+  curation/
 ```
 
-`cli.py` builds the `argparse` command surface and delegates to explicit stages. `config.py` loads TOML into immutable `PassageConfig`, `HintConfig`, `EmbeddingConfig`, and `BuilderConfig` models and validates incompatible settings before expensive work begins.
+`cli.py` is the composition root. It registers feature-owned command adapters and dispatches a parsed command to exactly one feature. It does not know source-site parsing, passage splitting, embeddings, SQLite details, or LLM proposal structure.
 
-## Catalog discovery and review
+## Dependency rules
 
-For the current Lib.ru workflow:
+The implementation follows these boundaries:
 
 ```mermaid
 flowchart TD
-    U[Author page URL] --> D[discovery.py]
-    D --> L[libru.py parser/classifier]
-    L --> S[SelectionManifest]
-    S --> T[selection.toml]
+    CLI[cli.py] --> CMD[feature command.py]
+    CMD --> API[feature api.py]
+    API --> INT[feature _internal]
+    INT --> CORE[corpus-core]
+    ADP[source adapters] --> CORE
 ```
 
-`libru.py` parses catalog sections and links, assigns deterministic candidate IDs, and classifies entries into initial `include`, `exclude`, or `review` decisions. `selection.py` owns the editable TOML representation.
+- feature callers use `api.py`, not another feature's `_internal` package;
+- `_internal` means implementation-private to one feature, not a generic dumping ground;
+- source-specific behavior lives under `sources/adapters/<source>/`;
+- feature-neutral shared code belongs in `corpus-core`, not `_internal`;
+- architecture regression tests enforce the most important import directions.
 
-Discovery is intentionally separate from acquisition and permanent registration.
+## `sources`: external artifacts to prepared canonical sources
 
-## Acquisition and canonical preparation
-
-`preparation.py` orchestrates selected/registry acquisition. Important supporting modules are:
-
-- `fetchers.py` — source-family candidate download logic, including Project Gutenberg;
-- `libru.py` — Lib.ru artifact candidates in TXT → HTML → FB2 fallback order;
-- `normalization.py` — versioned source-specific normalization;
-- `source_artifacts.py` — raw/canonical artifact storage and SHA-256 metadata;
-- `source_registry.py` — typed access to permanent registry records and approval checks.
-
-Each selected work is isolated so one malformed artifact does not discard successful work from the same batch. `AcquisitionReport` records acquired, failed, and skipped items.
-
-Prepared source documents are materialized under `data/work/` and later loaded by `source_loader.load_sources()`.
-
-## Large-LLM curation handoff
-
-`curation.py` implements the explicit external-curation boundary without making a remote LLM a package dependency.
-
-`export_curation_bundle()` reads prepared canonical `SourceDocument` values plus `corpus-curation/questions.json`, verifies canonical hashes, and creates a deterministic local ZIP containing a manifest, normalized question catalog, and canonical work text files. The bundle is generated under ignored local data and is intended to be uploaded manually to a strong external model.
-
-`import_curation()` treats returned model metadata as untrusted. It resolves `work_id`/`text_version_id`, checks the pinned canonical SHA-256, resolves the exact `chars:start:end` slice, verifies `text_sha256`, validates guided question IDs/strengths, derives deterministic `cp_...` IDs, and writes normalized Git-safe metadata without copied literary text. `validate_curated_curation()` repeats the same exact-source checks for already normalized files.
-
-The command surface is `export-curation-bundle`, `import-curation`, and `validate-curation`. The current runtime does not consume curated mappings yet; this module establishes the reproducible build-time handoff first.
-
-## Exact passage extraction
-
-`splitter.py` converts each canonical `SourceDocument` to `PassageCandidate` values.
-
-The splitter:
-
-1. finds paragraph boundaries;
-2. splits oversized paragraphs at sentence boundaries where possible;
-3. falls back to word-bounded units rather than mid-character cuts;
-4. groups units toward configured word targets;
-5. stores exact `chars:start:end` locators;
-6. derives deterministic passage IDs from source/version/offset/text identity.
-
-The persisted text therefore remains a direct canonical-text slice.
-
-## Semantic hints
-
-`hints.py` defines the `HintGenerator` protocol. Current implementations are:
-
-- `DeterministicHintGenerator` — model-free synthetic metadata for tests;
-- `PassageTextHintGenerator` — uses the exact passage text itself as retrieval input for the current real-text baseline.
-
-Hints are internal retrieval metadata and are never user quotations.
-
-## Embeddings and resumable cache
-
-`embeddings.py` defines `EmbeddingProvider`.
-
-- `HashEmbeddingProvider` generates deterministic non-semantic vectors for fixture tests.
-- `SentenceTransformerEmbeddingProvider` is an explicit optional ML adapter used by `config/real-text.toml`.
-
-`builder._resolve_embeddings()` deduplicates exact embedding inputs by SHA-256, opens an `EmbeddingCache` scoped by an embedding-configuration fingerprint, reads existing vectors, and computes only missing batches. Every completed batch is committed immediately.
-
-This means `Ctrl+C` can lose the current in-flight batch, but completed batches remain reusable on the next build. The cache lives under the prepared source directory, outside published output.
-
-## Corpus publication
-
-`builder.build_corpus()` is the main build orchestrator:
+Public surface: `sibyl_corpus_builder.sources.api`.
 
 ```mermaid
 flowchart TD
-    L[load_sources] --> P[split_document]
-    P --> H[HintGenerator]
-    H --> E[EmbeddingProvider + cache]
-    E --> D[create_database]
-    D --> V[vectors.json]
-    V --> M[manifest.json]
-    M --> C[validate_corpus]
-    C --> O[atomic publish]
+    U[Catalog URL / registry record] --> D[Discover / resolve]
+    D --> V[Developer review]
+    V --> A[Acquire or import]
+    A --> N[Source-specific normalization]
+    N --> C[Raw + canonical artifact cache]
+    C --> P[Prepare canonical source set]
+    P --> O[corpus-core SourceDocument boundary]
 ```
 
-`database.py` materializes the current v3 SQLite tables. The persisted semantic contract is owned by `corpus-format/`; the builder's schema-writing assumptions must be kept synchronized with it.
+### Command and API files
 
-Output is written to `.<output>.staging`. The requested output directory is replaced only after corpus validation succeeds. Failed or interrupted publication removes staging rather than publishing a partial corpus.
+- `sources/command.py` — argparse definitions and user-facing result output for source commands;
+- `sources/api.py` — public feature facade;
+- `sources/models.py` — public `SelectionManifest` / `SelectionWork` review contracts.
 
-## Runtime model bundle
+### Source adapters
 
-`runtime_model.py` implements the explicit `download-runtime-model` command. It downloads the ONNX model and tokenizer assets matching the configured build-time embedding model, calculates file hashes, writes `model-manifest.json`, and atomically publishes the completed bundle.
+Adapters are grouped by **source**, so all code needed to understand one source family is close together:
 
-This command is networked by design, but it runs only when explicitly invoked.
+```text
+sources/adapters/
+  libru/
+    discovery.py
+    fetch.py
+    normalize.py
+  gutenberg/
+    fetch.py
+    normalize.py
+  formats/
+    fb2.py
+```
 
-## Permanent registration
+`libru/discovery.py` parses an author catalog and classifies entries into conservative `include` / `review` / `exclude` decisions. It does not acquire work bodies.
 
-`registration.py` converts reviewed acquired selection items into `corpus-sources/` TOML records. New records are disabled candidates and registration refuses to overwrite existing work records. Approval and publication remain separate human-controlled steps.
+`libru/fetch.py` owns Lib.ru work-page artifact discovery and the resilient `TXT -> HTML -> FB2` fallback order.
 
-## Core dependencies
+`libru/normalize.py` owns Lib.ru-specific decoding/body-boundary/site-chrome logic. It preserves literary wording and keeps normalizer versions stable because exact canonical hashes and character locators depend on its output.
 
-The normal builder intentionally uses the Python standard library where practical:
+`gutenberg/fetch.py` locates/downloads a preferred UTF-8 plain-text artifact. `gutenberg/normalize.py` removes only the standard Project Gutenberg START/END transport wrapper.
 
-- `argparse`, `pathlib`, `tomllib`;
-- `urllib`;
-- `html.parser`;
-- `xml.etree.ElementTree`;
-- `sqlite3`;
-- `hashlib`, `json`, and related utilities.
+`formats/fb2.py` is source-neutral FB2 parsing because FB2 is a document format rather than a source family.
 
-Optional extras:
+### Source feature internals
 
-- `pytest` and Ruff for development;
-- NumPy, PyTorch, and Sentence Transformers for explicit ML builds.
+- `_internal/adapters.py` — the single explicit mapping from source family to concrete discovery/fetch/normalization adapters;
+- `_internal/http.py` — explicit build-time HTTP primitive used only by source adapters;
+- `_internal/selection.py` — editable `selection.toml` persistence and validation;
+- `_internal/registry.py` — typed access to permanent `corpus-sources` records and approval checks;
+- `_internal/artifacts.py` — raw/canonical cache with hashes and normalizer identity;
+- `_internal/acquisition.py` — candidate fallback/per-work isolation and registry/selection acquisition orchestration;
+- `_internal/reports.py` — deterministic acquisition reports;
+- `_internal/preparation.py` — the final source-ingestion stage that materializes deterministic canonical input shared by build and curation;
+- `_internal/registration.py` — converts reviewed acquired Lib.ru selection items into disabled candidate registry records.
+
+The important handoff is the prepared directory under `data/work/<name>/`. `corpus-core.prepared_sources.load_prepared_sources()` reads that directory; neither `build` nor `curation` reaches back into source `_internal` implementation.
+
+## `build`: automatic passages and current generic runtime corpus
+
+Public surface: `sibyl_corpus_builder.build.api`.
+
+```mermaid
+flowchart TD
+    P[Prepared SourceDocument values] --> S[Automatic splitter]
+    S --> H[Semantic hints]
+    H --> E[Embeddings + resumable cache]
+    E --> D[corpus.db]
+    E --> V[vectors.json]
+    D --> M[manifest.json]
+    V --> M
+    M --> Q[Validate]
+    Q --> A[Atomic publish]
+```
+
+This remains the fallback/open-ended path for arbitrary user questions. It is intentionally mechanical and independent of large-LLM curation.
+
+### Main files
+
+- `build/command.py` — CLI adapter for `inspect-passages`, `build`, `validate`, and runtime-model download;
+- `build/api.py` — high-level automatic pipeline. Reading this file should show the processing order without requiring knowledge of implementation details;
+- `build/config.py` — immutable build configuration models and eager validation.
+
+### Build internals
+
+- `_internal/splitter.py` — paragraph/sentence-aware exact automatic ranges with deterministic IDs;
+- `_internal/hints.py` — deterministic or exact-passage retrieval text;
+- `_internal/embeddings.py` — hash fixture provider and opt-in Sentence Transformers provider;
+- `_internal/embedding_pipeline.py` — provider selection, cache fingerprints, batching, progress, and cache reuse;
+- `_internal/embedding_cache.py` — SQLite cache of completed embedding inputs;
+- `_internal/database.py` — runtime SQLite writer; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
+- `_internal/manifest.py` — runtime artifact/embedding compatibility manifest;
+- `_internal/validation.py` — final persisted database checks before publication;
+- `_internal/runtime_model/specs.py` / `download.py` — explicit recipes and download/publish logic for the Desktop ONNX/tokenizer bundle.
+
+The automatic splitter is not considered a literary curator. Its module documentation explicitly identifies it as a mechanical fallback used for generic retrieval.
+
+## `curation`: external large-LLM passage selection
+
+Public surface: `sibyl_corpus_builder.curation.api`.
+
+```mermaid
+flowchart TD
+    P[Prepared canonical sources] --> E[Export bundle]
+    Q[Stable guided questions] --> E
+    E --> L[External large LLM]
+    L --> R[Proposal locator/hash metadata]
+    R --> V[Local exact-text validation]
+    V --> G[Git-safe curated metadata]
+```
+
+### Main files
+
+- `curation/command.py` — CLI adapter for export/import/validate commands;
+- `curation/api.py` — public feature facade and workflow contract;
+- `curation/models.py` — public guided-question catalog models.
+
+### Curation internals
+
+- `_internal/questions.py` — guided-question catalog loading/ID validation;
+- `_internal/bundle.py` — deterministic ZIP export containing pinned canonical texts and questions;
+- `_internal/proposal.py` — proposal import and normalized curated-mapping revalidation;
+- `_internal/validation.py` — the trust boundary that resolves local canonical slices and verifies hashes/question links.
+
+The external LLM decides literary relevance and natural boundaries. Local Python remains authoritative for exact text identity. Git-tracked curated metadata stores locators/hashes/matches rather than copied literary passages.
+
+## `corpus-core` relationship
+
+The builder depends on the separate local distribution `sibyl-corpus-core`. Shared code is intentionally small:
+
+- `SourceDocument` and prepared-source loading;
+- exact hashing;
+- exact character locator parsing/slicing;
+- newline/word-count primitives;
+- atomic directory publication.
+
+See [`../corpus-core/IMPLEMENTATION.md`](../corpus-core/IMPLEMENTATION.md). `corpus-core` must never import `corpus-builder`.
+
+## Setup and validation
+
+Install both local Python distributions from the repository root:
+
+```bash
+python -m pip install -e ./corpus-core -e './corpus-builder[dev]'
+```
+
+Focused validation:
+
+```bash
+make test-corpus-core
+make test-corpus-builder
+make check
+```
+
+`test_architecture.py` protects package dependency direction and requires meaningful package-level documentation in every `__init__.py`. `test_repository_hygiene.py` protects the refactored source layout from broad Git/archive exclusions, especially the architectural `sibyl_corpus_builder/build/` package.
 
 ## Generated directories
 
-All paths under `corpus-builder/data/` are local/generated and ignored by Git and shareable archives. They may contain downloaded source artifacts, canonical/prepared text, embedding caches, runtime models, and published development corpora.
+All paths under `corpus-builder/data/` are local/generated and ignored by Git and shareable archives. They may contain downloaded source artifacts, canonical/prepared texts, embedding caches, LLM curation bundles, runtime models, and published development corpora.
 
-See [`README.md`](README.md) for commands and [`../docs/USAGE.md`](../docs/USAGE.md) for the operational workflow.
+Use [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md) for the operational start/continue flow and [`README.md`](README.md) / [`../docs/USAGE.md`](../docs/USAGE.md) for command details.

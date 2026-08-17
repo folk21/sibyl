@@ -31,8 +31,8 @@ vectors.json
 
 The format package defines the contract, while concrete code lives elsewhere:
 
-- Python writer: `corpus-builder/src/sibyl_corpus_builder/database.py` and `builder.py`;
-- Python corpus validation: `corpus-builder/src/sibyl_corpus_builder/validation.py`;
+- Python writer: `corpus-builder/src/sibyl_corpus_builder/build/_internal/database.py` and `build/api.py`;
+- Python corpus validation: `corpus-builder/src/sibyl_corpus_builder/build/_internal/validation.py`;
 - Desktop manifest reader: `mobile/desktopApp/.../RuntimeManifests.kt`;
 - Desktop SQLite reader: `mobile/desktopApp/.../SqliteCorpusRepository.kt`.
 

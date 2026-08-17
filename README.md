@@ -34,7 +34,8 @@ Commands in this README run from the repository root unless the command explicit
 ## Repository structure
 
 - [`mobile/`](mobile/) — Kotlin Multiplatform domain/runtime/UI, Android host, and JVM Desktop development host.
-- [`corpus-builder/`](corpus-builder/) — Python build-time source preparation and corpus publication.
+- [`corpus-core/`](corpus-core/) — shared feature-neutral Python canonical-source contracts/primitives.
+- [`corpus-builder/`](corpus-builder/) — Python source ingestion, automatic corpus build, and large-LLM curation tooling.
 - [`corpus-format/`](corpus-format/) — versioned persisted contract shared by builder and runtime.
 - [`corpus-sources/`](corpus-sources/) — Git-tracked source/provenance/rights registry.
 - [`corpus-curation/`](corpus-curation/) — guided-question catalog and Git-safe LLM curation metadata.
@@ -50,7 +51,7 @@ Core repository checks require Python 3.11+ and the corpus-builder development d
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e 'corpus-builder[dev]'
+python -m pip install -e ./corpus-core -e './corpus-builder[dev]'
 
 make check
 ```

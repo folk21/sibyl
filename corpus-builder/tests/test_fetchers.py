@@ -1,4 +1,4 @@
-from sibyl_corpus_builder.fetchers import _GutenbergTextLinkParser
+from sibyl_corpus_builder.sources.adapters.gutenberg.fetch import _GutenbergTextLinkParser
 
 
 def test_gutenberg_parser_finds_current_plain_text_style_link() -> None:
@@ -9,16 +9,16 @@ def test_gutenberg_parser_finds_current_plain_text_style_link() -> None:
 
 
 def test_libru_pinned_download_uri_is_not_re_discovered(monkeypatch) -> None:
-    from sibyl_corpus_builder import fetchers
-    from sibyl_corpus_builder.source_registry import RegistryTextVersion
+    from sibyl_corpus_builder.sources.adapters.libru import fetch
+    from sibyl_corpus_builder.sources._internal.registry import RegistryTextVersion
 
     calls: list[str] = []
 
-    def fake_download(url: str) -> bytes:
+    def fake_download(url: str, **_kwargs) -> bytes:
         calls.append(url)
         return b"pinned artifact"
 
-    monkeypatch.setattr(fetchers, "_download", fake_download)
+    monkeypatch.setattr(fetch, "download", fake_download)
     version = RegistryTextVersion(
         id="dostoevsky-libru",
         language="ru",
@@ -33,7 +33,7 @@ def test_libru_pinned_download_uri_is_not_re_discovered(monkeypatch) -> None:
         download_uri="https://az.lib.ru/d/dostoewskij_f_m/text_0060.shtml",
     )
 
-    candidates = fetchers.fetch_text_version_candidates(version)
+    candidates = tuple(fetch.iter_candidates(version))
 
     assert len(candidates) == 1
     assert candidates[0].kind == "auto"

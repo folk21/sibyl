@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file contains repository-wide development rules for Sibyl. Read the nearest local `AGENTS.md` before changing `mobile/`, `corpus-builder/`, `corpus-format/`, `corpus-sources/`, or `test-corpus/`.
+This file contains repository-wide development rules for Sibyl. Read the nearest local `AGENTS.md` before changing `mobile/`, `corpus-core/`, `corpus-builder/`, `corpus-curation/`, `corpus-format/`, `corpus-sources/`, or `test-corpus/`.
 
 ## Project summary
 
@@ -9,7 +9,8 @@ Sibyl is an offline-first literary discovery application. A user question is emb
 Primary scopes:
 
 - `mobile/` — Kotlin Multiplatform runtime/UI with Android product and JVM Desktop development entry points;
-- `corpus-builder/` — Python build-time preprocessing;
+- `corpus-core/` — feature-neutral Python canonical-source contracts and deterministic shared primitives;
+- `corpus-builder/` — Python build-time source ingestion, automatic corpus build, and LLM-curation tooling;
 - `corpus-format/` — versioned persisted contract;
 - `corpus-sources/` — source/provenance/rights registry;
 - `corpus-curation/` — guided-question catalog and validated LLM curation metadata;
@@ -24,6 +25,7 @@ There is no required backend in the core architecture.
 - Avoid comments that restate code. Document useful contracts/invariants instead.
 - Give every Kotlin class/interface/enum/data class a meaningful KDoc. For non-obvious runtime, retrieval, persistence, or algorithmic code, explain the responsibility, why the class exists, the main processing order, important invariants/assumptions, and notable fallback/resource-ownership behavior. Keep simple models concise and avoid line-by-line narration.
 - Document substantial public/orchestration methods when their ordering, side effects, compatibility rules, or exact-text guarantees are not obvious from the signature alone.
+- Every non-trivial Python package must have a meaningful package-level docstring in `__init__.py`. It should explain the package role, its place in the larger pipeline, its main responsibilities, and important ownership/dependency boundaries; avoid placeholder descriptions such as `Internal package`.
 - Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`.
 - Each code subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
 - Do not create separate subproject `docs/` trees or duplicate root architecture/policy content in local implementation guides.
@@ -62,7 +64,8 @@ There is no required backend in the core architecture.
 ## Architecture boundaries
 
 - `mobile/` consumes published corpus artifacts through `corpus-format` and must not know how semantic hints were generated.
-- `corpus-builder/` may depend on format/source declarations but must not execute mobile code.
+- `corpus-core/` is feature-neutral and must not depend on `corpus-builder/`, source adapters, LLM proposal formats, or runtime corpus writer internals.
+- `corpus-builder/` may depend on `corpus-core` and format/source declarations but must not execute mobile code. Its Python root stays a thin CLI composition layer over `sources`, `build`, and `curation` features.
 - `corpus-format/` owns persisted semantics and must not depend on builder/mobile internals.
 - `corpus-sources/` owns source/version declarations and review state, not passage extraction or ranking.
 - `corpus-curation/` owns stable guided-question IDs plus small LLM curation locator/hash metadata; it must not store downloaded canonical books or bypass local exact-text validation.
@@ -70,6 +73,7 @@ There is no required backend in the core architecture.
 - Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`. The Desktop development harness may use JVM ONNX Runtime, SQLite JDBC, and brute-force vectors for small corpora; these dependencies must not leak into common code.
 - The JVM Desktop app is a development harness: reuse shared UI/runtime code and do not introduce a REST/backend boundary just to run it locally.
 - UI must not implement ranking, vector-search internals, or corpus parsing.
+- Python features must not import another feature's `_internal` package. Source-specific discovery/fetch/normalization belongs under `corpus-builder/.../sources/adapters/<source>/`; shared feature-neutral primitives belong in `corpus-core`, not a generic utility bucket.
 
 ## Testing
 
@@ -123,4 +127,4 @@ Documentation changes follow one ownership rule: operational start/continue flow
 6. Full generated archives must use `sibyl/` as the top-level directory.
 7. Name complete repository archives with `FULL` and patch archives with `PATCH`. A patch archive contains only added/modified files under `sibyl/`; deleted paths must be reported explicitly because extracting a ZIP cannot delete them.
 8. When handing off either a full archive or a patch, explicitly report the list of deleted files; write `none` when there are no deletions.
-9. `archive.sh` and `concat_sibyl.sh` must exclude downloaded/generated corpus data, embedding/model caches, virtual environments, build outputs, and local IDE/tool metadata.
+9. `archive.sh` and `concat_sibyl.sh` must exclude downloaded/generated corpus data, embedding/model caches, virtual environments, generated build outputs, and local IDE/tool metadata without excluding source packages whose architectural name is `build` (notably `corpus-builder/src/sibyl_corpus_builder/build/`).

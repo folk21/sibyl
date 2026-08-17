@@ -3,17 +3,29 @@ name: corpus-builder
 on:
   push:
     paths:
+      - "corpus-core/**"
       - "corpus-builder/**"
       - "corpus-curation/**"
       - "corpus-format/**"
+      - "corpus-sources/**"
       - "test-corpus/**"
+      - "Makefile"
+      - ".gitignore"
+      - "archive.sh"
+      - "concat_sibyl.sh"
       - ".github/workflows/corpus-builder.yml"
   pull_request:
     paths:
+      - "corpus-core/**"
       - "corpus-builder/**"
       - "corpus-curation/**"
       - "corpus-format/**"
+      - "corpus-sources/**"
       - "test-corpus/**"
+      - "Makefile"
+      - ".gitignore"
+      - "archive.sh"
+      - "concat_sibyl.sh"
       - ".github/workflows/corpus-builder.yml"
 
 jobs:
@@ -24,8 +36,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install -e '.[dev]'
-        working-directory: corpus-builder
-      - run: python -m pytest
-        working-directory: corpus-builder
-      - run: python corpus-format/tools/validate_schema.py
+      - run: python -m pip install -e ./corpus-core -e './corpus-builder[dev]'
+      - run: make check

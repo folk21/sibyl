@@ -20,6 +20,17 @@ Choose the row that matches what you currently have.
 | A built `corpus.db` + `vectors.json` + `manifest.json` | [Run the real Desktop runtime](#6-run-the-current-real-desktop-runtime) |
 | Only a clean repository checkout | Install the builder environment, then start with a source catalog or `make smoke-corpus` |
 
+When a step fails and you need to inspect code, use the owning feature rather than starting from a large flat module:
+
+| Workflow step | Owning Python package |
+|---|---|
+| discover / acquire / normalize / prepare / register | `sibyl_corpus_builder.sources` |
+| inspect-passages / embeddings / build / validate | `sibyl_corpus_builder.build` |
+| export-curation-bundle / import-curation / validate-curation | `sibyl_corpus_builder.curation` |
+| prepared canonical source contract / locators / hashes | `sibyl_corpus_core` |
+
+The package root `sibyl_corpus_builder.cli` is only the command composition entry point; implementation details live in the owning feature. See [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md).
+
 The two passage-preparation paths are deliberately independent for now:
 
 ```mermaid

@@ -2,15 +2,15 @@ import json
 from pathlib import Path
 import tomllib
 
-from sibyl_corpus_builder.fetchers import FetchedSourceCandidate
-from sibyl_corpus_builder.preparation import (
-    _selection_registry_models,
+from sibyl_corpus_builder.sources.adapters.libru.fetch import FetchedSourceCandidate
+from sibyl_corpus_builder.sources._internal.acquisition import selection_registry_models
+from sibyl_corpus_builder.sources.api import (
     acquire_selection,
     prepare_selection_sources,
+    register_selection,
 )
-from sibyl_corpus_builder.registration import register_selection
-from sibyl_corpus_builder.selection import SelectionManifest, SelectionWork, write_selection
-from sibyl_corpus_builder.source_artifacts import write_source_artifact
+from sibyl_corpus_builder.sources.api import SelectionManifest, SelectionWork, write_selection
+from sibyl_corpus_builder.sources._internal.artifacts import write_source_artifact
 
 _HTML = """
 <html><body>
@@ -60,7 +60,7 @@ def test_prepare_selection_and_register_candidate_records(tmp_path: Path):
     selection_path, manifest = _selection(tmp_path)
     cache = tmp_path / "raw"
     selected = manifest.included()[0]
-    work, version = _selection_registry_models(manifest, selected)
+    work, version = selection_registry_models(manifest, selected)
     artifact = write_source_artifact(
         cache_dir=cache,
         work=work,
@@ -167,7 +167,8 @@ def test_acquire_selection_falls_back_and_isolates_failed_works(tmp_path: Path, 
         )
 
     monkeypatch.setattr(
-        "sibyl_corpus_builder.preparation.iter_text_version_candidates", fake_candidates
+        "sibyl_corpus_builder.sources._internal.acquisition.iter_text_version_candidates",
+        fake_candidates,
     )
     report_path = tmp_path / "acquire-report.toml"
     report = acquire_selection(

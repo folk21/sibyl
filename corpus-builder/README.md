@@ -21,12 +21,27 @@ flowchart TD
 
 Importing the package never downloads sources or models. Network/model work happens only through explicit CLI commands/providers. For the primary start/continue flow across these branches, see [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md).
 
+## Package map
+
+The Python package root is intentionally small. `cli.py` only composes feature-owned command adapters:
+
+```text
+sibyl_corpus_builder/
+  __init__.py
+  cli.py
+  sources/   # external sources -> prepared canonical texts
+  build/     # automatic splitter/embeddings -> current runtime corpus
+  curation/  # prepared texts <-> large LLM -> validated curated metadata
+```
+
+Shared feature-neutral contracts live in the separate [`../corpus-core/`](../corpus-core/) subproject. Source-specific implementation is grouped under `sources/adapters/<source>/`; feature-private implementation stays under each feature's `_internal/` package. See [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the full map.
+
 ## Setup
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e '.[dev]'
+python -m pip install -e ../corpus-core -e '.[dev]'
 ```
 
 Install the optional ML dependencies only when building semantic vectors. The current ML environment requires Python 3.11 or 3.12 and uses pinned versions for reproducibility, including Intel macOS compatibility:
@@ -35,7 +50,7 @@ Install the optional ML dependencies only when building semantic vectors. The cu
 python3.12 -m venv .venv-ml
 source .venv-ml/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[ml]'
+python -m pip install -e ../corpus-core -e '.[ml]'
 ```
 
 If `python3.12` is unavailable, Python 3.11 is also supported. Do not install the ML extra from Python 3.13+ with the current dependency set.

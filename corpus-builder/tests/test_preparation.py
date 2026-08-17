@@ -2,7 +2,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from sibyl_corpus_builder.preparation import import_registry_source, prepare_registry_sources
+from sibyl_corpus_builder.sources.api import import_registry_source, prepare_registry_sources
 
 
 def _write_registry(root: Path) -> None:

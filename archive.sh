@@ -24,7 +24,11 @@ zip -r "$archive_path" "$repo_name" \
      "*/.kotlin/*" \
      "*/.gradle/*" \
      "*/.gradle-dist/*" \
-     "*/build/*" \
+     "sibyl/build/*" \
+     "sibyl/mobile/build/*" \
+     "sibyl/mobile/*/build/*" \
+     "sibyl/corpus-core/build/*" \
+     "sibyl/corpus-builder/build/*" \
      "*/target/*" \
      "*/dist/*" \
      "*/__pycache__/*" \
@@ -48,5 +52,13 @@ zip -r "$archive_path" "$repo_name" \
      "*.gguf" \
      "*.usearch" \
      "*.zip"
+
+required_source="$repo_name/corpus-builder/src/sibyl_corpus_builder/build/api.py"
+archive_listing="$(unzip -Z1 "$archive_path")"
+if ! grep -Fxq "$required_source" <<<"$archive_listing"; then
+  rm -f "$archive_path"
+  echo "Archive validation failed: required source package entry is missing: $required_source" >&2
+  exit 2
+fi
 
 echo "Created $archive_path"
