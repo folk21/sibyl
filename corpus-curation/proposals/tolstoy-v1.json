@@ -1,0 +1,735 @@
+{
+  "schema_version": 1,
+  "proposal_id": "tolstoy-v1",
+  "question_catalog_id": "sibyl-guided-questions-ru-v1",
+  "curation_method": "large_llm",
+  "source_bundle_id": "cb_96fe9073a9976a73b989",
+  "passages": [
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0039",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0039-libru",
+      "canonical_sha256": "f6de805070ae725db0b016ebe78f6b994052b80580c7b8db53ed4f5adfa58831",
+      "source_locator": "chars:54688:55801",
+      "text_sha256": "ef3509b30754bc5972a2a34e1a1979b39c6a7b8f0db4f07fd67556237b02e631",
+      "matches": [
+        {
+          "question_id": "books_and_inner_life",
+          "strength": 0.99
+        },
+        {
+          "question_id": "forgiving_someone",
+          "strength": 0.9
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.89
+        },
+        {
+          "question_id": "value_of_books",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0039",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0039-libru",
+      "canonical_sha256": "f6de805070ae725db0b016ebe78f6b994052b80580c7b8db53ed4f5adfa58831",
+      "source_locator": "chars:71275:72050",
+      "text_sha256": "f9f015e12fd0eb4ba2597003200b38c93d23a2ccd9f4f2d57d3d94fdf463195c",
+      "matches": [
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.75
+        },
+        {
+          "question_id": "dignity_of_work",
+          "strength": 0.84
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.92
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.9
+        },
+        {
+          "question_id": "value_of_books",
+          "strength": 0.8
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0039",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0039-libru",
+      "canonical_sha256": "f6de805070ae725db0b016ebe78f6b994052b80580c7b8db53ed4f5adfa58831",
+      "source_locator": "chars:163346:163607",
+      "text_sha256": "0e4169a2e8b1905d4828caef4c20e01c79c277dd8e12dae573c506b7aba93ac4",
+      "matches": [
+        {
+          "question_id": "changing_identity",
+          "strength": 0.94
+        },
+        {
+          "question_id": "fight_or_let_go",
+          "strength": 0.91
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0040",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0040-libru",
+      "canonical_sha256": "5aa8d77ff5bce9ee48319efcc14c4ccc090c3b8b7d5382a09a14297b71b85397",
+      "source_locator": "chars:659485:660167",
+      "text_sha256": "3cd337634109761a80399b131f7922ced3d280f76e3c404a56d1f04ad8a77775",
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.93
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.99
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.97
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0050",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0050-libru",
+      "canonical_sha256": "6cf77ff76476fa8515a14b3ffe84d92b10654edc8676702fd6ea19ffa2b43f82",
+      "source_locator": "chars:307110:308473",
+      "text_sha256": "5125ea0d6bc566e6b86076efba00b05b979691148b7f4cf5acee95920291ed2b",
+      "matches": [
+        {
+          "question_id": "change_timing",
+          "strength": 0.88
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.99
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0060",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0060-libru",
+      "canonical_sha256": "480d55feed3832aa725aa99b4d4cff79320633c707d17dbf611418635095e089",
+      "source_locator": "chars:518142:518685",
+      "text_sha256": "ec8a8010de7444f30526f0598542d16c64829cfb8865f79feb41bdfa698d8f61",
+      "matches": [
+        {
+          "question_id": "forgiving_someone",
+          "strength": 0.99
+        },
+        {
+          "question_id": "hatred",
+          "strength": 0.84
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.94
+        },
+        {
+          "question_id": "revenge",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0070",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0070-libru",
+      "canonical_sha256": "45c4a3326e8a46581c631ae08a3e105829c6ff2d27095852747715a2452bce5c",
+      "source_locator": "chars:96658:97548",
+      "text_sha256": "f518e8d197dec1289fa756e0c4278559baf2899819128e80ccec768eb5c58613",
+      "matches": [
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.96
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.86
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.82
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0070",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0070-libru",
+      "canonical_sha256": "45c4a3326e8a46581c631ae08a3e105829c6ff2d27095852747715a2452bce5c",
+      "source_locator": "chars:303824:305027",
+      "text_sha256": "a7db00d9135cd345dc44069f9a86e18f7f5cc4c28c4b1f9e92f5c709b3cf5c41",
+      "matches": [
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.92
+        },
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.84
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.94
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0070",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0070-libru",
+      "canonical_sha256": "45c4a3326e8a46581c631ae08a3e105829c6ff2d27095852747715a2452bce5c",
+      "source_locator": "chars:445303:445839",
+      "text_sha256": "bc3bc1e998286bc1634f6df9f9b1f436ac4a7ca7c5bee746f207c401f113838e",
+      "matches": [
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.89
+        },
+        {
+          "question_id": "lost_old_meanings",
+          "strength": 0.92
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.97
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0080",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0080-libru",
+      "canonical_sha256": "b38c8ac90ec8db448c4742aa60a5711a72a0c116292f03784fa7db5b004e78a2",
+      "source_locator": "chars:526919:527618",
+      "text_sha256": "4e0e4a02080b19524022f7f1c3e426a07b8a73eb6e7f35ee1e9b6ff79a604ae0",
+      "matches": [
+        {
+          "question_id": "dignity_of_work",
+          "strength": 0.98
+        },
+        {
+          "question_id": "diligence",
+          "strength": 0.86
+        },
+        {
+          "question_id": "meaningful_work",
+          "strength": 0.93
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0080",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0080-libru",
+      "canonical_sha256": "b38c8ac90ec8db448c4742aa60a5711a72a0c116292f03784fa7db5b004e78a2",
+      "source_locator": "chars:1550359:1551225",
+      "text_sha256": "99c0b61e549a7c177c063b525b28c696c0fddb2762fa1487c4213ac941aa669b",
+      "matches": [
+        {
+          "question_id": "envy_of_others",
+          "strength": 0.83
+        },
+        {
+          "question_id": "fear_of_closeness",
+          "strength": 0.71
+        },
+        {
+          "question_id": "jealousy_in_love",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0080",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0080-libru",
+      "canonical_sha256": "b38c8ac90ec8db448c4742aa60a5711a72a0c116292f03784fa7db5b004e78a2",
+      "source_locator": "chars:1669647:1670136",
+      "text_sha256": "adc96ecc53a8d733c3e7958a6c0d2d03c28d1972d988ed2c32e554b2127a4879",
+      "matches": [
+        {
+          "question_id": "inner_core",
+          "strength": 0.96
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.99
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.94
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0090",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0090-libru",
+      "canonical_sha256": "719fa3d2ce8f31f79eef1c186027be151d60421b96a361577e2f88f95a0aa812",
+      "source_locator": "chars:205597:205923",
+      "text_sha256": "bcd8fc59a0ae22dacde0256e8f6f8560a0b03b34ccb183e3b064ff4ca1c126ee",
+      "matches": [
+        {
+          "question_id": "consequences_of_mistakes",
+          "strength": 0.97
+        },
+        {
+          "question_id": "irreversible_mistake",
+          "strength": 0.9
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0090",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0090-libru",
+      "canonical_sha256": "719fa3d2ce8f31f79eef1c186027be151d60421b96a361577e2f88f95a0aa812",
+      "source_locator": "chars:297273:297594",
+      "text_sha256": "21dd1ebc27eb4de1b1ebf15f5673b40259c1a16a5b3e352bbad1d5ca59c3f69a",
+      "matches": [
+        {
+          "question_id": "consequences_of_mistakes",
+          "strength": 0.88
+        },
+        {
+          "question_id": "irreversible_mistake",
+          "strength": 0.99
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.89
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0090",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0090-libru",
+      "canonical_sha256": "719fa3d2ce8f31f79eef1c186027be151d60421b96a361577e2f88f95a0aa812",
+      "source_locator": "chars:639015:639521",
+      "text_sha256": "03730356080aacac0dd63f83f4e0e7860bee5de93e13062561b64db1209e7a40",
+      "matches": [
+        {
+          "question_id": "meaningful_work",
+          "strength": 0.76
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.91
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0134",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0134-libru",
+      "canonical_sha256": "8469d386a88105546e4c279f470706cf35144c7b43c3f881ee2ef033d9807b1c",
+      "source_locator": "chars:35705:36767",
+      "text_sha256": "6c5a9ae8cf63f22e5e698d16cc9b8399e22234dd387a56dd4d19d17941b2b7fe",
+      "matches": [
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.87
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.97
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0136",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0136-libru",
+      "canonical_sha256": "7b57f9245e48596dce52b36298b1bb0d3e3a56158023c290bec9761c9159f9c4",
+      "source_locator": "chars:66895:68042",
+      "text_sha256": "7147a5f5a95b71f35960da2bffd1a12b6e57dc6df7e2aeb27d2af9c033a774f1",
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.99
+        },
+        {
+          "question_id": "limited_time",
+          "strength": 0.88
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.9
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0136",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0136-libru",
+      "canonical_sha256": "7b57f9245e48596dce52b36298b1bb0d3e3a56158023c290bec9761c9159f9c4",
+      "source_locator": "chars:107235:107694",
+      "text_sha256": "3f2279e439b0c4697f022818fa16f8757c6b6d5dfea287bfd2c8c9e8e7da789d",
+      "matches": [
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.98
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.79
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0136",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0136-libru",
+      "canonical_sha256": "7b57f9245e48596dce52b36298b1bb0d3e3a56158023c290bec9761c9159f9c4",
+      "source_locator": "chars:108603:108849",
+      "text_sha256": "9e70906c1454791a156639f152e3bfa2ed593c49980f3d6dc89baf8eaaac463e",
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.97
+        },
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0160",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0160-libru",
+      "canonical_sha256": "03309c2b41d21c4df24cd7a5fea7b3075756814e0c5646bf648665950b0bf550",
+      "source_locator": "chars:149371:150241",
+      "text_sha256": "0e8ea9ba790499d3f7f0bfc92ba64c4e243124ea885422e5f17df3736f41b995",
+      "matches": [
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.95
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.84
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0160",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0160-libru",
+      "canonical_sha256": "03309c2b41d21c4df24cd7a5fea7b3075756814e0c5646bf648665950b0bf550",
+      "source_locator": "chars:197446:198748",
+      "text_sha256": "4dc03a106cb11b4f71df5bb6a8e08d1ac625b82fef86cb36e0a4096ac3621a98",
+      "matches": [
+        {
+          "question_id": "being_authentic",
+          "strength": 0.91
+        },
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.75
+        },
+        {
+          "question_id": "fear_and_action",
+          "strength": 0.8
+        },
+        {
+          "question_id": "finding_my_place",
+          "strength": 0.98
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0160",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0160-libru",
+      "canonical_sha256": "03309c2b41d21c4df24cd7a5fea7b3075756814e0c5646bf648665950b0bf550",
+      "source_locator": "chars:233628:234176",
+      "text_sha256": "db985a24732b20367b1d560a4c5ca9da4f9f53c01725912ecbc6e2cfd2d735aa",
+      "matches": [
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.93
+        },
+        {
+          "question_id": "finding_my_place",
+          "strength": 0.84
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.81
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0212",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0212-libru",
+      "canonical_sha256": "125c6012c37ef20370304f61b96a5d66a322e716d6e8c89ead8a69f0bc171d18",
+      "source_locator": "chars:21775:23504",
+      "text_sha256": "719d99002225e33a0b02c9521facddec7ce99ef3b4ac76e639d6b1fa8e309db1",
+      "matches": [
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.95
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.84
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0240",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0240-libru",
+      "canonical_sha256": "7eaf45bb69689f4c791c317de7f6e48b9215418cd85e4df15c4520eebedb5d7b",
+      "source_locator": "chars:132735:133245",
+      "text_sha256": "f124b53d377ab3f0494831aacdf4c59b85385d38d48b4e27d6dab150aa33e1e3",
+      "matches": [
+        {
+          "question_id": "hatred",
+          "strength": 0.78
+        },
+        {
+          "question_id": "jealousy_in_love",
+          "strength": 0.97
+        },
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0245",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0245-libru",
+      "canonical_sha256": "cc440ee202f3d7b8de2ef40c625a8f57436ae2a73b42d9e90c7ffae5e6c884e1",
+      "source_locator": "chars:48379:49587",
+      "text_sha256": "8814759b0ebc8c6857a6381099bebdefbeba8ad62a63c9820653778970d78488",
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.98
+        },
+        {
+          "question_id": "being_authentic",
+          "strength": 0.94
+        },
+        {
+          "question_id": "others_expectations",
+          "strength": 0.81
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.97
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0245",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0245-libru",
+      "canonical_sha256": "cc440ee202f3d7b8de2ef40c625a8f57436ae2a73b42d9e90c7ffae5e6c884e1",
+      "source_locator": "chars:79674:80133",
+      "text_sha256": "433f33b76dd52ecaee77830865157fcbac0f7cd5ee6616f978e66989f1b4f0e0",
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.91
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.95
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.93
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0250",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0250-libru",
+      "canonical_sha256": "11be5ee8d1a12c576f2a68aee2d9942105e9d50bc3ac1a044062f93c1f15a03e",
+      "source_locator": "chars:1936:2610",
+      "text_sha256": "d12cc49c02dc845b98388cf274fe1ffa7aac451a012611d7060076efe185d38d",
+      "matches": [
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.99
+        },
+        {
+          "question_id": "responsibility_to_next_generations",
+          "strength": 0.74
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0250",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0250-libru",
+      "canonical_sha256": "11be5ee8d1a12c576f2a68aee2d9942105e9d50bc3ac1a044062f93c1f15a03e",
+      "source_locator": "chars:2669:3514",
+      "text_sha256": "91d02c7cd3a75919b2c15109d61d2ba7ad3445a3fcfc791ca7a0a8ef17569cfd",
+      "matches": [
+        {
+          "question_id": "care_for_nature",
+          "strength": 0.88
+        },
+        {
+          "question_id": "fear_and_action",
+          "strength": 0.85
+        },
+        {
+          "question_id": "no_strength_left",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0270",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0270-libru",
+      "canonical_sha256": "5426e0e791e8fca94e65a35dd691f61f5026beaa4e24cefbacd2fc47e903977c",
+      "source_locator": "chars:48082:48995",
+      "text_sha256": "f9dcdccd3194c98b2d46e15d62a0e57ab8477be6a6133a54494d76ef11caaf22",
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.92
+        },
+        {
+          "question_id": "fear_and_action",
+          "strength": 0.86
+        },
+        {
+          "question_id": "what_is_courage",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0270",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0270-libru",
+      "canonical_sha256": "5426e0e791e8fca94e65a35dd691f61f5026beaa4e24cefbacd2fc47e903977c",
+      "source_locator": "chars:83335:83844",
+      "text_sha256": "6cc24a5c280d14a517198fffae1fce17b957ae884c75897f35f78c39f6cee6b4",
+      "matches": [
+        {
+          "question_id": "hatred",
+          "strength": 0.94
+        },
+        {
+          "question_id": "living_with_injustice",
+          "strength": 0.82
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.97
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0290",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0290-libru",
+      "canonical_sha256": "1decfebbe464ab822f912fc5d372b55ade22f94494ab996e2500425b9c9d0608",
+      "source_locator": "chars:49671:50139",
+      "text_sha256": "d8ce37935827bf41f7ba266dd694a6b56380903b43e6af8e73795d45e40c59b8",
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.76
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.92
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.96
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0290",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0290-libru",
+      "canonical_sha256": "1decfebbe464ab822f912fc5d372b55ade22f94494ab996e2500425b9c9d0608",
+      "source_locator": "chars:50576:51251",
+      "text_sha256": "8d4289a20c4695abbe9a0fccd3da897909e9cd6a6f725ea7d5ca8b88256f4e90",
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.99
+        },
+        {
+          "question_id": "lost_old_meanings",
+          "strength": 0.82
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0300",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0300-libru",
+      "canonical_sha256": "6b99eb6ca869965fcd0ac7c860346a44e6edc41f5216cf76297d23821176b27e",
+      "source_locator": "chars:2035:2654",
+      "text_sha256": "a39156e698f42526fed54a416af284f9c7c92b5fd022b347189480fefc96f48c",
+      "matches": [
+        {
+          "question_id": "dignity_of_work",
+          "strength": 0.81
+        },
+        {
+          "question_id": "diligence",
+          "strength": 0.96
+        }
+      ]
+    },
+    {
+      "work_id": "libru-tolstoj-lew-nikolaewich-text-0300",
+      "text_version_id": "libru-tolstoj-lew-nikolaewich-text-0300-libru",
+      "canonical_sha256": "6b99eb6ca869965fcd0ac7c860346a44e6edc41f5216cf76297d23821176b27e",
+      "source_locator": "chars:4722:5773",
+      "text_sha256": "940e8c67ca0d3ab7ae1df07a39b053b250c12d81a09dc4a59158f1edd961e28c",
+      "matches": [
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.77
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.99
+        },
+        {
+          "question_id": "understood_or_self",
+          "strength": 0.8
+        }
+      ]
+    }
+  ]
+}

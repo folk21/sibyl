@@ -172,7 +172,7 @@ flowchart TD
 ### Curation internals
 
 - `_internal/questions.py` — guided-question catalog loading/ID validation;
-- `_internal/bundle.py` — deterministic ZIP export containing pinned canonical texts and questions;
+- `_internal/bundle.py` — deterministic ZIP export containing pinned canonical texts and questions, with strict/approved-only/explicit-override rights modes;
 - `_internal/proposal.py` — proposal import and normalized curated-mapping revalidation;
 - `_internal/validation.py` — the trust boundary that resolves local canonical slices and verifies hashes/question links.
 

@@ -5,6 +5,7 @@ from zipfile import ZipFile
 
 import pytest
 
+from sibyl_corpus_builder.cli import build_parser
 from sibyl_corpus_builder.curation import (
     export_curation_bundle,
     import_curation,
@@ -78,6 +79,33 @@ def _prepared_source(path: Path) -> str:
         ),
         encoding="utf-8",
     )
+    return text
+
+
+def _add_prepared_work(path: Path, *, work_id: str, rights_status: str) -> str:
+    text = f"Canonical text for {work_id}.\n"
+    version_id = f"{work_id}-v1"
+    file_name = f"{version_id}.txt"
+    (path / file_name).write_text(text, encoding="utf-8")
+    manifest_path = path / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["works"].append(
+        {
+            "id": work_id,
+            "text_version_id": version_id,
+            "author": "Fixture Author",
+            "title": f"Fixture {work_id}",
+            "file": file_name,
+            "source_name": "Fixture Source",
+            "language": "en",
+            "original_language": "en",
+            "category": "literature",
+            "text_role": "original",
+            "rights_status": rights_status,
+            "canonical_text_sha256": _sha256(text),
+        }
+    )
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     return text
 
 
@@ -156,8 +184,6 @@ def test_export_curation_bundle_contains_exact_canonical_text_and_is_reproducibl
         assert archive.read(work["file"]).decode("utf-8") == canonical
 
 
-
-
 def test_export_curation_bundle_requires_explicit_override_for_unapproved_rights(
     tmp_path: Path,
 ) -> None:
@@ -183,6 +209,83 @@ def test_export_curation_bundle_requires_explicit_override_for_unapproved_rights
         output_path=tmp_path / "allowed.zip",
         allow_unapproved=True,
     )
+
+
+def test_export_curation_bundle_approved_only_skips_unapproved_sources(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    approved_text = _prepared_source(source)
+    _add_prepared_work(source, work_id="review-work", rights_status="review_required")
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+
+    output = export_curation_bundle(
+        source_dir=source,
+        questions_path=questions,
+        output_path=tmp_path / "approved.zip",
+        approved_only=True,
+    )
+
+    with ZipFile(output) as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        assert [work["work_id"] for work in manifest["works"]] == ["fixture-work"]
+        work = manifest["works"][0]
+        assert archive.read(work["file"]).decode("utf-8") == approved_text
+
+
+def test_export_curation_bundle_approved_only_rejects_empty_result(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _prepared_source(source)
+    manifest_path = source / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["works"][0]["rights_status"] = "review_required"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+
+    with pytest.raises(ValueError, match="no approved source versions"):
+        export_curation_bundle(
+            source_dir=source,
+            questions_path=questions,
+            output_path=tmp_path / "approved.zip",
+            approved_only=True,
+        )
+
+
+def test_export_curation_bundle_rejects_conflicting_rights_modes(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _prepared_source(source)
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        export_curation_bundle(
+            source_dir=source,
+            questions_path=questions,
+            output_path=tmp_path / "invalid.zip",
+            approved_only=True,
+            allow_unapproved=True,
+        )
+
+
+def test_export_curation_cli_rights_modes_are_mutually_exclusive() -> None:
+    parser = build_parser()
+
+    with pytest.raises(SystemExit):
+        parser.parse_args(
+            [
+                "export-curation-bundle",
+                "--source",
+                "source",
+                "--questions",
+                "questions.json",
+                "--output",
+                "bundle.zip",
+                "--approved-only",
+                "--allow-unapproved",
+            ]
+        )
 
 
 def test_import_curation_verifies_exact_slice_and_writes_git_safe_metadata(

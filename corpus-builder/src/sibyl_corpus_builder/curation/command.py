@@ -19,7 +19,13 @@ def register_commands(subparsers) -> None:
     export_curation.add_argument(
         "--work", action="append", help="Optional prepared work ID to include; repeat as needed"
     )
-    export_curation.add_argument(
+    rights_mode = export_curation.add_mutually_exclusive_group()
+    rights_mode.add_argument(
+        "--approved-only",
+        action="store_true",
+        help="Skip source versions without approved rights metadata",
+    )
+    rights_mode.add_argument(
         "--allow-unapproved",
         action="store_true",
         help=(
@@ -56,6 +62,7 @@ def dispatch(args) -> bool:
             questions_path=args.questions,
             output_path=args.output,
             work_ids=args.work,
+            approved_only=args.approved_only,
             allow_unapproved=args.allow_unapproved,
         )
         print(f"Exported local LLM curation bundle: {output}")

@@ -94,12 +94,14 @@ Curation starts from prepared canonical input; it does **not** depend on automat
 ### `export-curation-bundle`
 
 ```text
-sibyl-corpus export-curation-bundle --source <prepared-dir> --questions <questions.json> --output <bundle.zip> [--work <work-id> ...] [--allow-unapproved]
+sibyl-corpus export-curation-bundle --source <prepared-dir> --questions <questions.json> --output <bundle.zip> [--work <work-id> ...] [--approved-only | --allow-unapproved]
 ```
 
 - repeat `--work` to export only selected prepared work IDs;
-- export requires approved rights metadata by default;
-- `--allow-unapproved` is permitted only after separately confirming that the concrete text may be sent to the external model/service.
+- export requires approved rights metadata by default and fails if any selected source version is unapproved;
+- `--approved-only` skips unapproved source versions and fails if none remain;
+- `--allow-unapproved` includes unapproved versions only after separately confirming that the concrete text may be sent to the external model/service;
+- `--approved-only` and `--allow-unapproved` are mutually exclusive.
 
 The ZIP contains canonical literary texts and therefore belongs under ignored local `corpus-builder/data/` paths, never Git.
 

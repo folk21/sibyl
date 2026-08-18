@@ -41,6 +41,8 @@ fi
   -i .torch -i '*/.torch/*' \
   -i node_modules -i '*/node_modules/*' \
   -i corpus-builder/data -i '*/corpus-builder/data/*' \
+  -i docs/WORKLOG.md -i '*/docs/WORKLOG.md' \
+  -i docs/specs/archive -i '*/docs/specs/archive/*' \
   -i local.properties -i sibyl_files.txt \
   -e .kt -e .kts -e .py -e .md -e .txt \
   -e .ini -e .toml -e .yaml -e .yml -e .json \

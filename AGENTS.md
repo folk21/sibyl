@@ -78,10 +78,12 @@ There is no required backend in the core architecture.
 ## Change workflow
 
 1. Read root and nearest local `AGENTS.md`, then inspect the current code/tests and owning documentation for the affected scope.
-2. Make the smallest coherent change and preserve established terminology/boundaries.
-3. Keep cross-project contracts synchronized: persisted format changes must be checked against builder writers/validators and mobile readers; source-registry changes must preserve provenance/rights rules.
-4. Add or update focused tests and the single owning document for changed public behavior, commands, contracts, or architecture.
-5. Run focused validation first, then `make check` from the repository root where practical.
+2. For a significant cross-cutting, persisted-contract, or substantial P0/P1 change, read/create the relevant active change spec under `docs/specs/active/` before implementation. Small bug fixes and narrow maintenance work do not require a spec.
+3. Make the smallest coherent change and preserve established terminology/boundaries.
+4. Keep cross-project contracts synchronized: persisted format changes must be checked against builder writers/validators and mobile readers; source-registry changes must preserve provenance/rights rules.
+5. Add or update focused tests and the single owning document for changed public behavior, commands, contracts, or architecture. Behavioral tests for a specced change should trace back to its requirements/scenarios.
+6. Run focused validation first, then `make check` from the repository root where practical.
+7. After a specced change is accepted, update current-state owning docs and move the completed spec to `docs/specs/archive/`.
 
 ## Testing
 
@@ -116,13 +118,15 @@ Use one owning root document and link to it instead of duplicating detailed cont
 - `docs/SOURCES.md` — source/provenance/rights/normalization policy;
 - `docs/CORPUS_FORMAT.md` — persisted format semantics/versioning/validation;
 - `docs/SECURITY_AND_PRIVACY.md` — privacy/content-integrity rules;
-- `docs/ROADMAP.md` — prioritized work with explicit status;
-- `docs/CHANGELOG.md` — completed repository changes;
+- `docs/ROADMAP.md` — prioritized work with explicit status; detailed requirements for active work belong in change specs rather than roadmap rows;
+- `docs/specs/README.md` — change-spec lifecycle/template; `docs/specs/active/` describes intended deltas for significant planned/in-progress work and is normal implementation context, while `docs/specs/archive/` is historical design intent;
+- `docs/CHANGELOG.md` — concise history of meaningful product, architecture, data-contract, and capability evolution;
+- `docs/WORKLOG.md` — detailed engineering/maintenance history; it is not required context for normal implementation work and should be consulted only when historical reasoning or a prior maintenance change is relevant;
 - subproject `README.md` — local overview and commands;
 - subproject `IMPLEMENTATION.md` — current modules/classes/libraries and concrete call paths;
 - local `AGENTS.md` — protected rules close to code.
 
-Documentation changes follow one ownership rule: operational start/continue flow belongs in `WORKFLOW.md`; command syntax/options belong in `USAGE.md`; source/provenance policy belongs in `SOURCES.md`; product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`. Root/local `AGENTS.md` own repository change rules. Prefer links over repeated command sequences or volatile derived facts such as current catalog/registry counts.
+Documentation changes follow one ownership rule: operational start/continue flow belongs in `WORKFLOW.md`; command syntax/options belong in `USAGE.md`; source/provenance policy belongs in `SOURCES.md`; product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`. Root/local `AGENTS.md` own repository change rules. Active change specs describe intended future deltas and must not be treated as current-state documentation; after implementation, durable results move into the owning docs and the spec is archived. `CHANGELOG.md` records only meaningful project evolution; routine implementation and maintenance details belong in `WORKLOG.md`. Prefer links over repeated command sequences or volatile derived facts such as current catalog/registry counts.
 
 ## Repository archive checklist
 
@@ -134,4 +138,4 @@ Documentation changes follow one ownership rule: operational start/continue flow
 6. Full generated archives must use `sibyl/` as the top-level directory.
 7. Name complete repository archives with `FULL` and patch archives with `PATCH`. A patch archive contains only added/modified files under `sibyl/`; deleted paths must be reported explicitly because extracting a ZIP cannot delete them.
 8. When handing off either a full archive or a patch, explicitly report the list of deleted files; write `none` when there are no deletions.
-9. `archive.sh` and `concat_sibyl.sh` must exclude downloaded/generated corpus data, embedding/model caches, virtual environments, generated build outputs, and local IDE/tool metadata without excluding source packages whose architectural name is `build` (notably `corpus-builder/src/sibyl_corpus_builder/build/`).
+9. `archive.sh` and `concat_sibyl.sh` must exclude downloaded/generated corpus data, embedding/model caches, virtual environments, generated build outputs, and local IDE/tool metadata without excluding source packages whose architectural name is `build` (notably `corpus-builder/src/sibyl_corpus_builder/build/`). Normal concatenated LLM snapshots also exclude `docs/WORKLOG.md` and `docs/specs/archive/`, while retaining `docs/specs/active/`; full repository archives keep all of them.

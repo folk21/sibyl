@@ -43,9 +43,13 @@ def export_curation_bundle(
     questions_path: Path,
     output_path: Path,
     work_ids: list[str] | None = None,
+    approved_only: bool = False,
     allow_unapproved: bool = False,
 ) -> Path:
     """Exports exact canonical texts/questions after explicit rights and identity checks."""
+    if approved_only and allow_unapproved:
+        raise ValueError("approved_only and allow_unapproved are mutually exclusive")
+
     catalog = load_question_catalog(questions_path)
     documents = load_prepared_sources(source_dir)
     selected_ids = set(work_ids or [])
@@ -57,7 +61,11 @@ def export_curation_bundle(
         documents = [document for document in documents if document.source_id in selected_ids]
     if not documents:
         raise ValueError("Curation export contains no prepared works")
-    if not allow_unapproved:
+    if approved_only:
+        documents = [document for document in documents if document.rights_status == "approved"]
+        if not documents:
+            raise ValueError("Curation export contains no approved source versions")
+    elif not allow_unapproved:
         unapproved = [
             f"{document.source_id}/{document.text_version_id}"
             for document in documents

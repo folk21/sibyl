@@ -39,3 +39,18 @@ def test_concat_helper_does_not_globally_exclude_build_directories() -> None:
     assert "-i '*/build/*'" not in script
     assert "required_source=" in script
     assert "sibyl_corpus_builder/build/api.py" in script
+
+
+def test_concat_helper_excludes_detailed_worklog_from_normal_llm_snapshot() -> None:
+    """Detailed maintenance history stays in Git but out of the default concatenated context."""
+    script = (_REPOSITORY_ROOT / "concat_sibyl.sh").read_text(encoding="utf-8")
+
+    assert "docs/WORKLOG.md" in script
+
+def test_concat_helper_keeps_active_specs_and_excludes_archived_specs() -> None:
+    """Normal LLM snapshots keep current change intent but omit completed spec history."""
+    script = (_REPOSITORY_ROOT / "concat_sibyl.sh").read_text(encoding="utf-8")
+
+    assert "docs/specs/archive" in script
+    assert "docs/specs/active" not in script
+

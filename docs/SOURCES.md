@@ -145,7 +145,7 @@ A public-domain author/work does not automatically approve a particular electron
 
 Rights/status metadata in this engineering registry is not legal advice; ambiguous distribution cases require appropriate review.
 
-Large-LLM curation is an additional external-use decision. A text acceptable for local review is not automatically approved for upload to an external model/service. `export-curation-bundle` therefore requires approved rights metadata by default; the explicit development override is appropriate only after separately confirming that the concrete text may be sent to that service.
+Large-LLM curation is an additional external-use decision. A text acceptable for local review is not automatically approved for upload to an external model/service. `export-curation-bundle` therefore requires approved rights metadata by default. `--approved-only` may safely filter a mixed prepared set down to approved versions; the explicit `--allow-unapproved` development override is appropriate only after separately confirming that the concrete text may be sent to that service.
 
 Useful source-site references:
 

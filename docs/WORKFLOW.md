@@ -134,7 +134,7 @@ sibyl-corpus export-curation-bundle \
 
 The exporter is deterministic. The bundle contains the question catalog, a manifest that pins each included `work_id`/`text_version_id`/canonical SHA-256, and the canonical text files required for curation.
 
-Export requires approved rights metadata by default. Optional work filtering and the explicit development rights override are documented in [`USAGE.md`](USAGE.md). The bundle contains full literary text, so it belongs under ignored `corpus-builder/data/` and must not be committed or included in a shareable project archive.
+Export requires approved rights metadata by default. Use `--approved-only` when a mixed prepared set should silently exclude unapproved versions, or the explicit `--allow-unapproved` development override only after separately confirming external-service upload rights. Optional work filtering and full flag details are documented in [`USAGE.md`](USAGE.md). The bundle contains full literary text, so it belongs under ignored `corpus-builder/data/` and must not be committed or included in a shareable project archive.
 
 ### 3.1 Ask the large LLM for a curation patch
 

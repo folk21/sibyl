@@ -30,6 +30,7 @@ Commands in this README run from the repository root unless the command explicit
 | Understand source/provenance rules | [`docs/SOURCES.md`](docs/SOURCES.md) |
 | Change persisted corpus semantics | [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) |
 | See planned work | [`docs/ROADMAP.md`](docs/ROADMAP.md) |
+| Review requirements/design for active significant changes | [`docs/specs/README.md`](docs/specs/README.md) |
 
 ## Repository structure
 
@@ -132,14 +133,16 @@ See [`mobile/README.md`](mobile/README.md).
 - [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) — format semantics and versioning.
 - [`docs/TESTS.md`](docs/TESTS.md) — test matrix and commands.
 - [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md) — local privacy and content integrity.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — planned work.
-- [`docs/CHANGELOG.md`](docs/CHANGELOG.md) — completed repository changes.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — prioritized planned work; active cross-cutting items link to detailed change specs instead of duplicating requirements.
+- [`docs/specs/README.md`](docs/specs/README.md) — lifecycle and index for change specifications; active specs describe intended deltas, archived specs retain historical design intent.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md) — concise history of meaningful product, architecture, data-contract, and capability evolution.
+- [`docs/WORKLOG.md`](docs/WORKLOG.md) — detailed engineering and maintenance history; consult when historical implementation context is needed.
 
 ## Repository helpers
 
 `archive.sh` creates a shareable `FULL` ZIP while excluding generated corpus/model data, caches, build outputs, environments, and local IDE files.
 
-`concat_sibyl.sh` creates a source-only text snapshot through `~/work/python/concat_files_to_txt.py` by default and applies the same generated-data exclusions.
+`concat_sibyl.sh` creates a source-only text snapshot through `~/work/python/concat_files_to_txt.py` by default, applies the same generated-data exclusions, and omits the detailed `docs/WORKLOG.md` plus archived change specs so normal LLM context stays focused. Active specs remain in the snapshot.
 
 ## License
 
