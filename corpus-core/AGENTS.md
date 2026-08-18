@@ -28,7 +28,7 @@ If not, keep the code in the owning `corpus-builder` feature, usually under that
 
 ## Documentation and tests
 
-Every Python package must have a meaningful `__init__.py` package docstring that explains its architectural role and dependency boundary. Keep package documentation concise enough for navigation but specific enough that a reader can understand why the package exists without inspecting its implementation first.
+Every Python package must have a meaningful `__init__.py` package docstring that explains its architectural role and dependency boundary. Keep it to one or two short paragraphs when possible; detailed pipeline/module descriptions belong in `IMPLEMENTATION.md`.
 
 Every non-obvious module should explain where it sits in the corpus pipeline and what it intentionally does not own. Add deterministic tests for shared contracts and update [`IMPLEMENTATION.md`](IMPLEMENTATION.md) when modules move or responsibilities change.
 

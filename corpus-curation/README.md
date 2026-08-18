@@ -2,7 +2,7 @@
 
 This directory stores small Git-tracked metadata for LLM-assisted literary curation. It does not store downloaded source texts or published runtime corpus artifacts.
 
-- `questions.json` — versioned catalog of 66 guided user questions/states.
+- `questions.json` — versioned catalog of guided user questions/states.
 - `proposals/` — LLM-generated locator/hash mappings awaiting local import/validation.
 - `curated/` — normalized mappings that have passed the local importer against a concrete prepared canonical source.
 

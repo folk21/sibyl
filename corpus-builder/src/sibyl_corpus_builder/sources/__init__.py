@@ -1,26 +1,10 @@
-"""Source-ingestion feature: external text versions to canonical prepared input.
+"""Source-ingestion feature for producing deterministic canonical input.
 
-The ``sources`` feature owns the left side of the corpus pipeline. It discovers
-or resolves concrete source versions, lets a developer review selections,
-acquires or imports artifacts, runs source-specific normalization, caches raw
-and canonical forms with hashes, and finally materializes a deterministic
-prepared-source directory.
-
-Pipeline position::
-
-    catalog / registry / reviewed local file
-        -> discover or resolve
-        -> acquire / import
-        -> normalize and cache
-        -> prepare
-        -> corpus-core SourceDocument values
-
-The public facade exported from this package is intended for CLI composition
-and other feature-neutral callers. Source-specific implementation details live
-under ``adapters`` and feature-private orchestration lives under ``_internal``.
-This feature does not split passages, compute embeddings, build runtime SQLite
-artifacts, or perform large-LLM curation.
-"""
+It owns discovery/registry resolution, reviewed acquisition/import,
+source-specific normalization, raw/canonical caching, preparation, and optional
+registration. Its public result is prepared canonical source data consumed by
+``build`` or ``curation``; passage splitting, embeddings, and LLM proposal
+processing do not belong here."""
 
 from .api import (
     acquire_selection,

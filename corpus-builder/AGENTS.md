@@ -73,7 +73,7 @@ Cross-source document formats such as FB2 belong under `sources/adapters/formats
 
 ## Module documentation
 
-Every Python package in the builder hierarchy, including `_internal` and source-adapter packages, must have a meaningful `__init__.py` package docstring. Describe where that package sits in the pipeline, what responsibilities it groups, and what adjacent responsibilities it intentionally does not own. Package docstrings are architecture/navigation aids, not inventories of every symbol.
+Every Python package in the builder hierarchy, including `_internal` and source-adapter packages, must have a meaningful but compact `__init__.py` package docstring. Usually one or two short paragraphs should state the package responsibility and its most important ownership/dependency boundary. Do not repeat full pipeline diagrams, command workflows, or detailed module inventories already owned by `IMPLEMENTATION.md`/`WORKFLOW.md`.
 
 For non-obvious modules/classes/orchestration methods, documentation must explain **where the code sits in the end-to-end pipeline**, what responsibility it owns, and what adjacent responsibilities it intentionally does not own. Source normalizers, fallback acquisition, preparation, embedding orchestration, publication, and curation validation require this context.
 

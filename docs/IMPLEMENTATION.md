@@ -2,55 +2,44 @@
 
 ## Purpose
 
-This document maps Sibyl's architecture to the **current codebase**. It answers questions such as which module owns a step, which concrete implementation is active today, and how calls cross project boundaries.
+This document maps Sibyl's stable architecture to the **current repository implementation**. It identifies the active cross-project call paths and concrete technology choices without duplicating subproject internals.
 
-It intentionally does not redefine the product concept or architectural rules:
-
-- [`CONCEPT.md`](CONCEPT.md) explains what Sibyl is and why it behaves this way;
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) defines stable boundaries and data flow;
-- this document describes the concrete implementation currently checked into the repository.
-
-Concrete class names, libraries, development adapters, and temporary implementation choices belong here and in the subproject implementation guides.
+- [`CONCEPT.md`](CONCEPT.md) owns product intent and behavior.
+- [`ARCHITECTURE.md`](ARCHITECTURE.md) owns stable boundaries and responsibilities.
+- This document owns the current cross-project realization.
+- Subproject `IMPLEMENTATION.md` files own detailed classes, modules, and local call paths.
 
 ## Repository implementation map
 
 | Area | Current responsibility | Detailed implementation |
 |---|---|---|
 | `mobile/` | Shared Kotlin runtime/UI plus Android and JVM Desktop hosts | [`../mobile/IMPLEMENTATION.md`](../mobile/IMPLEMENTATION.md) |
-| `corpus-core/` | Shared Python canonical-source contract, hashes, locators, atomic publication | [`../corpus-core/IMPLEMENTATION.md`](../corpus-core/IMPLEMENTATION.md) |
-| `corpus-builder/` | Python source ingestion, automatic corpus build, and large-LLM curation workflow | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
+| `corpus-core/` | Feature-neutral canonical-source contracts, hashes, locators, atomic publication | [`../corpus-core/IMPLEMENTATION.md`](../corpus-core/IMPLEMENTATION.md) |
+| `corpus-builder/` | Source ingestion, automatic corpus build, and large-LLM curation tooling | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
 | `corpus-format/` | Versioned SQLite/manifest persistence contract | [`../corpus-format/IMPLEMENTATION.md`](../corpus-format/IMPLEMENTATION.md) |
-| `corpus-sources/` | Permanent source/provenance/rights registry | [`../corpus-sources/IMPLEMENTATION.md`](../corpus-sources/IMPLEMENTATION.md) |
-| `corpus-curation/` | Guided-question catalog plus Git-safe LLM proposal/validated mapping metadata | [`../corpus-curation/README.md`](../corpus-curation/README.md) |
-| `test-corpus/` | Small synthetic input for deterministic end-to-end checks | [`../test-corpus/IMPLEMENTATION.md`](../test-corpus/IMPLEMENTATION.md) |
+| `corpus-sources/` | Source/provenance/rights registry | [`../corpus-sources/IMPLEMENTATION.md`](../corpus-sources/IMPLEMENTATION.md) |
+| `corpus-curation/` | Stable guided-question catalog and Git-safe curation metadata | [`../corpus-curation/README.md`](../corpus-curation/README.md) |
+| `test-corpus/` | Synthetic deterministic build fixtures | [`../test-corpus/IMPLEMENTATION.md`](../test-corpus/IMPLEMENTATION.md) |
 
-## End-to-end implementation
-
-The current real-text development path has two phases.
-
-### Build time
+## Build-time wiring
 
 ```mermaid
 flowchart TD
-    U[Lib.ru author URL] --> D[sibyl-corpus discover]
-    D --> S[selection.toml]
-    S --> A[sibyl-corpus acquire]
-    A --> C[data/raw cache]
-    C --> P[sibyl-corpus prepare-selection]
-    P --> W[data/work prepared sources]
-    W --> B[sibyl-corpus build]
-    B --> DB[corpus.db]
-    B --> V[vectors.json]
-    B --> M[manifest.json]
+    U[External source / registry] --> S[sibyl_corpus_builder.sources]
+    S --> P[Prepared canonical SourceDocument values]
+    P --> B[sibyl_corpus_builder.build]
+    P --> C[sibyl_corpus_builder.curation]
+    B --> R[corpus.db + vectors.json + manifest.json]
+    C --> M[Validated curated locator/hash metadata]
 ```
 
-The command entry point is `sibyl_corpus_builder.cli:main`, but the root CLI is now intentionally only a composition layer. Source ingestion is owned by `sibyl_corpus_builder.sources`, automatic corpus publication by `sibyl_corpus_builder.build`, and external large-LLM curation by `sibyl_corpus_builder.curation`. Shared prepared-source contracts and exact hash/locator primitives live in the separate `sibyl_corpus_core` package.
+`sibyl_corpus_builder.cli` is only the command composition root. `sources` owns discovery, acquisition, normalization, and prepared-source publication. `build` owns mechanical passage extraction, retrieval text, embeddings, runtime-artifact writing, validation, and publication. `curation` exports canonical texts plus the stable guided-question catalog and validates external LLM locator/hash proposals locally.
 
-The automatic build orchestration is `build.api.build_corpus()`. Exact mechanical passage extraction is implemented by `build._internal.splitter.split_document()`. Build-time embeddings use providers under `build._internal`; the real-text configuration selects `SentenceTransformerEmbeddingProvider` with `intfloat/multilingual-e5-small`. Completed embeddings are cached under the prepared source directory so an interrupted build can resume without recomputing successful batches. Publication uses the shared `corpus-core` atomic staging primitive and replaces the requested output only after validation succeeds.
+The shared `sibyl_corpus_core` package owns only feature-neutral prepared-source contracts and deterministic primitives. It does not own source adapters, embeddings, curation proposal semantics, or persisted runtime corpus format.
 
-Prepared canonical sources also support a separate LLM-curation path before automatic splitting. `curation.api.export_curation_bundle()` creates a deterministic local ZIP containing the 66-item guided-question catalog and concrete canonical text versions. An external large model returns locator/hash proposal metadata; `curation.api.import_curation()` and `validate_curated_curation()` resolve those locators back against local canonical text and reject hash or question-reference drift. The normalized mapping contains deterministic curated passage IDs but no copied literary text. This mapping is not wired into Desktop/Android runtime yet.
+The current automatic real-text build uses `intfloat/multilingual-e5-small`. Exact passage text is indexed as retrieval text for the first real-corpus milestone; completed embeddings are cached beside prepared sources so interrupted builds can resume. LLM curation is independent of the automatic splitter: the external model chooses literary relevance and natural ranges, while local Python remains authoritative for exact canonical text, locators, and hashes.
 
-### Runtime
+## Runtime wiring
 
 ```mermaid
 flowchart LR
@@ -64,18 +53,15 @@ flowchart LR
     C --> SQ[SqliteCorpusRepository]
 ```
 
-`shared` owns the interfaces and orchestration. The Desktop development host supplies JVM-specific implementations:
+Shared Kotlin owns retrieval contracts, candidate resolution, selection, and UI-facing behavior. The current Desktop development host supplies JVM implementations for local ONNX query embedding, brute-force cosine search over `vectors.json`, and read-only SQLite passage lookup.
 
-- `OnnxE5EmbeddingEngine` — local query tokenization and ONNX inference;
-- `JsonBruteForceVectorIndex` — exhaustive cosine search over `vectors.json`;
-- `SqliteCorpusRepository` — read-only resolution of hint IDs to exact `passage_text` rows;
-- `DesktopRuntime` — manifest compatibility checks and resource wiring.
+`LocalRetrievalService` retrieves a broader semantic pool, resolves hint matches to stored passages, deduplicates by passage ID while keeping the strongest score, and delegates final controlled-random choice to `SelectionEngine`. The displayed literary text is always resolved from stored corpus data.
 
-`LocalRetrievalService` deliberately retrieves a wider hint pool than the requested passage limit, resolves hints to passages, deduplicates by passage ID, and retains the strongest semantic score for each passage. `SelectionEngine` then applies the semantic threshold and independent weights before controlled-random sampling.
+The guided-question curation metadata is **not yet wired into Desktop or Android runtime**. Current real runtime retrieval still consumes the automatic corpus artifacts.
 
-## Current runtime artifacts
+## Runtime artifacts and compatibility
 
-A published development corpus contains:
+A development corpus publishes:
 
 ```text
 corpus.db
@@ -83,50 +69,42 @@ vectors.json
 manifest.json
 ```
 
-The Desktop query embedding bundle is downloaded separately and contains an ONNX model, `tokenizer.json`, and `model-manifest.json`. Generated corpus/model data lives under `corpus-builder/data/` and is intentionally excluded from Git and shareable archives.
+The Desktop embedding bundle is separate and contains the ONNX model, tokenizer data, and `model-manifest.json`. Corpus and model manifests are compared before retrieval so format version, model identity, vector dimensions, normalization, E5 query-prefix, and pooling assumptions cannot drift silently.
 
-The corpus and model manifests are compared before retrieval so model ID, dimensions, normalization, E5 query prefix, pooling assumptions, and corpus format cannot drift silently.
+Generated corpus/model data remains under ignored `corpus-builder/data/` paths and is not committed or included in shareable archives.
 
-## Current major libraries
+## Current technology choices
 
-### Kotlin runtime
+| Scope | Current implementation |
+|---|---|
+| Shared application | Kotlin Multiplatform, Compose Multiplatform, coroutines |
+| Desktop local inference | ONNX Runtime JVM + DJL Hugging Face Tokenizers |
+| Desktop corpus access | Xerial SQLite JDBC + JSON vector loading |
+| Current vector search | Exhaustive cosine search behind `VectorIndex` |
+| Build-time ML | Sentence Transformers/PyTorch/NumPy in the optional `ml` extra |
+| Core build tooling | Python standard library plus `corpus-core` contracts |
 
-- Kotlin Multiplatform — shared domain/retrieval/selection/UI source sets;
-- Compose Multiplatform — shared Compose UI and JVM Desktop harness;
-- kotlinx.coroutines — asynchronous retrieval from Compose;
-- kotlinx.serialization JSON — Desktop manifest/vector parsing;
-- ONNX Runtime JVM — local E5 model inference in Desktop;
-- DJL Hugging Face Tokenizers — local `tokenizer.json` execution;
-- Xerial SQLite JDBC — read-only Desktop access to `corpus.db`.
+Host-specific setup and native-library workarounds belong in [`INSTALLATION.md`](INSTALLATION.md), not in this implementation overview.
 
-The Desktop harness currently pins an ONNX Runtime version compatible with the Intel macOS development machine. DJL's tokenizer native library may require a locally built x86_64 macOS library exposed through `RUST_LIBRARY_PATH`; this is a development-host limitation, not a runtime architecture requirement.
+## Temporary implementations versus stable boundaries
 
-### Python build time
+Several current choices are intentionally replaceable:
 
-The builder intentionally uses the Python standard library for most core stages (`sqlite3`, `urllib`, `html.parser`, `xml.etree.ElementTree`, `hashlib`, `tomllib`). Optional ML dependencies are isolated in the `ml` extra:
+- `JsonBruteForceVectorIndex` is suitable for small development corpora and can later be replaced by ANN behind `VectorIndex`.
+- Desktop uses SQLite JDBC directly; Android can provide a platform storage adapter behind shared contracts.
+- Android still uses `DemoRetrievalService`; real Android embedding/index/storage adapters are not wired yet.
+- richer generated semantic hints remain an optional build-time enhancement rather than a runtime requirement.
 
-- NumPy;
-- PyTorch;
-- Sentence Transformers.
+These are implementation choices, not architectural changes.
 
-Default tests do not download models or use the network.
+## Documentation maintenance
 
-## Current development implementations versus intended scale
+Update the document that owns the changed fact:
 
-Some implementations exist specifically to validate the product loop before optimization:
-
-- `JsonBruteForceVectorIndex` performs exhaustive search and is appropriate for the current small Desktop corpus; an ANN implementation can replace it behind `VectorIndex` later.
-- Desktop uses SQLite JDBC directly; Android will use its own storage adapter behind shared contracts.
-- real-text builds currently index exact passage text as the semantic hint; richer generated retrieval metadata remains a build-time extension.
-- Android still uses `DemoRetrievalService`; real Android ONNX/index/storage adapters are not yet wired.
-
-These are implementation choices, not changes to the architecture.
-
-## Documentation maintenance rule
-
-Use this rule when the repository changes:
-
-- product meaning or user promise changed → update `CONCEPT.md`;
-- system boundary, responsibility, or stable contract changed → update `ARCHITECTURE.md`;
-- concrete class, library, file, command wiring, or active adapter changed → update the relevant `IMPLEMENTATION.md`;
-- setup or operational command changed → update the owning installation/usage document and link to it rather than duplicating instructions.
+- product intent → `CONCEPT.md`;
+- stable boundary/contract → `ARCHITECTURE.md`;
+- cross-project current wiring → this file;
+- detailed module/class wiring → the relevant subproject `IMPLEMENTATION.md`;
+- operational sequence → `WORKFLOW.md`;
+- command syntax/options → `USAGE.md`;
+- setup/toolchain details → `INSTALLATION.md`.

@@ -25,7 +25,7 @@ There is no required backend in the core architecture.
 - Avoid comments that restate code. Document useful contracts/invariants instead.
 - Give every Kotlin class/interface/enum/data class a meaningful KDoc. For non-obvious runtime, retrieval, persistence, or algorithmic code, explain the responsibility, why the class exists, the main processing order, important invariants/assumptions, and notable fallback/resource-ownership behavior. Keep simple models concise and avoid line-by-line narration.
 - Document substantial public/orchestration methods when their ordering, side effects, compatibility rules, or exact-text guarantees are not obvious from the signature alone.
-- Every non-trivial Python package must have a meaningful package-level docstring in `__init__.py`. It should explain the package role, its place in the larger pipeline, its main responsibilities, and important ownership/dependency boundaries; avoid placeholder descriptions such as `Internal package`.
+- Every non-trivial Python package must have a meaningful, concise package-level docstring in `__init__.py`. Usually one or two short paragraphs are enough: state what the package owns and its most important dependency/ownership boundary. Do not repeat full pipeline diagrams, command instructions, or detailed module inventories that belong in `IMPLEMENTATION.md`.
 - Cross-project product, architecture, policy, workflow, and compatibility documentation lives under root `docs/`.
 - Each code subproject keeps `README.md` for local quick start, `AGENTS.md` for local change rules, and `IMPLEMENTATION.md` for concrete classes/files/libraries in that subproject.
 - Do not create separate subproject `docs/` trees or duplicate root architecture/policy content in local implementation guides.
@@ -75,6 +75,14 @@ There is no required backend in the core architecture.
 - UI must not implement ranking, vector-search internals, or corpus parsing.
 - Python features must not import another feature's `_internal` package. Source-specific discovery/fetch/normalization belongs under `corpus-builder/.../sources/adapters/<source>/`; shared feature-neutral primitives belong in `corpus-core`, not a generic utility bucket.
 
+## Change workflow
+
+1. Read root and nearest local `AGENTS.md`, then inspect the current code/tests and owning documentation for the affected scope.
+2. Make the smallest coherent change and preserve established terminology/boundaries.
+3. Keep cross-project contracts synchronized: persisted format changes must be checked against builder writers/validators and mobile readers; source-registry changes must preserve provenance/rights rules.
+4. Add or update focused tests and the single owning document for changed public behavior, commands, contracts, or architecture.
+5. Run focused validation first, then `make check` from the repository root where practical.
+
 ## Testing
 
 - Kotlin selection tests use deterministic injected randomness.
@@ -107,7 +115,6 @@ Use one owning root document and link to it instead of duplicating detailed cont
 - `docs/CONFIGURATION.md` — configuration ownership;
 - `docs/SOURCES.md` — source/provenance/rights/normalization policy;
 - `docs/CORPUS_FORMAT.md` — persisted format semantics/versioning/validation;
-- `docs/DEVELOPMENT.md` — contribution workflow;
 - `docs/SECURITY_AND_PRIVACY.md` — privacy/content-integrity rules;
 - `docs/ROADMAP.md` — prioritized work with explicit status;
 - `docs/CHANGELOG.md` — completed repository changes;
@@ -115,7 +122,7 @@ Use one owning root document and link to it instead of duplicating detailed cont
 - subproject `IMPLEMENTATION.md` — current modules/classes/libraries and concrete call paths;
 - local `AGENTS.md` — protected rules close to code.
 
-Documentation changes follow one ownership rule: operational start/continue flow belongs in `WORKFLOW.md`; product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`.
+Documentation changes follow one ownership rule: operational start/continue flow belongs in `WORKFLOW.md`; command syntax/options belong in `USAGE.md`; source/provenance policy belongs in `SOURCES.md`; product meaning belongs in `CONCEPT.md`; stable boundaries belong in `ARCHITECTURE.md`; concrete code/library wiring belongs in `IMPLEMENTATION.md`. Root/local `AGENTS.md` own repository change rules. Prefer links over repeated command sequences or volatile derived facts such as current catalog/registry counts.
 
 ## Repository archive checklist
 

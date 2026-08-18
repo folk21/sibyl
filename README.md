@@ -1,6 +1,6 @@
 # Sibyl
 
-Sibyl is an offline-first literary discovery application. A user asks a question or describes a state, and Sibyl retrieves several semantically related passages from a local corpus before selecting one **verbatim stored passage** with controlled randomness.
+Sibyl is an offline-first literary discovery application. A user asks a question or describes a state, and Sibyl retrieves several semantically related passages from a local corpus before selecting one **verbatim stored passage** with controlled randomness. For product intent and behavior in more detail, see [`docs/CONCEPT.md`](docs/CONCEPT.md).
 
 The application uses machine learning to find where to look; it does not generate literary quotations.
 
@@ -131,7 +131,6 @@ See [`mobile/README.md`](mobile/README.md).
 - [`docs/SOURCES.md`](docs/SOURCES.md) — provenance, rights review, and normalization policy.
 - [`docs/CORPUS_FORMAT.md`](docs/CORPUS_FORMAT.md) — format semantics and versioning.
 - [`docs/TESTS.md`](docs/TESTS.md) — test matrix and commands.
-- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — development workflow.
 - [`docs/SECURITY_AND_PRIVACY.md`](docs/SECURITY_AND_PRIVACY.md) — local privacy and content integrity.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — planned work.
 - [`docs/CHANGELOG.md`](docs/CHANGELOG.md) — completed repository changes.

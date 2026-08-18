@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-17 — Streamline documentation ownership and model context
+
+- removed `docs/DEVELOPMENT.md` because repository change rules are already owned by root/local `AGENTS.md`;
+- made `WORKFLOW.md` the single end-to-end operational path, `USAGE.md` the command/option reference, and `SOURCES.md` the source/provenance policy owner;
+- reduced repeated command sequences and volatile derived counts across root/subproject documentation while preserving useful local invariants and navigation;
+- shortened root implementation guidance and Python package docstrings so they provide local architectural context without repeating detailed implementation documents;
+- linked the root README product summary directly to `docs/CONCEPT.md`.
+
+
 ## 2026-08-17 — Align Git, CI, and documentation with the Python corpus refactor
 
 - narrowed `.gitignore` build-output rules so Git can track the architectural `sibyl_corpus_builder/build/` source package while still excluding known generated build directories;
