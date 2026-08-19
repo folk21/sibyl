@@ -9,6 +9,7 @@ inference and direct curation-file reads remain outside this feature.
 """
 
 from .api import (
+    curation_passage_ids,
     curation_source_keys,
     export_curation_bundle,
     import_curation,
@@ -31,6 +32,7 @@ __all__ = [
     "QuestionCatalog",
     "ValidatedCuratedPassage",
     "ValidatedCuration",
+    "curation_passage_ids",
     "curation_source_keys",
     "export_curation_bundle",
     "import_curation",

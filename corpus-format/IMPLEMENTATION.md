@@ -47,3 +47,5 @@ Because writer and readers are implemented in separate projects, format changes 
 ## Version compatibility
 
 New builder output is v4. Desktop currently accepts v3 and v4 so existing development corpora can continue free-form retrieval; guided lookup is available only from v4 persisted tables. Unknown versions are rejected before runtime resources are opened.
+
+Format v4 already permits multiple `passage_text` realizations for one logical passage through distinct `text_version` rows. Build-time generated translations use `role = machine_translation`, preserve provider/model provenance, and may cover only curated passages; no schema/version change is required for this additive capability.

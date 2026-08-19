@@ -12,6 +12,7 @@ cli.py
 sources/
 build/
 curation/
+translation/
 ```
 
 Do not add new top-level implementation modules without a strong cross-feature orchestration reason. Prefer placing behavior in the owning feature.
@@ -21,6 +22,7 @@ Do not add new top-level implementation modules without a strong cross-feature o
 - `sources` owns external catalog/source acquisition through deterministic prepared canonical source output.
 - `build` owns the automatic splitter, semantic hints, embeddings, runtime corpus writing/validation, and runtime model bundle.
 - `curation` owns guided-question bundle export and large-LLM proposal import/exact-text validation.
+- `translation` owns build-time large-LLM translation bundles/proposals for already validated curated passages; generated target text remains local data and must never be presented as source text.
 - `corpus-core` owns only feature-neutral contracts/primitives shared by multiple features.
 
 Each feature should expose intended callers through `api.py`. `command.py` translates argparse values to the public API. Implementation-private helpers belong under that feature's `_internal/` package.
@@ -29,7 +31,7 @@ A feature must not import another feature's `_internal` package. Root `cli.py` m
 
 ### `_internal` versus `corpus-core`
 
-Use `_internal` when code is reusable **inside one feature** but still understands that feature's concepts. Use `corpus-core` only when the same contract/primitive makes sense independently of source acquisition, automatic build, and LLM curation.
+Use `_internal` when code is reusable **inside one feature** but still understands that feature's concepts. Use `corpus-core` only when the same contract/primitive makes sense independently of source acquisition, automatic build, LLM curation, and curated-passage translation.
 
 Do not use either location as a miscellaneous utility bucket.
 
@@ -62,6 +64,15 @@ Cross-source document formats such as FB2 belong under `sources/adapters/formats
 - Build into staging output and publish only after validation succeeds.
 - Persist completed embedding batches outside published output so interrupted real-text builds can resume. Cache identity must include embedding configuration and exact input text hashes.
 - Production source provenance/rights metadata is mandatory.
+
+## Build-time machine translation
+
+- Translate only from already validated curated source passages in the first implementation slice.
+- Preserve the original canonical passage unchanged; generated text is a separate `machine_translation` text version.
+- Translation bundles/proposals with generated literary text stay under ignored `corpus-builder/data/` and must not be committed.
+- Import/revalidation must pin source curation identity, passage IDs, exact source hashes, target language, provider/model, prompt version, and derived translation hashes.
+- Local validation proves identity/completeness/provenance, not literary translation quality; human review may still reject a generated translation before publication.
+- Runtime code must never call a translation service.
 
 ## Large-LLM curation
 

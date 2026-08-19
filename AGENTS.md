@@ -10,7 +10,7 @@ Primary scopes:
 
 - `mobile/` — Kotlin Multiplatform runtime/UI with Android product and JVM Desktop development entry points;
 - `corpus-core/` — feature-neutral Python canonical-source contracts and deterministic shared primitives;
-- `corpus-builder/` — Python build-time source ingestion, automatic corpus build, and LLM-curation tooling;
+- `corpus-builder/` — Python build-time source ingestion, automatic corpus build, LLM curation, and curated-passage machine-translation tooling;
 - `corpus-format/` — versioned persisted contract;
 - `corpus-sources/` — source/provenance/rights registry;
 - `corpus-curation/` — guided-question catalog and validated LLM curation metadata;
@@ -65,10 +65,10 @@ There is no required backend in the core architecture.
 
 - `mobile/` consumes published corpus artifacts through `corpus-format` and must not know how semantic hints were generated.
 - `corpus-core/` is feature-neutral and must not depend on `corpus-builder/`, source adapters, LLM proposal formats, or runtime corpus writer internals.
-- `corpus-builder/` may depend on `corpus-core` and format/source declarations but must not execute mobile code. Its Python root stays a thin CLI composition layer over `sources`, `build`, and `curation` features.
+- `corpus-builder/` may depend on `corpus-core` and format/source declarations but must not execute mobile code. Its Python root stays a thin CLI composition layer over `sources`, `build`, `curation`, and `translation` features.
 - `corpus-format/` owns persisted semantics and must not depend on builder/mobile internals.
 - `corpus-sources/` owns source/version declarations and review state, not passage extraction or ranking.
-- `corpus-curation/` owns stable guided-question IDs plus small LLM curation locator/hash metadata; it must not store downloaded canonical books or bypass local exact-text validation.
+- `corpus-curation/` owns stable guided-question IDs plus small LLM curation locator/hash metadata; it must not store downloaded canonical books, generated translations, or bypass local exact-text validation. Generated machine-translation text stays under ignored local builder data and is persisted to runtime only with explicit `machine_translation` provenance.
 - Source discovery manifests are developer review artifacts: discovery may classify candidates but must never approve or publish them automatically.
 - Platform-specific ONNX/index APIs stay behind small interfaces such as `EmbeddingEngine` and `VectorIndex`. The Desktop development harness may use JVM ONNX Runtime, SQLite JDBC, and brute-force vectors for small corpora; these dependencies must not leak into common code.
 - The JVM Desktop app is a development harness: reuse shared UI/runtime code and do not introduce a REST/backend boundary just to run it locally.

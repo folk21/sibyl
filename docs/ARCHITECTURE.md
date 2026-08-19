@@ -86,11 +86,12 @@ It must not know about source-specific sites, automatic embeddings, large-LLM pr
 
 ### Corpus builder
 
-The build-time Python application is organized as three feature boundaries around `corpus-core`:
+The build-time Python application is organized as four feature boundaries around `corpus-core`:
 
 - `sources` — external catalogs/artifacts to deterministic prepared canonical sources;
 - `build` — automatic passage splitting/embeddings plus assembly of validated guided curation into runtime corpus publication;
-- `curation` — deterministic export to a large LLM and local exact-text validation of returned mappings.
+- `curation` — deterministic export to a large LLM and local exact-text validation of returned mappings;
+- `translation` — deterministic export of validated curated foreign-language passages and local validation of generated target-language text/provenance.
 
 The package root is a thin CLI composition layer. Features expose public APIs and keep implementation-private helpers under their own `_internal` packages. A feature must not depend on another feature's `_internal` implementation. Source-specific parsing/fetching/normalization is grouped under `sources/adapters/<source>/`.
 
@@ -184,6 +185,9 @@ flowchart TD
 ```
 
 Validated curated ranges are re-resolved against the same prepared canonical source during assembly. Their exact slices are inserted as normal `passage` / `passage_text` rows and related to stable guided questions through format-v4 mapping tables. Stale hashes/locators, unknown question IDs, duplicate mappings, or dangling references fail before atomic publication.
+
+Validated curated translations form a separate build-time branch. Translation export starts only from already validated curated passage IDs and exact source hashes. An external large LLM produces target-language text; local import verifies completeness, source identity, target language, provider/model/prompt provenance, and target-text hashes. The generated text remains local build data until assembly persists it as an explicitly labelled `machine_translation` `text_version`/`passage_text`. Runtime performs no translation inference.
+
 
 A published corpus is treated as generated immutable output. Expensive reusable preparation may be cached, but a corpus release should be assembled and validated as a coherent artifact instead of incrementally mutating a previously published database in place.
 

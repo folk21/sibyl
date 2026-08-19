@@ -37,6 +37,7 @@ RUNTIME_CORPUS_DIR ?= corpus-builder/data/output
 PREPARED_SOURCE_ROOT ?= corpus-builder/data/work
 QUESTIONS_PATH ?= corpus-curation/questions.json
 CURATION_ROOT ?= corpus-curation/curated
+TRANSLATION_ROOT ?= corpus-builder/data/translations/validated
 CORPUS_DIR ?= $(RUNTIME_CORPUS_DIR)
 MODEL_DIR ?= corpus-builder/data/runtime-models/multilingual-e5-small
 
@@ -46,6 +47,7 @@ build-runtime-corpus:
 		--source-root "$(PREPARED_SOURCE_ROOT)" \
 		--questions "$(QUESTIONS_PATH)" \
 		--curation-root "$(CURATION_ROOT)" \
+		--translation-root "$(TRANSLATION_ROOT)" \
 		--output "$(RUNTIME_CORPUS_DIR)"
 
 run-desktop-real:

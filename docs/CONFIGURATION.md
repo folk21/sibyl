@@ -66,6 +66,11 @@ The stable guided-question product catalog is not builder TOML configuration. Th
 
 LLM curation proposals and normalized mappings live under `corpus-curation/`. Full canonical text exported for the external model belongs only to ignored local `corpus-builder/data/curation/`. See [`WORKFLOW.md`](WORKFLOW.md).
 
+
+## Build-time machine translation
+
+Machine-translation provider/model/prompt identity is recorded in each validated local translation artifact rather than in the global builder TOML. Translation is an explicit external-LLM workflow over already validated curated passages. The normal runtime Make target discovers validated generated translations from `corpus-builder/data/translations/validated/` through `TRANSLATION_ROOT`; override that Make variable for alternate local layouts. Generated translation text and proposals remain outside Git.
+
 ## Source discovery and registry
 
 Editable discovery manifests live under local `corpus-builder/data/work/` and are not committed. The selection schema uses `include` / `exclude` / `review`; batch acquisition processes only explicit `include`. `registry_work_id` is optional until permanent registration.

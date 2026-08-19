@@ -96,6 +96,27 @@ def import_curation(
     return output_path
 
 
+
+def curation_passage_ids(curation_path: Path) -> frozenset[str]:
+    """Returns deterministic curated passage IDs declared by one normalized curation file."""
+    raw = json.loads(curation_path.read_text(encoding="utf-8"))
+    if raw.get("schema_version") != 1:
+        raise ValueError(f"Unsupported curated curation schema_version in {curation_path}")
+    raw_passages = raw.get("passages")
+    if not isinstance(raw_passages, list) or not raw_passages:
+        raise ValueError("Curated mapping contains no passages")
+    result: set[str] = set()
+    for raw_passage in raw_passages:
+        if not isinstance(raw_passage, dict):
+            raise ValueError("Curated passage must be an object")
+        passage_id = str(raw_passage.get("passage_id", ""))
+        if not passage_id:
+            raise ValueError("Curated passage requires passage_id")
+        if passage_id in result:
+            raise ValueError(f"Duplicate curated passage_id: {passage_id}")
+        result.add(passage_id)
+    return frozenset(result)
+
 def curation_source_keys(curation_path: Path) -> frozenset[tuple[str, str]]:
     """Returns prepared text-version identities required by one normalized curation file."""
     raw = json.loads(curation_path.read_text(encoding="utf-8"))

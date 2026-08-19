@@ -22,7 +22,8 @@ mobile/
 - `PassageLength` — prepared short/standard/extended variants;
 - `WorkCategory` — literature, philosophy, or sacred text;
 - `PassageTextRole` — original, human translation, or machine translation;
-- `PassageText` — exact display text plus translation metadata;
+- `PassageText` — exact stored display text plus translation metadata;
+- `PassageVariant.parallelDisplayTexts()` — original-first parallel display selection with preferred-language human/machine translation fallback;
 - `PassageVariant` — texts available for one prepared length;
 - `Passage` — literary metadata and variants;
 - `GuidedQuestion` — stable persisted prompt ID/text plus optional kind/theme metadata;
@@ -162,3 +163,5 @@ Dependency versions are centralized in `gradle/libs.versions.toml`.
 - Android host compilation is checked separately through the Android Gradle task.
 
 See [`../docs/TESTS.md`](../docs/TESTS.md) for the command matrix.
+
+Shared answer UI renders parallel original + preferred-language translation when both stored realizations exist. Machine translations are explicitly labelled with language; same-language originals remain single-text display. SQLite hydration already reads every persisted `passage_text`/`text_version` row, so no translation service or platform adapter is involved.

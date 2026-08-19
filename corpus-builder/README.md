@@ -1,6 +1,6 @@
 # Sibyl corpus builder
 
-`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the free-form retrieval corpus, supports external large-LLM curation, and assembles validated guided mappings into the current format-v4 runtime corpus. The normal runtime build discovers all locally prepared source sets, so authors can be added incrementally without maintaining a separate aggregate prepared directory. It is never part of runtime question answering.
+`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the free-form retrieval corpus, supports external large-LLM curation, validates build-time machine translations of curated foreign-language passages, and assembles them into the current format-v4 runtime corpus. The normal runtime build discovers all locally prepared source sets, so authors can be added incrementally without maintaining a separate aggregate prepared directory. It is never part of runtime question answering.
 
 ## Pipeline
 
@@ -11,7 +11,9 @@ flowchart TD
     P --> B[Automatic build]
     P --> C[Large-LLM curation]
     C --> M[Validated curated metadata]
+    M --> T[Optional large-LLM translation]
     M --> B
+    T --> B
     B --> R[Format-v4 runtime corpus artifacts]
 ```
 
@@ -27,7 +29,8 @@ sibyl_corpus_builder/
   cli.py
   sources/   # external sources -> prepared canonical sources
   build/     # splitter/embeddings -> current runtime corpus
-  curation/  # canonical texts <-> large LLM -> validated metadata
+  curation/     # canonical texts <-> large LLM -> validated locator/hash metadata
+  translation/  # curated passages <-> large LLM -> validated local machine translations
 ```
 
 `cli.py` is a thin composition root. Feature callers use each package's public API; implementation-private mechanics stay under that feature's `_internal/` package. Shared feature-neutral contracts live in [`../corpus-core/`](../corpus-core/).
@@ -53,6 +56,7 @@ The optional semantic embedding environment uses the `ml` extra and currently su
 | Discover/acquire/prepare sources | `discover`, `acquire`, `prepare-selection`, `fetch`, `import-file`, `prepare` | [`WORKFLOW`](../docs/WORKFLOW.md), [`SOURCES`](../docs/SOURCES.md) |
 | Persist reviewed source metadata | `register` | [`SOURCES`](../docs/SOURCES.md) |
 | Curate guided-question passages | `export-curation-bundle`, `import-curation`, `validate-curation` | [`WORKFLOW`](../docs/WORKFLOW.md) |
+| Translate curated foreign passages | `export-translation-bundle`, `import-translation`, `validate-translation` | [`WORKFLOW`](../docs/WORKFLOW.md) |
 | Build the current local runtime corpus | `build-available`, `build`, `validate` | [`WORKFLOW`](../docs/WORKFLOW.md) |
 | Prepare Desktop query model | `download-runtime-model` | [`INSTALLATION`](../docs/INSTALLATION.md), [`USAGE`](../docs/USAGE.md) |
 
@@ -66,7 +70,7 @@ Each author remains independently prepared under `data/work/<name>/` and may hav
 make build-runtime-corpus
 ```
 
-That target calls `build-available`, discovers every prepared child with `manifest.json`, selects curated metadata fully backed by those local text versions, reuses compatible embedding caches, and atomically replaces the single runtime output at `data/output`. Explicit repeatable `build --source ... --curation ...` remains available for focused/debug assembly and future filtering.
+That target calls `build-available`, discovers every prepared child with `manifest.json`, selects curated metadata fully backed by those local text versions, includes compatible validated machine translations when present, reuses compatible embedding caches, and atomically replaces the single runtime output at `data/output`. Explicit repeatable `build --source ... --curation ... --translation ...` remains available for focused/debug assembly and future filtering.
 
 ## Important local-data boundary
 

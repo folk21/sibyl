@@ -267,17 +267,45 @@ fun SibylApp(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        val displayText = current.variant.preferredText("ru")
-                        Text(displayText.text, style = MaterialTheme.typography.titleLarge)
+                        val displayTexts = current.variant.parallelDisplayTexts("ru")
+                        displayTexts.forEachIndexed { index, displayText ->
+                            if (displayTexts.size > 1) {
+                                Text(
+                                    when (displayText.role) {
+                                        PassageTextRole.ORIGINAL ->
+                                            "Original · ${displayText.language}"
+                                        PassageTextRole.HUMAN_TRANSLATION ->
+                                            "Translation · ${displayText.language}"
+                                        PassageTextRole.MACHINE_TRANSLATION ->
+                                            "Machine translation · ${displayText.language}"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                            Text(
+                                displayText.text,
+                                style = if (index == 0) {
+                                    MaterialTheme.typography.titleLarge
+                                } else {
+                                    MaterialTheme.typography.bodyLarge
+                                },
+                            )
+                            if (
+                                displayTexts.size == 1 &&
+                                displayText.role == PassageTextRole.MACHINE_TRANSLATION
+                            ) {
+                                Text(
+                                    "Machine translation · ${displayText.language}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
                         Text(
                             "${current.passage.author} — ${current.passage.work}",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         current.passage.location?.let {
                             Text(it, style = MaterialTheme.typography.bodySmall)
-                        }
-                        if (displayText.role == PassageTextRole.MACHINE_TRANSLATION) {
-                            Text("Machine translation", style = MaterialTheme.typography.labelSmall)
                         }
                         if (isDemo) {
                             Text(

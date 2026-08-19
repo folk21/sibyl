@@ -151,3 +151,9 @@ Useful source-site references:
 
 - Lib.ru storage/rendering format: <https://lib.ru/WEBMASTER/libformat.txt>
 - Lib.ru copyright/permissions notes: <https://lib.ru/COPYRIGHT/>
+
+## Build-time machine translations
+
+Machine translation does not change the approval/provenance status of the foreign source version. The original concrete edition remains independently pinned and reviewed. Translation export sends exact curated source text to an external service, so approved source rights metadata is required by default; any override is a developer decision that must be justified separately.
+
+Generated translation text is not source-registry metadata and must not be committed under `corpus-sources/` or `corpus-curation/`. It stays under ignored `corpus-builder/data/translations/` and is materialized into runtime artifacts only as an explicitly labelled `machine_translation` text version with provider/model/prompt provenance. A machine translation is generated content derived from the approved original; it must never be represented as an original or named human translation.

@@ -16,6 +16,7 @@ identity. Runtime code consumes only published corpus artifacts, never curation 
 
 from ._internal.bundle import export_curation_bundle
 from ._internal.proposal import (
+    curation_passage_ids,
     curation_source_keys,
     import_curation,
     load_validated_curation,
@@ -25,6 +26,7 @@ from ._internal.proposal import (
 from ._internal.questions import load_question_catalog
 
 __all__ = [
+    "curation_passage_ids",
     "curation_source_keys",
     "export_curation_bundle",
     "import_curation",

@@ -14,13 +14,31 @@ class SqliteCorpusRepositoryTest {
         val database = createFixtureDatabase()
         try {
             SqliteCorpusRepository(database, formatVersion = 4).use { repository ->
-                assertEquals(listOf("question-a", "question-c"), repository.availableQuestions().map { it.id })
+                assertEquals(
+                    listOf("question-a", "question-c"),
+                    repository.availableQuestions().map { it.id },
+                )
 
                 val candidates = repository.candidates("question-a", limit = 10)
                 assertEquals(listOf("p-strong", "p-low"), candidates.map { it.passage.id })
                 assertEquals(listOf(0.9, 0.1), candidates.map { it.semanticScore })
-                assertEquals("Exact strong stored text.", candidates[0].passage.variants.values.single().texts.single().text)
-                assertEquals("Exact low stored text.", candidates[1].passage.variants.values.single().texts.single().text)
+                val strongTexts = candidates[0].passage.variants.values.single().texts
+                assertEquals(
+                    "Exact strong stored text.",
+                    strongTexts.first { it.language == "en" }.text,
+                )
+                assertEquals(
+                    "Сохранённый машинный перевод.",
+                    strongTexts.first { it.language == "ru" }.text,
+                )
+                assertEquals(
+                    "fixture-provider",
+                    strongTexts.first { it.language == "ru" }.translationProvider,
+                )
+                assertEquals(
+                    "Exact low stored text.",
+                    candidates[1].passage.variants.values.single().texts.single().text,
+                )
                 assertEquals(emptyList(), repository.candidates("missing", limit = 10))
             }
         } finally {
@@ -83,11 +101,31 @@ class SqliteCorpusRepositoryTest {
                 )
                 statement.executeUpdate("INSERT INTO author VALUES ('author', 'Fixture Author')")
                 statement.executeUpdate("INSERT INTO work VALUES ('work', 'author', 'Fixture Work', 'en', 'literature')")
-                statement.executeUpdate("INSERT INTO text_version VALUES ('tv', 'work', 'en', 'original', NULL, NULL, NULL)")
-                statement.executeUpdate("INSERT INTO passage VALUES ('p-strong', 'work', 0, 'chars:0:24', NULL)")
-                statement.executeUpdate("INSERT INTO passage VALUES ('p-low', 'work', 1, 'chars:25:47', NULL)")
-                statement.executeUpdate("INSERT INTO passage_text VALUES ('p-strong', 'tv', 'standard', 'Exact strong stored text.')")
-                statement.executeUpdate("INSERT INTO passage_text VALUES ('p-low', 'tv', 'standard', 'Exact low stored text.')")
+                statement.executeUpdate(
+                    "INSERT INTO text_version VALUES " +
+                        "('tv', 'work', 'en', 'original', NULL, NULL, NULL)",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO text_version VALUES ('tv-ru', 'work', 'ru', 'machine_translation', NULL, " +
+                        "'fixture-provider', 'fixture-model')",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO passage VALUES ('p-strong', 'work', 0, 'chars:0:24', NULL)",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO passage VALUES ('p-low', 'work', 1, 'chars:25:47', NULL)",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO passage_text VALUES " +
+                        "('p-strong', 'tv', 'standard', 'Exact strong stored text.')",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO passage_text VALUES ('p-strong', 'tv-ru', 'standard', 'Сохранённый машинный перевод.')",
+                )
+                statement.executeUpdate(
+                    "INSERT INTO passage_text VALUES " +
+                        "('p-low', 'tv', 'standard', 'Exact low stored text.')",
+                )
                 statement.executeUpdate("INSERT INTO guided_question_catalog VALUES ('catalog', 'en')")
                 statement.executeUpdate("INSERT INTO guided_question VALUES ('question-a', 'catalog', 0, 'question', 'change', 'Question A?')")
                 statement.executeUpdate("INSERT INTO guided_question VALUES ('question-b', 'catalog', 1, 'question', 'change', 'Question B?')")

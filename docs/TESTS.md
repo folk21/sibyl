@@ -97,3 +97,7 @@ The following must remain opt-in:
 
 
 Corpus-builder tests also cover source-artifact normalization/hashing, prepared-source materialization, and exact source-slice passage extraction. Network fetches and ML model downloads remain outside the default test suite.
+
+## Curated machine-translation coverage
+
+`corpus-builder/tests/test_translation.py` uses synthetic foreign-language canonical text and validates deterministic translation bundles, complete source/hash/provenance import, rejection of incomplete proposals, all-available translation selection, and SQLite materialization of exact original plus stored `machine_translation`. Shared Kotlin tests cover parallel original/translation selection; Desktop SQLite tests verify translation metadata hydration. Default tests call no external translation service.

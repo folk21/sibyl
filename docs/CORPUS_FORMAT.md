@@ -28,7 +28,7 @@ erDiagram
 
 ### Text version provenance
 
-A `text_version` is one concrete original/human-translation/machine-translation text. The provenance fields introduced in v3 remain part of v4:
+A `text_version` is one concrete original/human-translation/machine-translation realization associated with a work. The provenance fields introduced in v3 remain part of v4:
 
 - `source_locator` — edition/revision/artifact locator from the source registry;
 - `source_artifact_sha256` — SHA-256 of the acquired raw artifact;
@@ -38,9 +38,9 @@ These fields make a built corpus traceable to the exact local source artifact us
 
 ### Passage
 
-A `passage` identifies a stable location in a work. The builder stores a source locator such as `chars:<start>:<end>` relative to the canonical text. `passage_text.text` must be exactly that canonical-text slice; runtime code must not invent or arbitrarily truncate literary wording.
+A `passage` identifies a stable location in a work. The builder stores the authoritative original/source locator such as `chars:<start>:<end>` relative to the prepared canonical text. For an original/human source text version, `passage_text.text` must be the exact approved stored source realization. For a build-time machine translation, `passage_text.text` must be the exact validated generated text stored in the local translation artifact and must link to a `machine_translation` text version; runtime code must never regenerate or rewrite it.
 
-Automatic splitter passages and curated guided passages share the same `passage` / `passage_text` representation. A curated passage may initially contain only the exact `standard` variant selected during curation.
+Automatic splitter passages and curated guided passages share the same `passage` / `passage_text` representation. A curated passage may have multiple text realizations for the same `standard` variant, such as the exact English original plus a stored Russian machine translation. Translation coverage may be sparse: absence of a translated `passage_text` means no stored translation exists for that passage.
 
 Length (`short` / `standard` / `extended`) and text role/language remain separate dimensions.
 
@@ -71,7 +71,8 @@ Vectors remain outside SQLite. `manifest.json` records provider/model identity, 
 V4 manifests retain the existing artifact/embedding contract and add:
 
 - `counts.guided_questions` — number of persisted catalog questions;
-- `counts.guided_mappings` — number of persisted question/passage relationships.
+- `counts.guided_mappings` — number of persisted question/passage relationships;
+- `counts.machine_translations` — optional diagnostic count of translated passage-text rows.
 
 Desktop v3 compatibility treats these fields as zero when absent.
 

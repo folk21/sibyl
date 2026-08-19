@@ -78,6 +78,10 @@
         "guided_mappings": {
           "type": "integer",
           "minimum": 0
+        },
+        "machine_translations": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     },

@@ -43,4 +43,5 @@ Requirements should have stable IDs such as `R1`, and scenarios should reference
 
 ## Active specs
 
+- [`active/curated-machine-translation.md`](active/curated-machine-translation.md) — implementation complete and pending acceptance; build-time large-LLM translation of validated curated foreign-language passages with persisted machine-translation variants and parallel display.
 - [`active/guided-question-runtime.md`](active/guided-question-runtime.md) — implementation complete and pending acceptance; publishes validated curated mappings into runtime corpus format and exposes guided-question selection in Desktop while preserving free-form retrieval.

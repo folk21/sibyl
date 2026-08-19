@@ -38,7 +38,7 @@ Priorities:
 | S-07a | done | P0 | Add Lib.ru author-page discovery into editable `include` / `exclude` / `review` selection manifests, excluding correspondence by default. |
 | S-07b | done | P0 | Add resilient batch Lib.ru acquisition with TXT → HTML → FB2 fallback, versioned normalizers, per-work failure reporting, batch preparation, and optional candidate registration with pinned hashes. |
 | S-08 | todo | P1 | Add approved historical Russian human translations where preferable to machine translation. |
-| S-09 | todo | P1 | Add build-time machine translation adapter for approved foreign originals; persist provider/model metadata. |
+| S-09 | done | P1 | Add build-time large-LLM machine translation for validated curated foreign-original passages; persist provider/model/prompt provenance and exact target-text hashes. |
 | S-10 | in_progress | P1 | Expand reviewed source registry beyond the seed 40 using catalog discovery + human review while keeping exact-version provenance. |
 | S-11 | todo | P1 | Define sacred-text tradition/version metadata where the distinction matters to users. |
 
@@ -85,7 +85,7 @@ Priorities:
 | P-04 | todo | P1 | User response-length preference using prepared variants. |
 | P-05 | todo | P1 | Library scope filters: any installed corpus, author/work, collection, and content category. |
 | P-06 | todo | P1 | Sacred-text include/exclude preference using normal category filtering. |
-| P-07 | todo | P1 | Display original + Russian translation when both exist; visibly label machine translation. |
+| P-07 | done | P1 | Display stored original + preferred Russian translation in parallel when both exist; visibly label machine translation. |
 | P-08 | todo | P1 | Graceful no-answer/fallback behavior when semantic relevance is too weak. |
 | P-09 | todo | P1 | Local deletion controls for history/saved encounters and documented backup behavior. |
 | P-10 | todo | P1 | Offline installable corpus packages with integrity verification. |

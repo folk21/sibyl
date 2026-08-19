@@ -2,17 +2,20 @@
 
 ## Scope and entry point
 
-`corpus-builder/` is the build-time Python application that composes three explicit features around the shared contracts in [`../corpus-core/`](../corpus-core/):
+`corpus-builder/` is the build-time Python application that composes four explicit features around the shared contracts in [`../corpus-core/`](../corpus-core/):
 
 ```mermaid
 flowchart TD
     CLI[sibyl_corpus_builder.cli] --> S[sources]
     CLI --> B[build]
     CLI --> C[curation]
+    CLI --> T[translation]
     S --> P[Prepared canonical sources]
     P --> B
     P --> C
     C --> M[Validated curated metadata]
+    M --> T
+    T --> X[Validated local machine translations]
     M --> B
     B --> R[Format-v4 runtime corpus]
 ```
@@ -26,6 +29,7 @@ sibyl_corpus_builder/
   sources/
   build/
   curation/
+  translation/
 ```
 
 `cli.py` is the composition root. It registers feature-owned command adapters and dispatches a parsed command to exactly one feature. It does not know source-site parsing, passage splitting, embeddings, SQLite details, or LLM proposal structure.
@@ -130,7 +134,7 @@ flowchart TD
 
 The automatic splitter/embedding branch remains the fallback/open-ended path for arbitrary user questions. Runtime publication can compose one or more prepared source sets, consume validated curated metadata through the public `curation` API, and materialize exact guided passages/mappings into the same format-v4 database; `build` never imports `curation._internal`. Curation validation receives the already composed canonical documents, so no temporary hand-merged prepared directory is required.
 
-`build-available` is the normal incremental assembly entry point. It discovers immediate prepared children beneath a local work root, filters curated metadata by required `(work_id, text_version_id)` identities, skips curation for entirely unavailable source sets, rejects partial curation availability, and then delegates to the same `build_corpus()` pipeline. The explicit repeatable `build --source ...` path remains for focused/manual selection and later filtering support.
+`build-available` is the normal incremental assembly entry point. It discovers immediate prepared children beneath a local work root, filters curated metadata by required `(work_id, text_version_id)` identities, selects validated translation artifacts by required curated `passage_id` values, skips entirely unavailable curation/translation sets, rejects partial availability, and then delegates to the same `build_corpus()` pipeline. The explicit repeatable `build --source ...` path remains for focused/manual selection and later filtering support.
 
 ### Main files
 
@@ -140,15 +144,15 @@ The automatic splitter/embedding branch remains the fallback/open-ended path for
 
 ### Build internals
 
-- `_internal/available_inputs.py` — deterministic discovery of prepared `data/work/*` inputs plus curated metadata selection based on locally available text-version identities;
+- `_internal/available_inputs.py` — deterministic discovery of prepared `data/work/*` inputs plus curated/translation metadata selection based on locally available text-version/passage identities;
 - `_internal/splitter.py` — paragraph/sentence-aware exact automatic ranges with deterministic IDs;
 - `_internal/hints.py` — deterministic or exact-passage retrieval text;
 - `_internal/embeddings.py` — hash fixture provider and opt-in Sentence Transformers provider;
 - `_internal/embedding_pipeline.py` — provider selection, cache fingerprints, batching, progress, and cache reuse across all prepared source inputs; new vectors are written to the first source cache;
 - `_internal/embedding_cache.py` — SQLite cache of completed embedding inputs;
-- `_internal/database.py` — runtime SQLite writer for automatic passages plus validated curated `passage`/`passage_text` and `guided_question*` rows; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
-- `_internal/manifest.py` — runtime artifact/embedding compatibility manifest plus guided question/mapping counts;
-- `_internal/validation.py` — final format-v4 metadata/foreign-key/guided-schema checks before publication;
+- `_internal/database.py` — runtime SQLite writer for automatic passages, validated curated guided rows, and additional labelled machine-translation `text_version`/`passage_text` realizations; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
+- `_internal/manifest.py` — runtime artifact/embedding compatibility manifest plus guided question/mapping and machine-translation diagnostic counts;
+- `_internal/validation.py` — final format-v4 metadata/foreign-key/guided-schema checks plus machine-translation provenance/original-pair checks before publication;
 - `_internal/runtime_model/specs.py` / `download.py` — explicit recipes and download/publish logic for the Desktop ONNX/tokenizer bundle.
 
 The automatic splitter is not considered a literary curator. Its module documentation explicitly identifies it as a mechanical fallback used for generic retrieval.
@@ -182,6 +186,30 @@ flowchart TD
 
 The external LLM decides literary relevance and natural boundaries. Local Python remains authoritative for exact text identity. Git-tracked curated metadata stores locators/hashes/matches rather than copied literary passages.
 
+## `translation`: curated foreign passages to stored machine translations
+
+Public surface: `sibyl_corpus_builder.translation.api`.
+
+```mermaid
+flowchart TD
+    C[Validated curated passages] --> B[Deterministic translation bundle]
+    B --> L[External large LLM]
+    L --> P[Generated translation proposal]
+    P --> V[Local identity/completeness/hash validation]
+    V --> T[Ignored validated translation artifact]
+    T --> R[Runtime machine_translation passage_text]
+```
+
+- `translation/command.py` — CLI adapter for export/import/revalidation;
+- `translation/api.py` — public feature facade used by build assembly;
+- `translation/models.py` — validated translation values consumed by the runtime writer;
+- `_internal/source.py` — reuses the public curation trust boundary and derives deterministic translation input identities;
+- `_internal/bundle.py` — deterministic local ZIP containing exact curated source text;
+- `_internal/proposal.py` — validates complete external LLM output, provider/model/prompt metadata, source hashes, and stored target-text hashes;
+- `_internal/validation.py` — compact ID/language/hash validation.
+
+Generated target text is local build data under `corpus-builder/data/`; it is not Git-safe curation metadata. The build feature consumes translation public contracts only and persists the target text under format-v4 `machine_translation` text versions.
+
 ## `corpus-core` relationship
 
 The builder depends on the separate local distribution `sibyl-corpus-core`. Shared code is intentionally small:
@@ -214,6 +242,6 @@ make check
 
 ## Generated directories
 
-All paths under `corpus-builder/data/` are local/generated and ignored by Git and shareable archives. They may contain downloaded source artifacts, canonical/prepared texts, embedding caches, LLM curation bundles, runtime models, and published development corpora.
+All paths under `corpus-builder/data/` are local/generated and ignored by Git and shareable archives. They may contain downloaded source artifacts, canonical/prepared texts, embedding caches, LLM curation/translation bundles, generated translation proposals/validated text, runtime models, and published development corpora.
 
 Use [`../docs/WORKFLOW.md`](../docs/WORKFLOW.md) for the operational start/continue flow and [`README.md`](README.md) / [`../docs/USAGE.md`](../docs/USAGE.md) for command details.

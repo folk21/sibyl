@@ -53,3 +53,5 @@ Android currently hosts the shared demo retrieval path. Real Android ONNX/index/
 - [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) — stable system boundaries.
 - [`../docs/TESTS.md`](../docs/TESTS.md) — repository test matrix.
 - [`AGENTS.md`](AGENTS.md) — local development rules.
+
+When the built corpus contains a stored preferred-language translation for a selected passage, shared UI displays the exact original and translation together. Machine translations are visibly labelled and are never generated at runtime.

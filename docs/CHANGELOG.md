@@ -14,6 +14,7 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 
 ### Source ingestion and corpus preparation
 
+- added build-time large-LLM translation of validated curated foreign-language passages, with deterministic source bundles, strict source/hash/provenance import, local generated-text storage, and runtime materialization as labelled machine translations;
 - added author-centric Lib.ru discovery with editable selection, resilient TXT -> HTML -> FB2 acquisition, deterministic canonical preparation, and optional source registration;
 - added Project Gutenberg acquisition and reviewed local-file import paths;
 - introduced reusable prepared canonical-source artifacts shared by automatic corpus builds and LLM curation;
@@ -22,6 +23,7 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 
 ### Local semantic retrieval
 
+- added parallel original + preferred-language translation display for stored passage variants, with explicit machine-translation labelling and no runtime translation calls;
 - added real JVM Desktop retrieval from generated corpus artifacts using local ONNX query embeddings, cosine candidate retrieval, exact SQLite passage resolution, and shared controlled-random selection;
 - adopted `intfloat/multilingual-e5-small` for the current real-corpus path and persisted asymmetric E5 `passage: ` / `query: ` compatibility;
 - added an explicit local runtime-model bundle for Desktop ONNX/tokenizer inference.

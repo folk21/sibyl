@@ -7,7 +7,7 @@ acquiring an accidental network dependency.
 
 from urllib.request import Request, urlopen
 
-_USER_AGENT = "SibylCorpusBuilder/0.6 (+local build-time corpus preparation)"
+_USER_AGENT = "SibylCorpusBuilder/0.7 (+local build-time corpus preparation)"
 
 
 def download(url: str, *, accept: str = "*/*") -> bytes:

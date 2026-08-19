@@ -15,7 +15,7 @@ This document maps Sibyl's stable architecture to the **current repository imple
 |---|---|---|
 | `mobile/` | Shared Kotlin runtime/UI plus Android and JVM Desktop hosts | [`../mobile/IMPLEMENTATION.md`](../mobile/IMPLEMENTATION.md) |
 | `corpus-core/` | Feature-neutral canonical-source contracts, hashes, locators, atomic publication | [`../corpus-core/IMPLEMENTATION.md`](../corpus-core/IMPLEMENTATION.md) |
-| `corpus-builder/` | Source ingestion, automatic corpus build, and large-LLM curation tooling | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
+| `corpus-builder/` | Source ingestion, automatic corpus build, large-LLM curation, and curated machine-translation tooling | [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) |
 | `corpus-format/` | Versioned SQLite/manifest persistence contract | [`../corpus-format/IMPLEMENTATION.md`](../corpus-format/IMPLEMENTATION.md) |
 | `corpus-sources/` | Source/provenance/rights registry | [`../corpus-sources/IMPLEMENTATION.md`](../corpus-sources/IMPLEMENTATION.md) |
 | `corpus-curation/` | Stable guided-question catalog and Git-safe curation metadata | [`../corpus-curation/README.md`](../corpus-curation/README.md) |
@@ -30,15 +30,18 @@ flowchart TD
     P --> B[sibyl_corpus_builder.build]
     P --> C[sibyl_corpus_builder.curation]
     C --> M[Validated curated exact ranges]
+    M --> T[sibyl_corpus_builder.translation]
+    T --> X[Validated local machine translations]
     M --> B
+    X --> B
     B --> R[format-v4 corpus.db + vectors.json + manifest.json]
 ```
 
-`sibyl_corpus_builder.cli` is only the command composition root. `sources` owns discovery, acquisition, normalization, and prepared-source publication. `curation` exports canonical texts plus the stable guided-question catalog, validates external LLM locator/hash proposals locally, and exposes validated exact slices through its public API. `build` owns mechanical free-form passage extraction/embeddings plus materialization of those validated curated slices and mappings into format-v4 runtime artifacts.
+`sibyl_corpus_builder.cli` is only the command composition root. `sources` owns discovery, acquisition, normalization, and prepared-source publication. `curation` exports canonical texts plus the stable guided-question catalog, validates external LLM locator/hash proposals locally, and exposes validated exact slices through its public API. `translation` exports those validated foreign-language curated passages for explicit large-LLM translation and validates complete generated target text/provenance locally. `build` owns mechanical free-form passage extraction/embeddings plus materialization of validated curated slices, mappings, and optional machine-translation text realizations into format-v4 runtime artifacts.
 
 The shared `sibyl_corpus_core` package owns only feature-neutral prepared-source contracts and deterministic primitives. It does not own source adapters, embeddings, curation proposal semantics, or persisted runtime corpus format.
 
-The current automatic real-text build uses `intfloat/multilingual-e5-small`. Exact passage text is indexed as retrieval text for the first real-corpus milestone; completed embeddings are cached beside prepared sources so interrupted builds can resume. The normal local assembly discovers all prepared source sets beneath the work root and compatible curated metadata, then atomically replaces one current runtime corpus while reusing those caches. LLM curation is independent of the automatic splitter: the external model chooses literary relevance and natural ranges, while local Python remains authoritative for exact canonical text, locators, and hashes.
+The current automatic real-text build uses `intfloat/multilingual-e5-small`. Exact passage text is indexed as retrieval text for the first real-corpus milestone; completed embeddings are cached beside prepared sources so interrupted builds can resume. The normal local assembly discovers all prepared source sets beneath the work root, compatible curated metadata, and compatible validated local machine translations, then atomically replaces one current runtime corpus while reusing those caches. LLM curation is independent of the automatic splitter: the external model chooses literary relevance and natural ranges, while local Python remains authoritative for exact canonical text, locators, and hashes.
 
 ## Runtime wiring
 
@@ -61,7 +64,7 @@ Shared Kotlin keeps free-form and guided lookup as separate contracts. `LocalRet
 
 The Desktop development host uses one read-only `SqliteCorpusRepository` for both corpus hydration paths. Format-v4 guided lookup reads only persisted `guided_question*` tables and exact `passage_text`; free-form lookup continues to use ONNX E5 plus `vectors.json`. Format v3 remains readable for free-form development corpora, while guided mode is unavailable.
 
-`SibylApp` exposes a guided-question selector only when the runtime reports at least one mapped question, otherwise the existing free-form input remains the only mode. “Another passage” repeats the same retrieval mode/prompt and runs `SelectionEngine` again.
+`SibylApp` exposes a guided-question selector only when the runtime reports at least one mapped question, otherwise the existing free-form input remains the only mode. When a selected passage contains an original plus a preferred-language translation, shared UI renders both stored texts in parallel and labels machine translation explicitly. “Another passage” repeats the same retrieval mode/prompt and runs `SelectionEngine` again.
 
 ## Runtime artifacts and compatibility
 
@@ -112,3 +115,7 @@ Update the document that owns the changed fact:
 - operational sequence → `WORKFLOW.md`;
 - command syntax/options → `USAGE.md`;
 - setup/toolchain details → `INSTALLATION.md`.
+
+## Curated machine translation
+
+`sibyl_corpus_builder.translation` exports deterministic bundles from validated curated foreign-language passages, imports complete external large-LLM translations with source/provider/model/prompt hashes, and exposes validated local translation values to `build`. `build-available` auto-discovers compatible files under the configured local translation root. The SQLite writer creates `machine_translation` text versions and additional `passage_text` rows without changing guided/vector ranking. Shared UI uses stored variants to render original plus preferred translation; it never translates at runtime.

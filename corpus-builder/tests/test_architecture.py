@@ -6,7 +6,7 @@ from pathlib import Path
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _BUILDER_PACKAGE = _REPOSITORY_ROOT / "corpus-builder" / "src" / "sibyl_corpus_builder"
 _CORE_PACKAGE = _REPOSITORY_ROOT / "corpus-core" / "src" / "sibyl_corpus_core"
-_FEATURES = {"sources", "build", "curation"}
+_FEATURES = {"sources", "build", "curation", "translation"}
 
 
 def _imports(path: Path) -> list[str]:

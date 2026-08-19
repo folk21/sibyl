@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This is Sibyl's canonical **where do I start and what do I run next?** guide. It connects source preparation, optional large-LLM curation, format-v4 corpus assembly, and the current Desktop real-corpus runtime.
+This is Sibyl's canonical **where do I start and what do I run next?** guide. It connects source preparation, optional large-LLM curation, optional build-time machine translation, format-v4 corpus assembly, and the current Desktop real-corpus runtime.
 
 Keep the happy-path sequence here. Use [`USAGE.md`](USAGE.md) for command syntax, optional flags, and alternate source inputs; [`SOURCES.md`](SOURCES.md) for provenance/rights/normalization policy; and implementation guides when you need code ownership.
 
@@ -13,9 +13,11 @@ Keep the happy-path sequence here. Use [`USAGE.md`](USAGE.md) for command syntax
 | A new supported author/catalog URL | [Prepare canonical works](#1-prepare-canonical-works) |
 | A reviewed `selection.toml` | Acquire the included works, then prepare canonical input |
 | Cached source artifacts | Materialize prepared canonical input |
-| A prepared `data/work/<author>/` directory | Choose [LLM curation](#2-large-llm-curation-path) and/or build the [runtime corpus](#5-build-the-runtime-corpus) |
-| An LLM proposal patch | [Import and validate the proposal](#4-import-and-validate-the-llm-proposal) |
-| A built corpus directory | [Run the real Desktop runtime](#6-run-the-current-real-desktop-runtime) |
+| A prepared `data/work/<author>/` directory | Choose [LLM curation](#2-large-llm-curation-path) and/or build the [runtime corpus](#6-build-the-runtime-corpus) |
+| An LLM curation proposal patch | [Import and validate the proposal](#4-import-and-validate-the-llm-proposal) |
+| Validated foreign-language curated passages | [Translate curated passages at build time](#5-translate-curated-foreign-language-passages) |
+| A validated local translation artifact | [Build the runtime corpus](#6-build-the-runtime-corpus) |
+| A built corpus directory | [Run the real Desktop runtime](#7-run-the-current-real-desktop-runtime) |
 | Only a clean checkout | Follow [`INSTALLATION.md`](INSTALLATION.md), then start with a source or `make smoke-corpus` |
 
 When debugging implementation, follow the owning feature:
@@ -25,6 +27,7 @@ When debugging implementation, follow the owning feature:
 | discover / acquire / normalize / prepare / register | `sibyl_corpus_builder.sources` |
 | inspect passages / embeddings / build / validate | `sibyl_corpus_builder.build` |
 | curation export / proposal import / validation | `sibyl_corpus_builder.curation` |
+| curated translation export / import / validation | `sibyl_corpus_builder.translation` |
 | prepared source contract / exact locators / hashes | `sibyl_corpus_core` |
 
 The root `sibyl_corpus_builder.cli` only composes feature command surfaces. See [`../corpus-builder/IMPLEMENTATION.md`](../corpus-builder/IMPLEMENTATION.md) for concrete code paths.
@@ -37,8 +40,10 @@ flowchart TD
     C --> L[Large-LLM curation]
     C --> A[Automatic splitter + E5 embeddings]
     L --> M[Validated curated mappings]
+    M --> T[Optional build-time translation]
     A --> B[Format-v4 corpus assembly]
     M --> B
+    T --> B
     B --> R[Desktop free-form + guided runtime]
 ```
 
@@ -89,7 +94,28 @@ Selection decisions and source-version rights status are independent. `decision 
 
 **For LLM curation, stop here. Do not run `inspect-passages` first.** The curator selects meaningful ranges directly from canonical text; the automatic splitter is a separate generic-retrieval path.
 
-### 1.5 Optional permanent registration
+### 1.5 Foreign originals such as Shakespeare
+
+Foreign originals use the same prepared-source boundary; there is no separate runtime engine. When no author-catalog discovery adapter exists, add/review a concrete source record under `corpus-sources/` (for example a Project Gutenberg text version) or import a reviewed local UTF-8 artifact, then use the registry flow:
+
+```bash
+sibyl-corpus fetch \
+  --registry ../corpus-sources \
+  --work <shakespeare-work-id> \
+  --cache data/raw \
+  [--allow-unapproved]
+
+sibyl-corpus prepare \
+  --registry ../corpus-sources \
+  --work <shakespeare-work-id> \
+  --cache data/raw \
+  --output data/work/shakespeare \
+  [--allow-unapproved]
+```
+
+Repeat `--work` on `prepare` for multiple Shakespeare plays. The prepared manifest must preserve `language = "en"`, `original_language = "en"`, and `text_role = "original"`. After that, curation and translation use exactly the same steps as any other author. `--allow-unapproved` is a development-only override; external LLM export still requires a separate rights decision.
+
+### 1.6 Optional permanent registration
 
 When the acquired concrete versions are worth preserving as project metadata:
 
@@ -214,7 +240,59 @@ sibyl-corpus validate-curation \
 
 Any stale locator/hash fails. Re-curate or deliberately migrate the mapping; never silently retarget an old locator.
 
-## 5. Build the runtime corpus
+
+## 5. Translate curated foreign-language passages
+
+Use this optional stage after a foreign-language author has validated curated passages. The first translation slice deliberately translates **curated passages only**; automatic splitter passages remain available for multilingual free-form retrieval in the original language and may have no Russian rendition yet.
+
+For Shakespeare-like English originals, from `corpus-builder/`:
+
+```bash
+sibyl-corpus export-translation-bundle \
+  --source data/work/shakespeare \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/shakespeare-v1.json \
+  --target-language ru \
+  --output data/translations/shakespeare-ru-bundle.zip
+```
+
+Translation export contains exact curated literary source text and therefore requires approved rights metadata by default. Use `--allow-unapproved` only after separately confirming that the concrete source version may be uploaded to the external translation service.
+
+The deterministic ZIP contains a manifest plus exact source passages pinned by `passage_id`, source text version, source language, and source SHA-256. Give this bundle to the large LLM and ask it to translate every passage into Russian without adding commentary, summaries, quotation marks, or omitted passages. The returned proposal is local generated data, for example:
+
+```text
+data/translations/proposals/shakespeare-ru-v1.json
+```
+
+Its top-level metadata must identify the source bundle/curation, target language, provider/model, prompt version, and `translation_method = "large_llm"`. Every passage entry contains the original `passage_id`, original `source_text_sha256`, and generated `text`.
+
+Import it locally:
+
+```bash
+sibyl-corpus import-translation \
+  --source data/work/shakespeare \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/shakespeare-v1.json \
+  --target-language ru \
+  --input data/translations/proposals/shakespeare-ru-v1.json \
+  --output data/translations/validated/shakespeare-ru-v1.json
+```
+
+The importer does **not** claim to judge literary translation quality. It revalidates the exact current curated source, source bundle identity, completeness, source hashes, target language, provider/model/prompt provenance, and derives exact target-text SHA-256 values without rewriting the returned translation. Review the generated Russian text before publication if quality matters.
+
+Revalidate later with:
+
+```bash
+sibyl-corpus validate-translation \
+  --source data/work/shakespeare \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/shakespeare-v1.json \
+  --translation data/translations/validated/shakespeare-ru-v1.json
+```
+
+If canonical text or curation changes, stale translation source hashes fail. Regenerate or deliberately migrate the translation; never silently attach generated Russian text to a different original passage. Generated proposal/validated translation files contain literary text and remain under ignored `corpus-builder/data/`, never Git.
+
+## 6. Build the runtime corpus
 
 Authors remain independent preparation artifacts under `data/work/<name>/`. The normal runtime build does not require a hand-maintained aggregate such as `data/work/russian-classics` and does not require listing every author again.
 
@@ -232,10 +310,11 @@ sibyl-corpus build-available \
   --source-root corpus-builder/data/work \
   --questions corpus-curation/questions.json \
   --curation-root corpus-curation/curated \
+  --translation-root corpus-builder/data/translations/validated \
   --output corpus-builder/data/output
 ```
 
-`build-available` discovers every immediate child of `data/work/` that contains a prepared `manifest.json`. Raw downloads or unfinished work directories are ignored until they reach the preparation boundary. It also discovers validated curated `*.json` files. A curation is included only when all text versions it references are locally available; curation for an entirely unavailable author is skipped, while a partially available curation fails instead of being silently truncated. Every selected curated range is then revalidated against exact canonical text before publication.
+`build-available` discovers every immediate child of `data/work/` that contains a prepared `manifest.json`. Raw downloads or unfinished work directories are ignored until they reach the preparation boundary. It also discovers validated curated `*.json` files and local validated machine-translation `*.json` files when the translation root exists. A curation is included only when all text versions it references are locally available; curation for an entirely unavailable author is skipped, while a partially available curation fails instead of being silently truncated. Every selected curated range is then revalidated against exact canonical text before publication. A translation is included only when every curated `passage_id` it references is selected; entirely unavailable translations are skipped, while partial availability fails instead of publishing an accidental subset.
 
 The automatic splitter/E5 branch is still built for every available prepared text, so free-form questions remain available even for authors without guided curation. Compatible embedding caches are read from all prepared source directories, which means adding Tolstoy after Dostoevsky does not require recomputing Dostoevsky vectors. Only missing exact embedding inputs are computed.
 
@@ -250,7 +329,7 @@ corpus-builder/data/output/
 
 The directory is atomically replaced only after validation succeeds. Per-author runtime outputs are therefore optional debugging artifacts, not part of the normal incremental workflow. For focused/manual assembly or future filtering, the explicit repeatable `sibyl-corpus build --source ... --curation ...` command remains available; see [`USAGE.md`](USAGE.md).
 
-## 6. Run the current real Desktop runtime
+## 7. Run the current real Desktop runtime
 
 Prepare the matching local runtime model once if needed, then use the default current corpus from the repository root:
 
@@ -263,15 +342,16 @@ After adding another author, the normal loop is simply:
 
 ```text
 prepare/curate new author
+-> optionally translate curated foreign passages
 -> make build-runtime-corpus
 -> make run-desktop-real
 ```
 
-For a v4 corpus with guided mappings, Desktop shows a **Guided question** mode containing only prompts that actually have candidates in the published corpus, plus the existing **Own question** mode. Guided actions use local SQLite mappings only; free-form actions continue to use the local E5 model/vector index. Existing v3 development corpora remain free-form-only.
+For a v4 corpus with guided mappings, Desktop shows a **Guided question** mode containing only prompts that actually have candidates in the published corpus, plus the existing **Own question** mode. When a passage has a preferred-language translation, the shared UI shows the exact stored original and translation together; machine translations are visibly labelled. Guided actions use local SQLite mappings only; free-form actions continue to use the local E5 model/vector index. Existing v3 development corpora remain free-form-only.
 
 Use [`USAGE.md`](USAGE.md) for explicit source/output overrides and [`INSTALLATION.md`](INSTALLATION.md) for host-specific native setup.
 
-## 7. Current milestone boundary
+## 8. Current milestone boundary
 
 Implemented now:
 
@@ -283,15 +363,18 @@ Implemented now:
 - automatic splitter + E5 retrieval for free-form questions;
 - Desktop guided-question dropdown and `question_id -> curated candidates -> SelectionEngine` routing without runtime embedding;
 - v3 Desktop free-form read compatibility during the migration;
-- deterministic offline tests for build/format/shared guided selection and Desktop SQLite lookup.
+- deterministic offline tests for build/format/shared guided selection and Desktop SQLite lookup;
+- build-time curated-passage machine-translation bundles/import validation and format-v4 materialization;
+- parallel original + preferred translation display with explicit machine-translation labelling.
 
 Still later:
 
+- translation of automatic non-curated passages or whole works;
 - Android real-corpus guided integration;
 - richer thematic guided-question browsing;
 - persistent history/saved encounters and prepared short/extended curated variants.
 
-## 8. Repository/data boundaries
+## 9. Repository/data boundaries
 
 | Data | Location | Git/shareable archive |
 |---|---|---|
@@ -301,6 +384,7 @@ Still later:
 | Downloaded/cached source artifacts | `corpus-builder/data/raw/` | no |
 | Prepared canonical texts | `corpus-builder/data/work/` | no |
 | Curation bundle with full canonical texts | `corpus-builder/data/curation/` | no |
+| Translation bundles/proposals/validated generated text | `corpus-builder/data/translations/` | no |
 | Embedding caches, model bundles, corpus output | `corpus-builder/data/` | no |
 
 If you are unsure where to continue, identify the last durable/local artifact you produced and return to the table at the top of this document.

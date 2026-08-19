@@ -51,6 +51,20 @@ data class PassageVariant(
             ?: texts.minByOrNull { it.role.displayPriority() }
             ?: error("Passage variant must contain at least one text version")
     }
+
+    /**
+     * Returns exact stored texts for reading: original first, then the preferred-language translation when present.
+     *
+     * Same-language originals are returned once. Human translation wins over machine translation for the requested
+     * language through [preferredText]; no runtime translation or rewriting is performed.
+     */
+    fun parallelDisplayTexts(language: String = "ru"): List<PassageText> {
+        val preferred = preferredText(language)
+        val original = texts.firstOrNull { it.role == PassageTextRole.ORIGINAL }
+        if (original == null || preferred.role == PassageTextRole.ORIGINAL) return listOf(preferred)
+        if (original.language == preferred.language && original.text == preferred.text) return listOf(original)
+        return listOf(original, preferred)
+    }
 }
 
 private fun PassageTextRole.displayPriority(): Int = when (this) {

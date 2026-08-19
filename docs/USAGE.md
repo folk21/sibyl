@@ -10,7 +10,7 @@ From the repository root:
 
 | Command | Purpose |
 |---|---|
-| `make build-runtime-corpus` | Rebuild the single runtime corpus from all locally prepared source sets and compatible curated metadata. |
+| `make build-runtime-corpus` | Rebuild the single runtime corpus from all locally prepared source sets and compatible curated metadata/validated machine translations. |
 | `make run-desktop` | Run the deterministic synthetic Compose Desktop demo. |
 | `make run-desktop-real` | Run Desktop with the default generated corpus/model paths. |
 | `make run-desktop-real CORPUS_DIR=<dir> MODEL_DIR=<dir>` | Run Desktop with explicit generated corpus/model directories. |
@@ -122,6 +122,49 @@ sibyl-corpus validate-curation --source <prepared-dir> --questions <questions.js
 
 Use after canonical-source or curated-metadata changes. Stale hashes/locators fail validation rather than being retargeted silently.
 
+## Build-time machine-translation commands
+
+These commands translate only already validated curated passages. Generated target text stays under ignored local `corpus-builder/data/`.
+
+### `export-translation-bundle`
+
+```text
+sibyl-corpus export-translation-bundle \
+  --source <prepared-dir> \
+  --questions <questions.json> \
+  --curation <curated.json> \
+  --target-language <lang> \
+  --output <bundle.zip> [--allow-unapproved]
+```
+
+The bundle contains exact curated source text and deterministic source hashes. Export requires approved source rights metadata by default; `--allow-unapproved` is an explicit local-review override after separately confirming external-service upload rights. Passages already in the target language are omitted; export fails if nothing requires translation.
+
+### `import-translation`
+
+```text
+sibyl-corpus import-translation \
+  --source <prepared-dir> \
+  --questions <questions.json> \
+  --curation <curated.json> \
+  --target-language <lang> \
+  --input <translation-proposal.json> \
+  --output <validated-translation.json>
+```
+
+The proposal must be complete for the exported bundle and identify `translation_provider`, `translation_model`, `prompt_version`, and `translation_method = "large_llm"`. Import pins every generated text to an exact curated `passage_id`/source hash and derives target-text SHA-256 without rewriting the generated literary wording.
+
+### `validate-translation`
+
+```text
+sibyl-corpus validate-translation \
+  --source <prepared-dir> \
+  --questions <questions.json> \
+  --curation <curated.json> \
+  --translation <validated-translation.json>
+```
+
+Revalidates generated text against the current canonical source and curated passage identities.
+
 ## Automatic-build commands
 
 ### `inspect-passages`
@@ -144,10 +187,11 @@ sibyl-corpus build-available \
   --source-root <prepared-root> \
   --questions <questions.json> \
   --curation-root <curated-dir> \
+  [--translation-root <validated-translations-dir>] \
   --output <corpus-dir>
 ```
 
-`--source-root` considers only immediate child directories containing a prepared `manifest.json`; raw/acquired directories that have not reached preparation are ignored. Curated `*.json` files are selected when all of their referenced `(work_id, text_version_id)` values are present in the discovered prepared source sets. Curations for entirely unavailable authors are skipped; a partially available curation is rejected instead of being silently truncated. All selected curation is then revalidated against exact canonical text before publication.
+`--source-root` considers only immediate child directories containing a prepared `manifest.json`; raw/acquired directories that have not reached preparation are ignored. Curated `*.json` files are selected when all of their referenced `(work_id, text_version_id)` values are present in the discovered prepared source sets. Validated translation `*.json` files are selected when every curated `passage_id` they require is present; entirely unavailable translations are skipped and partially available ones are rejected. Curations for entirely unavailable authors are skipped; a partially available curation is rejected instead of being silently truncated. All selected curation is then revalidated against exact canonical text before publication.
 
 The repository convenience target uses this command with the standard local paths and publishes one current runtime corpus directly at `corpus-builder/data/output`:
 
@@ -166,10 +210,11 @@ sibyl-corpus build --config <config.toml> \
   --source <prepared-dir> [--source <prepared-dir-2> ...] \
   [--questions <questions.json>] \
   [--curation <curated.json> ...] \
+  [--translation <validated-translation.json> ...] \
   --output <corpus-dir>
 ```
 
-`--source` and `--curation` are repeatable. Prepared source sets are composed in memory; duplicate text-version identities and conflicting metadata for the same `work_id` are rejected instead of being silently merged. Supplying any `--curation` requires `--questions`. Curation inputs are revalidated against the combined prepared canonical sources during assembly.
+`--source`, `--curation`, and `--translation` are repeatable. Prepared source sets are composed in memory; duplicate text-version identities and conflicting metadata for the same `work_id` are rejected instead of being silently merged. Supplying any `--curation` requires `--questions`. Curation inputs are revalidated against the combined prepared canonical sources during assembly.
 
 With `config/real-text.toml`, both build modes use the optional Sentence Transformers provider and `intfloat/multilingual-e5-small` for free-form retrieval. Compatible embedding caches are read from every prepared source directory; curated passages do not receive query embeddings merely to support guided lookup.
 

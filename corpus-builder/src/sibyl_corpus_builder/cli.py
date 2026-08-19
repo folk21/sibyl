@@ -2,11 +2,12 @@
 
 The CLI is intentionally the only top-level orchestration entry point in ``sibyl_corpus_builder``.
 It does not implement source parsing, passage splitting, embedding logic, or LLM curation. Instead
-it composes three feature command adapters:
+it composes four feature command adapters:
 
     sources  -> external text to prepared canonical sources
     build    -> prepared sources plus optional validated curation to runtime corpus artifacts
     curation -> prepared sources through large-LLM selection to verified curated metadata
+    translation -> curated exact passages through large-LLM translation to validated local text
 
 For the end-to-end operational sequence, start with ``docs/WORKFLOW.md``. For implementation
 ownership and package boundaries, see ``corpus-builder/IMPLEMENTATION.md``.
@@ -17,8 +18,9 @@ import argparse
 from .build import command as build_command
 from .curation import command as curation_command
 from .sources import command as sources_command
+from .translation import command as translation_command
 
-_COMMAND_MODULES = (sources_command, build_command, curation_command)
+_COMMAND_MODULES = (sources_command, build_command, curation_command, translation_command)
 
 
 def build_parser() -> argparse.ArgumentParser:
