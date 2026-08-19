@@ -1,0 +1,3 @@
+*.log linguist-detectable=false
+data/*.py linguist-detectable=false
+
