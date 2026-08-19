@@ -58,6 +58,7 @@ Priorities:
 | C-10 | todo | P2 | Benchmark corpus/index size, build cost, and retrieval quality for 10k / 50k / 100k+ passage packages. |
 | C-11 | done | P0 | Add the first large-LLM curation infrastructure: 66 stable guided prompts, deterministic canonical-text export bundles, Git-safe locator/hash proposals, and local exact-text import/validation. |
 | C-12 | done | P0 | Publish curated guided-question mappings into the format-v4 runtime corpus and route guided question IDs to candidate pools while retaining `SelectionEngine` serendipity. |
+| C-13 | done | P0 | Assemble one runtime corpus from all locally available independently prepared source sets, automatically include compatible curated metadata, and reuse compatible embedding caches. |
 
 ## Android retrieval slice
 

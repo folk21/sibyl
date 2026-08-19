@@ -9,10 +9,12 @@ inference and direct curation-file reads remain outside this feature.
 """
 
 from .api import (
+    curation_source_keys,
     export_curation_bundle,
     import_curation,
     load_question_catalog,
     load_validated_curation,
+    load_validated_curation_from_documents,
     validate_curated_curation,
 )
 from .models import (
@@ -29,9 +31,11 @@ __all__ = [
     "QuestionCatalog",
     "ValidatedCuratedPassage",
     "ValidatedCuration",
+    "curation_source_keys",
     "export_curation_bundle",
     "import_curation",
     "load_question_catalog",
     "load_validated_curation",
+    "load_validated_curation_from_documents",
     "validate_curated_curation",
 ]

@@ -10,6 +10,7 @@ From the repository root:
 
 | Command | Purpose |
 |---|---|
+| `make build-runtime-corpus` | Rebuild the single runtime corpus from all locally prepared source sets and compatible curated metadata. |
 | `make run-desktop` | Run the deterministic synthetic Compose Desktop demo. |
 | `make run-desktop-real` | Run Desktop with the default generated corpus/model paths. |
 | `make run-desktop-real CORPUS_DIR=<dir> MODEL_DIR=<dir>` | Run Desktop with explicit generated corpus/model directories. |
@@ -133,27 +134,44 @@ sibyl-corpus inspect-passages --config <config.toml> --source <prepared-dir> --o
 
 The splitter preserves exact canonical `chars:start:end` locators and natural boundaries where possible. It is a mechanical generic-retrieval path, not literary curation.
 
-### `build`
+### `build-available`
 
-Builds the current format-v4 runtime corpus from prepared canonical sources. The automatic splitter/embedding branch is always built for free-form retrieval; validated guided curation can be materialized into the same SQLite database.
-
-Free-form only:
+Builds the normal local runtime corpus from every prepared source set currently available beneath one work root. This is the preferred command when authors are prepared incrementally.
 
 ```text
-sibyl-corpus build --config <config.toml> --source <prepared-dir> --output <corpus-dir>
-```
-
-With guided curation:
-
-```text
-sibyl-corpus build --config <config.toml> --source <prepared-dir> \
-  --questions <questions.json> --curation <curated.json> [--curation <curated-2.json> ...] \
+sibyl-corpus build-available \
+  --config <config.toml> \
+  --source-root <prepared-root> \
+  --questions <questions.json> \
+  --curation-root <curated-dir> \
   --output <corpus-dir>
 ```
 
-`--curation` is repeatable. Supplying any `--curation` requires `--questions`. `--questions` by itself is allowed and persists the selected catalog with zero mappings. Curation inputs are revalidated against the prepared canonical sources during assembly; stale hashes/locators, unknown question IDs, duplicate curated passage IDs, or duplicate mappings fail before atomic publication.
+`--source-root` considers only immediate child directories containing a prepared `manifest.json`; raw/acquired directories that have not reached preparation are ignored. Curated `*.json` files are selected when all of their referenced `(work_id, text_version_id)` values are present in the discovered prepared source sets. Curations for entirely unavailable authors are skipped; a partially available curation is rejected instead of being silently truncated. All selected curation is then revalidated against exact canonical text before publication.
 
-With `config/real-text.toml`, the free-form branch uses the optional Sentence Transformers provider and `intfloat/multilingual-e5-small`. Completed embedding inputs are cached under the prepared source directory and are reused when their exact text/configuration identity still matches. Curated passages do not receive query embeddings merely to support guided lookup.
+The repository convenience target uses this command with the standard local paths and publishes one current runtime corpus directly at `corpus-builder/data/output`:
+
+```bash
+make build-runtime-corpus
+```
+
+Re-running the command after preparing a new author rebuilds only the final immutable runtime artifact. Compatible embedding caches from all discovered source sets are reused, so existing authors do not need to be re-embedded.
+
+### `build`
+
+Builds a format-v4 runtime corpus from explicitly selected prepared source directories. Keep this command for focused/debug builds and future filtered assembly; the normal all-available workflow uses `build-available`.
+
+```text
+sibyl-corpus build --config <config.toml> \
+  --source <prepared-dir> [--source <prepared-dir-2> ...] \
+  [--questions <questions.json>] \
+  [--curation <curated.json> ...] \
+  --output <corpus-dir>
+```
+
+`--source` and `--curation` are repeatable. Prepared source sets are composed in memory; duplicate text-version identities and conflicting metadata for the same `work_id` are rejected instead of being silently merged. Supplying any `--curation` requires `--questions`. Curation inputs are revalidated against the combined prepared canonical sources during assembly.
+
+With `config/real-text.toml`, both build modes use the optional Sentence Transformers provider and `intfloat/multilingual-e5-small` for free-form retrieval. Compatible embedding caches are read from every prepared source directory; curated passages do not receive query embeddings merely to support guided lookup.
 
 ### `validate`
 

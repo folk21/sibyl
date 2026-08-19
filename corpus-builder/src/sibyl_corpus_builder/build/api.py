@@ -17,13 +17,20 @@ exact stored passages plus question mappings in the same runtime corpus.
 """
 
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
 from sibyl_corpus_core.atomic import staging_directory
-from sibyl_corpus_core.prepared_sources import load_prepared_sources
+from sibyl_corpus_core.models import SourceDocument
+from sibyl_corpus_core.prepared_sources import load_prepared_source_sets, load_prepared_sources
 
-from ..curation import load_question_catalog, load_validated_curation
+from ..curation import load_question_catalog, load_validated_curation_from_documents
 from ..curation.models import QuestionCatalog, ValidatedCuratedPassage
+from ._internal.available_inputs import (
+    discover_curation_paths,
+    discover_prepared_source_dirs,
+    select_available_curations,
+)
 from ._internal.database import create_database
 from ._internal.embedding_pipeline import resolve_embeddings
 from ._internal.hints import DeterministicHintGenerator, PassageTextHintGenerator
@@ -32,6 +39,16 @@ from ._internal.runtime_model import download_runtime_model
 from ._internal.splitter import split_document
 from ._internal.validation import validate_corpus
 from .config import BuilderConfig, load_config
+
+
+def _normalize_source_dirs(source_dir: Path | Sequence[Path]) -> list[Path]:
+    """Normalizes the backward-compatible build API to one or more prepared directories."""
+    if isinstance(source_dir, Path):
+        return [source_dir]
+    result = [Path(value) for value in source_dir]
+    if not result:
+        raise ValueError("At least one --source is required")
+    return result
 
 
 def _hint_generator(config: BuilderConfig):
@@ -44,7 +61,7 @@ def _hint_generator(config: BuilderConfig):
 
 def _load_guided_inputs(
     *,
-    source_dir: Path,
+    documents: list[SourceDocument],
     questions_path: Path | None,
     curation_paths: list[Path],
 ) -> tuple[QuestionCatalog | None, list[ValidatedCuratedPassage]]:
@@ -58,8 +75,8 @@ def _load_guided_inputs(
     seen_passage_ids: set[str] = set()
     seen_mappings: set[tuple[str, str]] = set()
     for curation_path in curation_paths:
-        validated = load_validated_curation(
-            source_dir=source_dir,
+        validated = load_validated_curation_from_documents(
+            documents=documents,
             questions_path=questions_path,
             curation_path=curation_path,
         )
@@ -95,6 +112,55 @@ def _load_guided_inputs(
     return catalog, curated
 
 
+def build_available_corpus(
+    config: BuilderConfig,
+    source_root: Path,
+    output_dir: Path,
+    *,
+    questions_path: Path | None = None,
+    curation_root: Path | None = None,
+) -> None:
+    """Builds one runtime corpus from every prepared source set currently available locally."""
+    source_dirs = discover_prepared_source_dirs(source_root)
+    documents = load_prepared_source_sets(source_dirs)
+    discovered_curations = discover_curation_paths(curation_root)
+    if discovered_curations and questions_path is None:
+        raise ValueError("--questions is required when --curation-root contains curated metadata")
+    selected_curations, skipped_curations = select_available_curations(
+        documents=documents,
+        curation_paths=discovered_curations,
+    )
+
+    print(
+        f"Discovered {len(source_dirs)} prepared source sets under {source_root}:",
+        flush=True,
+    )
+    for source_dir in source_dirs:
+        print(f"  {source_dir}", flush=True)
+    if curation_root is not None:
+        print(
+            f"Selected {len(selected_curations)} curated metadata files from {curation_root}.",
+            flush=True,
+        )
+        for path in selected_curations:
+            print(f"  {path}", flush=True)
+        if skipped_curations:
+            print(
+                "Skipped curation files whose prepared text versions are not available locally:",
+                flush=True,
+            )
+            for path in skipped_curations:
+                print(f"  {path}", flush=True)
+
+    build_corpus(
+        config,
+        source_dirs,
+        output_dir,
+        questions_path=questions_path,
+        curation_paths=list(selected_curations),
+    )
+
+
 def inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None:
     """Writes automatic exact passage candidates as JSONL for developer inspection."""
     config = load_config(config_path)
@@ -122,7 +188,7 @@ def inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None:
 
 def build_corpus(
     config: BuilderConfig,
-    source_dir: Path,
+    source_dir: Path | Sequence[Path],
     output_dir: Path,
     *,
     questions_path: Path | None = None,
@@ -130,15 +196,16 @@ def build_corpus(
 ) -> None:
     """Builds, validates, and atomically publishes free-form plus optional guided runtime data."""
     curation_paths = list(curation_paths or [])
+    source_dirs = _normalize_source_dirs(source_dir)
     print("[1/5] Loading sources, passages, and guided curation...", flush=True)
-    documents = load_prepared_sources(source_dir)
+    documents = load_prepared_source_sets(source_dirs)
     passages = [
         passage
         for document in documents
         for passage in split_document(document, config.passages)
     ]
     question_catalog, curated_passages = _load_guided_inputs(
-        source_dir=source_dir,
+        documents=documents,
         questions_path=questions_path,
         curation_paths=curation_paths,
     )
@@ -168,7 +235,7 @@ def build_corpus(
         flush=True,
     )
     print("[2/5] Resolving embeddings...", flush=True)
-    vectors = resolve_embeddings(config, hints, source_dir.resolve())
+    vectors = resolve_embeddings(config, hints, source_dirs)
 
     output_dir = output_dir.resolve()
     with staging_directory(output_dir) as staging_dir:
@@ -209,6 +276,7 @@ def build_corpus(
 
 
 __all__ = [
+    "build_available_corpus",
     "build_corpus",
     "download_runtime_model",
     "inspect_passages",

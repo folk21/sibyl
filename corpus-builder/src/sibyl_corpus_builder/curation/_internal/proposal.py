@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 
 from sibyl_corpus_core.locators import parse_character_locator
+from sibyl_corpus_core.models import SourceDocument
+from sibyl_corpus_core.prepared_sources import load_prepared_sources
 
 from ..models import CuratedQuestionMatch, ValidatedCuratedPassage, ValidatedCuration
 from .questions import load_question_catalog
@@ -35,7 +37,7 @@ def import_curation(
 ) -> Path:
     """Validates an LLM proposal and writes normalized locator/hash/question metadata."""
     catalog = load_question_catalog(questions_path)
-    documents = document_index(source_dir)
+    documents = document_index(load_prepared_sources(source_dir))
     raw = json.loads(input_path.read_text(encoding="utf-8"))
     if raw.get("schema_version") != 1:
         raise ValueError(f"Unsupported curation proposal schema_version in {input_path}")
@@ -94,12 +96,44 @@ def import_curation(
     return output_path
 
 
+def curation_source_keys(curation_path: Path) -> frozenset[tuple[str, str]]:
+    """Returns prepared text-version identities required by one normalized curation file."""
+    raw = json.loads(curation_path.read_text(encoding="utf-8"))
+    if raw.get("schema_version") != 1:
+        raise ValueError(f"Unsupported curated curation schema_version in {curation_path}")
+    raw_passages = raw.get("passages")
+    if not isinstance(raw_passages, list) or not raw_passages:
+        raise ValueError("Curated mapping contains no passages")
+
+    keys: set[tuple[str, str]] = set()
+    for raw_passage in raw_passages:
+        if not isinstance(raw_passage, dict):
+            raise ValueError("Curated passage must be an object")
+        work_id = str(raw_passage.get("work_id", "")).strip()
+        text_version_id = str(raw_passage.get("text_version_id", "")).strip()
+        if not work_id or not text_version_id:
+            raise ValueError("Curated passage requires work_id and text_version_id")
+        keys.add((work_id, text_version_id))
+    return frozenset(keys)
+
+
 def load_validated_curation(
     *, source_dir: Path, questions_path: Path, curation_path: Path
 ) -> ValidatedCuration:
-    """Revalidates curated metadata and returns exact canonical slices for corpus assembly."""
+    """Revalidates one prepared source set and returns exact slices for corpus assembly."""
+    return load_validated_curation_from_documents(
+        documents=load_prepared_sources(source_dir),
+        questions_path=questions_path,
+        curation_path=curation_path,
+    )
+
+
+def load_validated_curation_from_documents(
+    *, documents: list[SourceDocument], questions_path: Path, curation_path: Path
+) -> ValidatedCuration:
+    """Revalidates curation against an already composed canonical source set."""
     catalog = load_question_catalog(questions_path)
-    documents = document_index(source_dir)
+    document_map = document_index(documents)
     raw = json.loads(curation_path.read_text(encoding="utf-8"))
     if raw.get("schema_version") != 1:
         raise ValueError(f"Unsupported curated curation schema_version in {curation_path}")
@@ -119,7 +153,7 @@ def load_validated_curation(
         if not isinstance(raw_passage, dict):
             raise ValueError("Curated passage must be an object")
         normalized = normalize_passage(
-            raw_passage, documents=documents, question_ids=catalog.ids
+            raw_passage, documents=document_map, question_ids=catalog.ids
         )
         passage_id = str(raw_passage.get("passage_id", ""))
         if passage_id != normalized["passage_id"]:
@@ -135,7 +169,7 @@ def load_validated_curation(
 
         work_id = str(normalized["work_id"])
         text_version_id = str(normalized["text_version_id"])
-        document, _document_hash = documents[(work_id, text_version_id)]
+        document, _document_hash = document_map[(work_id, text_version_id)]
         character_range = parse_character_locator(str(normalized["source_locator"]))
         text = character_range.extract(document.text)
         passages.append(

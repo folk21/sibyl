@@ -75,21 +75,21 @@ Synthetic demo mode:
 make run-desktop
 ```
 
-Real local corpus mode uses a generated corpus plus a matching local runtime model bundle:
+Real local corpus mode uses one generated runtime corpus plus a matching local runtime model bundle:
 
 ```bash
 make download-runtime-model
+make build-runtime-corpus
 make run-desktop-real
 ```
 
-Default development paths are:
+`make build-runtime-corpus` discovers every prepared canonical source set currently available under `corpus-builder/data/work/`, includes compatible validated curation from `corpus-curation/curated/`, and atomically publishes one current runtime corpus at:
 
 ```text
-corpus-builder/data/output/dostoevsky
-corpus-builder/data/runtime-models/multilingual-e5-small
+corpus-builder/data/output
 ```
 
-Override them with `CORPUS_DIR=... MODEL_DIR=...`.
+The default runtime model remains `corpus-builder/data/runtime-models/multilingual-e5-small`. Override runtime paths with `CORPUS_DIR=... MODEL_DIR=...` when needed.
 
 The current Desktop real-corpus implementation supports two local modes from the same published corpus. **Own question** embeds text locally with ONNX Runtime and performs exhaustive cosine search for the small development corpus. **Guided question** (format v4 with mappings) lists only prompts that have curated candidates and reads those candidates directly from SQLite without query embedding. Both paths resolve exact stored `passage_text` and delegate final choice to the shared `SelectionEngine`. Existing v3 development corpora remain free-form-only.
 
@@ -103,7 +103,7 @@ A current Lib.ru author starts with:
 discover -> review selection -> acquire -> prepare-selection
 ```
 
-From the prepared canonical directory, optionally run the LLM-curation path, then build a format-v4 runtime corpus. The build always keeps the automatic splitter/E5 free-form path and can additionally materialize validated `--curation` mappings into the same `corpus.db`.
+From each prepared canonical directory, optionally run the LLM-curation path. Authors remain independent under `corpus-builder/data/work/<name>/`; after adding or updating an author, rerun `make build-runtime-corpus` to assemble all locally available prepared texts into the single format-v4 runtime corpus. Existing compatible embedding caches are reused, so previously prepared authors do not need to be re-embedded. The build always keeps the automatic splitter/E5 free-form path and additionally materializes compatible validated curation mappings into the same `corpus.db`.
 
 Start with [`docs/WORKFLOW.md`](docs/WORKFLOW.md) to choose the end-to-end path, then use [`corpus-builder/README.md`](corpus-builder/README.md) or [`docs/USAGE.md`](docs/USAGE.md) for command details.
 

@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from .api import (
+    build_available_corpus,
     build_corpus,
     download_runtime_model,
     inspect_passages,
@@ -10,7 +11,13 @@ from .api import (
     validate_corpus,
 )
 
-_COMMANDS = {"inspect-passages", "build", "download-runtime-model", "validate"}
+_COMMANDS = {
+    "inspect-passages",
+    "build",
+    "build-available",
+    "download-runtime-model",
+    "validate",
+}
 
 
 def register_commands(subparsers) -> None:
@@ -24,7 +31,13 @@ def register_commands(subparsers) -> None:
 
     build = subparsers.add_parser("build", help="Build a runtime corpus from prepared source input")
     build.add_argument("--config", type=Path, required=True)
-    build.add_argument("--source", type=Path, required=True)
+    build.add_argument(
+        "--source",
+        type=Path,
+        action="append",
+        required=True,
+        help="Prepared canonical source directory; repeat to assemble multiple source sets",
+    )
     build.add_argument(
         "--questions",
         type=Path,
@@ -38,6 +51,29 @@ def register_commands(subparsers) -> None:
         help="Validated curated metadata to materialize; repeat for multiple curation sets",
     )
     build.add_argument("--output", type=Path, required=True)
+
+    available = subparsers.add_parser(
+        "build-available",
+        help="Build one runtime corpus from all locally prepared source sets",
+    )
+    available.add_argument("--config", type=Path, required=True)
+    available.add_argument(
+        "--source-root",
+        type=Path,
+        required=True,
+        help="Directory whose immediate prepared-source children contain manifest.json",
+    )
+    available.add_argument(
+        "--questions",
+        type=Path,
+        help="Optional guided-question catalog; required when available curations are used",
+    )
+    available.add_argument(
+        "--curation-root",
+        type=Path,
+        help="Optional directory containing validated curated *.json metadata",
+    )
+    available.add_argument("--output", type=Path, required=True)
 
     runtime_model = subparsers.add_parser(
         "download-runtime-model",
@@ -67,6 +103,17 @@ def dispatch(args) -> bool:
         )
         validate_corpus(args.output / "corpus.db")
         print(f"Built and validated corpus in {args.output}")
+    elif args.command == "build-available":
+        config = load_config(args.config)
+        build_available_corpus(
+            config,
+            args.source_root,
+            args.output,
+            questions_path=args.questions,
+            curation_root=args.curation_root,
+        )
+        validate_corpus(args.output / "corpus.db")
+        print(f"Built and validated corpus from available local sources in {args.output}")
     elif args.command == "download-runtime-model":
         config = load_config(args.config)
         path = download_runtime_model(config, args.output)

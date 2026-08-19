@@ -7,6 +7,6 @@ atomic publication. Validated large-LLM curation remains owned by the separate
 contract and never imports ``curation._internal``.
 """
 
-from .api import build_corpus, inspect_passages, validate_corpus
+from .api import build_available_corpus, build_corpus, inspect_passages, validate_corpus
 
-__all__ = ["build_corpus", "inspect_passages", "validate_corpus"]
+__all__ = ["build_available_corpus", "build_corpus", "inspect_passages", "validate_corpus"]

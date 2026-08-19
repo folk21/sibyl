@@ -216,55 +216,60 @@ Any stale locator/hash fails. Re-curate or deliberately migrate the mapping; nev
 
 ## 5. Build the runtime corpus
 
-The runtime corpus always includes the automatic splitter/E5 branch for arbitrary free-form questions. Guided curation is optional and is assembled into the same format-v4 `corpus.db` when supplied.
+Authors remain independent preparation artifacts under `data/work/<name>/`. The normal runtime build does not require a hand-maintained aggregate such as `data/work/russian-classics` and does not require listing every author again.
 
-Inspect mechanical automatic passage boundaries when needed:
-
-```bash
-sibyl-corpus inspect-passages \
-  --config config/real-text.toml \
-  --source data/work/tolstoy \
-  --output data/work/tolstoy-passages.jsonl
-```
-
-Build free-form retrieval only:
+After preparing or curating any author, return to the repository root and rebuild the single current runtime corpus:
 
 ```bash
-sibyl-corpus build \
-  --config config/real-text.toml \
-  --source data/work/tolstoy \
-  --output data/output/tolstoy
+make build-runtime-corpus
 ```
 
-Build free-form plus the validated Tolstoy guided mappings:
+The target is equivalent to:
 
 ```bash
-sibyl-corpus build \
-  --config config/real-text.toml \
-  --source data/work/tolstoy \
-  --questions ../corpus-curation/questions.json \
-  --curation ../corpus-curation/curated/tolstoy-v1.json \
-  --output data/output/tolstoy
-
-sibyl-corpus validate --corpus data/output/tolstoy/corpus.db
+sibyl-corpus build-available \
+  --config corpus-builder/config/real-text.toml \
+  --source-root corpus-builder/data/work \
+  --questions corpus-curation/questions.json \
+  --curation-root corpus-curation/curated \
+  --output corpus-builder/data/output
 ```
 
-`--curation` is repeatable for multiple validated sets that reference prepared text versions present in `--source`. If any curation is supplied, `--questions` is required. Each curated range is revalidated against canonical text during assembly; stale hashes/locators or duplicate mappings fail before publication. A build without curation is still a valid v4 corpus and simply exposes no guided questions.
+`build-available` discovers every immediate child of `data/work/` that contains a prepared `manifest.json`. Raw downloads or unfinished work directories are ignored until they reach the preparation boundary. It also discovers validated curated `*.json` files. A curation is included only when all text versions it references are locally available; curation for an entirely unavailable author is skipped, while a partially available curation fails instead of being silently truncated. Every selected curated range is then revalidated against exact canonical text before publication.
 
-The current real-text configuration uses the deterministic splitter and local `multilingual-e5-small` embeddings for free-form retrieval. Completed embedding inputs are reusable through the local cache when their exact text/configuration identity has not changed.
+The automatic splitter/E5 branch is still built for every available prepared text, so free-form questions remain available even for authors without guided curation. Compatible embedding caches are read from all prepared source directories, which means adding Tolstoy after Dostoevsky does not require recomputing Dostoevsky vectors. Only missing exact embedding inputs are computed.
+
+The output is one immutable current runtime release:
+
+```text
+corpus-builder/data/output/
+    corpus.db
+    vectors.json
+    manifest.json
+```
+
+The directory is atomically replaced only after validation succeeds. Per-author runtime outputs are therefore optional debugging artifacts, not part of the normal incremental workflow. For focused/manual assembly or future filtering, the explicit repeatable `sibyl-corpus build --source ... --curation ...` command remains available; see [`USAGE.md`](USAGE.md).
 
 ## 6. Run the current real Desktop runtime
 
-Prepare the matching local runtime model once if needed, then run from the repository root:
+Prepare the matching local runtime model once if needed, then use the default current corpus from the repository root:
 
 ```bash
 make download-runtime-model
-make run-desktop-real CORPUS_DIR=corpus-builder/data/output/tolstoy
+make run-desktop-real
 ```
 
-For a v4 corpus built with guided mappings, Desktop shows a **Guided question** mode containing only prompts that actually have candidates in that corpus, plus the existing **Own question** mode. Guided actions use local SQLite mappings only; free-form actions continue to use the local E5 model/vector index. Existing v3 development corpora remain free-form-only.
+After adding another author, the normal loop is simply:
 
-Use [`USAGE.md`](USAGE.md) for alternate corpus/model paths and [`INSTALLATION.md`](INSTALLATION.md) for host-specific native setup.
+```text
+prepare/curate new author
+-> make build-runtime-corpus
+-> make run-desktop-real
+```
+
+For a v4 corpus with guided mappings, Desktop shows a **Guided question** mode containing only prompts that actually have candidates in the published corpus, plus the existing **Own question** mode. Guided actions use local SQLite mappings only; free-form actions continue to use the local E5 model/vector index. Existing v3 development corpora remain free-form-only.
+
+Use [`USAGE.md`](USAGE.md) for explicit source/output overrides and [`INSTALLATION.md`](INSTALLATION.md) for host-specific native setup.
 
 ## 7. Current milestone boundary
 
@@ -284,7 +289,6 @@ Still later:
 
 - Android real-corpus guided integration;
 - richer thematic guided-question browsing;
-- assembly/product packaging of larger curated sets across many authors;
 - persistent history/saved encounters and prepared short/extended curated variants.
 
 ## 8. Repository/data boundaries

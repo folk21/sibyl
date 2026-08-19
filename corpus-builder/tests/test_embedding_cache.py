@@ -96,3 +96,34 @@ def test_embedding_cache_avoids_loading_provider_when_complete(
     vectors = embedding_pipeline.resolve_embeddings(_config(), hints, tmp_path)
 
     assert vectors["h1"]
+
+
+def test_multi_source_build_reuses_each_prepared_source_cache(
+    tmp_path: Path, monkeypatch
+) -> None:
+    first_source = tmp_path / "first"
+    second_source = tmp_path / "second"
+    first_source.mkdir()
+    second_source.mkdir()
+    first_hint = SemanticHint(hint_id="h1", passage_id="p1", text="alpha")
+    second_hint = SemanticHint(hint_id="h2", passage_id="p2", text="beta")
+
+    first_provider = _RecordingProvider(dimensions=4)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", lambda config: first_provider)
+    embedding_pipeline.resolve_embeddings(_config(), [first_hint], first_source)
+
+    second_provider = _RecordingProvider(dimensions=4)
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", lambda config: second_provider)
+    embedding_pipeline.resolve_embeddings(_config(), [second_hint], second_source)
+
+    def fail_if_loaded(config):
+        raise AssertionError("provider should not load when all source caches cover the build")
+
+    monkeypatch.setattr(embedding_pipeline, "_embedding_provider", fail_if_loaded)
+    vectors = embedding_pipeline.resolve_embeddings(
+        _config(),
+        [first_hint, second_hint],
+        [first_source, second_source],
+    )
+
+    assert set(vectors) == {"h1", "h2"}

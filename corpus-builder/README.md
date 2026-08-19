@@ -1,6 +1,6 @@
 # Sibyl corpus builder
 
-`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the free-form retrieval corpus, supports external large-LLM curation, and assembles validated guided mappings into the current format-v4 runtime corpus. It is never part of runtime question answering.
+`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the free-form retrieval corpus, supports external large-LLM curation, and assembles validated guided mappings into the current format-v4 runtime corpus. The normal runtime build discovers all locally prepared source sets, so authors can be added incrementally without maintaining a separate aggregate prepared directory. It is never part of runtime question answering.
 
 ## Pipeline
 
@@ -53,10 +53,20 @@ The optional semantic embedding environment uses the `ml` extra and currently su
 | Discover/acquire/prepare sources | `discover`, `acquire`, `prepare-selection`, `fetch`, `import-file`, `prepare` | [`WORKFLOW`](../docs/WORKFLOW.md), [`SOURCES`](../docs/SOURCES.md) |
 | Persist reviewed source metadata | `register` | [`SOURCES`](../docs/SOURCES.md) |
 | Curate guided-question passages | `export-curation-bundle`, `import-curation`, `validate-curation` | [`WORKFLOW`](../docs/WORKFLOW.md) |
-| Inspect/build automatic corpus | `inspect-passages`, `build`, `validate` | [`WORKFLOW`](../docs/WORKFLOW.md) |
+| Build the current local runtime corpus | `build-available`, `build`, `validate` | [`WORKFLOW`](../docs/WORKFLOW.md) |
 | Prepare Desktop query model | `download-runtime-model` | [`INSTALLATION`](../docs/INSTALLATION.md), [`USAGE`](../docs/USAGE.md) |
 
 Run `sibyl-corpus --help` for the available command surface. [`../docs/USAGE.md`](../docs/USAGE.md) documents command arguments and development-only overrides without duplicating the end-to-end workflow.
+
+## Incremental author workflow
+
+Each author remains independently prepared under `data/work/<name>/` and may have an independent validated curation file under `../corpus-curation/curated/`. The normal repository workflow is:
+
+```bash
+make build-runtime-corpus
+```
+
+That target calls `build-available`, discovers every prepared child with `manifest.json`, selects curated metadata fully backed by those local text versions, reuses compatible embedding caches, and atomically replaces the single runtime output at `data/output`. Explicit repeatable `build --source ... --curation ...` remains available for focused/debug assembly and future filtering.
 
 ## Important local-data boundary
 

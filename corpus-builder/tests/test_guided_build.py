@@ -5,8 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from sibyl_corpus_builder.build.api import build_corpus
+from sibyl_corpus_builder.build.api import build_available_corpus, build_corpus
 from sibyl_corpus_builder.build.config import load_config
+from sibyl_corpus_builder.cli import build_parser
 from sibyl_corpus_builder.curation import import_curation
 
 
@@ -309,3 +310,351 @@ def test_stale_curated_hash_blocks_atomic_publication(tmp_path: Path) -> None:
             curation_paths=[curated],
         )
     assert not output.exists()
+
+
+
+def _named_prepared_source(
+    path: Path,
+    *,
+    work_id: str,
+    version_id: str,
+    author: str,
+    title: str,
+    text: str,
+) -> str:
+    path.mkdir()
+    file_name = f"{version_id}.txt"
+    (path / file_name).write_text(text, encoding="utf-8")
+    (path / "manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "works": [
+                    {
+                        "id": work_id,
+                        "text_version_id": version_id,
+                        "author": author,
+                        "title": title,
+                        "file": file_name,
+                        "source_name": "Fixture Source",
+                        "language": "en",
+                        "original_language": "en",
+                        "category": "literature",
+                        "text_role": "original",
+                        "rights_status": "approved",
+                        "canonical_text_sha256": _sha256(text),
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return text
+
+
+def _single_named_curation(
+    *,
+    source: Path,
+    questions: Path,
+    output: Path,
+    proposal_id: str,
+    work_id: str,
+    version_id: str,
+    canonical: str,
+    selected: str,
+    strength: float,
+) -> None:
+    start = canonical.index(selected)
+    end = start + len(selected)
+    proposal = output.with_name(f"{proposal_id}.json")
+    proposal.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "proposal_id": proposal_id,
+                "question_catalog_id": "fixture-guided-v1",
+                "curation_method": "large_llm",
+                "source_bundle_id": "cb_0123456789abcdefabcd",
+                "passages": [
+                    {
+                        "work_id": work_id,
+                        "text_version_id": version_id,
+                        "canonical_sha256": _sha256(canonical),
+                        "source_locator": f"chars:{start}:{end}",
+                        "text_sha256": _sha256(selected),
+                        "matches": [{"question_id": "change", "strength": strength}],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    import_curation(
+        source_dir=source,
+        questions_path=questions,
+        input_path=proposal,
+        output_path=output,
+    )
+
+
+def test_build_composes_multiple_prepared_sources_and_curations(tmp_path: Path) -> None:
+    first_source = tmp_path / "tolstoy"
+    first_text = (
+        "A first author considers a difficult change and chooses to act despite uncertainty.\n"
+    )
+    _named_prepared_source(
+        first_source,
+        work_id="tolstoy-work",
+        version_id="tolstoy-v1",
+        author="First Author",
+        title="First Work",
+        text=first_text,
+    )
+    second_source = tmp_path / "dostoevsky"
+    second_text = (
+        "A second author faces the same question from a different moral and emotional angle.\n"
+    )
+    _named_prepared_source(
+        second_source,
+        work_id="dostoevsky-work",
+        version_id="dostoevsky-v1",
+        author="Second Author",
+        title="Second Work",
+        text=second_text,
+    )
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+    first_curated = tmp_path / "tolstoy-curated.json"
+    second_curated = tmp_path / "dostoevsky-curated.json"
+    _single_named_curation(
+        source=first_source,
+        questions=questions,
+        output=first_curated,
+        proposal_id="tolstoy-curation-v1",
+        work_id="tolstoy-work",
+        version_id="tolstoy-v1",
+        canonical=first_text,
+        selected=first_text.strip(),
+        strength=0.9,
+    )
+    _single_named_curation(
+        source=second_source,
+        questions=questions,
+        output=second_curated,
+        proposal_id="dostoevsky-curation-v1",
+        work_id="dostoevsky-work",
+        version_id="dostoevsky-v1",
+        canonical=second_text,
+        selected=second_text.strip(),
+        strength=0.8,
+    )
+    config_path = tmp_path / "config.toml"
+    _config(config_path)
+    output = tmp_path / "output"
+
+    build_corpus(
+        load_config(config_path),
+        [first_source, second_source],
+        output,
+        questions_path=questions,
+        curation_paths=[first_curated, second_curated],
+    )
+
+    with sqlite3.connect(output / "corpus.db") as connection:
+        assert connection.execute("SELECT COUNT(*) FROM work").fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM guided_question_passage WHERE question_id = 'change'"
+        ).fetchone()[0] == 2
+        curated_authors = connection.execute(
+            "SELECT DISTINCT a.display_name "
+            "FROM guided_question_passage gqp "
+            "JOIN passage p ON p.id = gqp.passage_id "
+            "JOIN work w ON w.id = p.work_id "
+            "JOIN author a ON a.id = w.author_id "
+            "ORDER BY a.display_name"
+        ).fetchall()
+        assert curated_authors == [("First Author",), ("Second Author",)]
+
+
+def test_build_cli_accepts_repeatable_sources() -> None:
+    args = build_parser().parse_args(
+        [
+            "build",
+            "--config",
+            "config.toml",
+            "--source",
+            "first",
+            "--source",
+            "second",
+            "--output",
+            "output",
+        ]
+    )
+
+    assert args.source == [Path("first"), Path("second")]
+
+
+
+def test_build_available_discovers_prepared_sources_and_matching_curations(tmp_path: Path) -> None:
+    source_root = tmp_path / "work"
+    source_root.mkdir()
+    first_source = source_root / "dostoevsky"
+    first_text = "A first available author considers change and moral responsibility carefully.\n"
+    _named_prepared_source(
+        first_source,
+        work_id="dostoevsky-work",
+        version_id="dostoevsky-v1",
+        author="First Available Author",
+        title="First Available Work",
+        text=first_text,
+    )
+    second_source = source_root / "tolstoy"
+    second_text = "A second available author considers change from another human perspective.\n"
+    _named_prepared_source(
+        second_source,
+        work_id="tolstoy-work",
+        version_id="tolstoy-v1",
+        author="Second Available Author",
+        title="Second Available Work",
+        text=second_text,
+    )
+    ignored_directory = source_root / "unfinished-download"
+    ignored_directory.mkdir()
+    (ignored_directory / "raw.txt").write_text("Not prepared yet", encoding="utf-8")
+
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+    curation_root = tmp_path / "curated"
+    curation_root.mkdir()
+    _single_named_curation(
+        source=first_source,
+        questions=questions,
+        output=curation_root / "dostoevsky-v1.json",
+        proposal_id="dostoevsky-curation-v1",
+        work_id="dostoevsky-work",
+        version_id="dostoevsky-v1",
+        canonical=first_text,
+        selected=first_text.strip(),
+        strength=0.9,
+    )
+    (curation_root / "dostoevsky-curation-v1.json").unlink()
+    _single_named_curation(
+        source=second_source,
+        questions=questions,
+        output=curation_root / "tolstoy-v1.json",
+        proposal_id="tolstoy-curation-v1",
+        work_id="tolstoy-work",
+        version_id="tolstoy-v1",
+        canonical=second_text,
+        selected=second_text.strip(),
+        strength=0.8,
+    )
+    (curation_root / "tolstoy-curation-v1.json").unlink()
+
+    unavailable_source = tmp_path / "chekhov"
+    unavailable_text = "An unavailable prepared source has not been installed under the work root.\n"
+    _named_prepared_source(
+        unavailable_source,
+        work_id="chekhov-work",
+        version_id="chekhov-v1",
+        author="Unavailable Author",
+        title="Unavailable Work",
+        text=unavailable_text,
+    )
+    _single_named_curation(
+        source=unavailable_source,
+        questions=questions,
+        output=curation_root / "chekhov-v1.json",
+        proposal_id="chekhov-curation-v1",
+        work_id="chekhov-work",
+        version_id="chekhov-v1",
+        canonical=unavailable_text,
+        selected=unavailable_text.strip(),
+        strength=0.7,
+    )
+    (curation_root / "chekhov-curation-v1.json").unlink()
+
+    config_path = tmp_path / "config.toml"
+    _config(config_path)
+    output = tmp_path / "output"
+    build_available_corpus(
+        load_config(config_path),
+        source_root,
+        output,
+        questions_path=questions,
+        curation_root=curation_root,
+    )
+
+    with sqlite3.connect(output / "corpus.db") as connection:
+        assert connection.execute("SELECT COUNT(*) FROM work").fetchone()[0] == 2
+        assert connection.execute(
+            "SELECT COUNT(*) FROM guided_question_passage WHERE question_id = 'change'"
+        ).fetchone()[0] == 2
+        authors = connection.execute(
+            "SELECT display_name FROM author ORDER BY display_name"
+        ).fetchall()
+        assert authors == [("First Available Author",), ("Second Available Author",)]
+
+
+def test_build_available_cli_uses_roots_instead_of_explicit_author_lists() -> None:
+    args = build_parser().parse_args(
+        [
+            "build-available",
+            "--config",
+            "config.toml",
+            "--source-root",
+            "data/work",
+            "--questions",
+            "questions.json",
+            "--curation-root",
+            "curated",
+            "--output",
+            "data/output",
+        ]
+    )
+
+    assert args.source_root == Path("data/work")
+    assert args.curation_root == Path("curated")
+    assert args.output == Path("data/output")
+
+
+def test_build_available_rejects_partially_available_curation(tmp_path: Path) -> None:
+    source_root = tmp_path / "work"
+    source_root.mkdir()
+    source = source_root / "dostoevsky"
+    text = "An available work is present, but another referenced text version is missing.\n"
+    _named_prepared_source(
+        source,
+        work_id="dostoevsky-work",
+        version_id="dostoevsky-v1",
+        author="Available Author",
+        title="Available Work",
+        text=text,
+    )
+    questions = tmp_path / "questions.json"
+    _questions(questions)
+    curation_root = tmp_path / "curated"
+    curation_root.mkdir()
+    (curation_root / "partial.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "passages": [
+                    {"work_id": "dostoevsky-work", "text_version_id": "dostoevsky-v1"},
+                    {"work_id": "missing-work", "text_version_id": "missing-v1"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    config_path = tmp_path / "config.toml"
+    _config(config_path)
+
+    with pytest.raises(ValueError, match="only partially available"):
+        build_available_corpus(
+            load_config(config_path),
+            source_root,
+            tmp_path / "output",
+            questions_path=questions,
+            curation_root=curation_root,
+        )

@@ -1,4 +1,4 @@
-.PHONY: help check check-all test-mobile test-desktop run-desktop run-desktop-real download-runtime-model test-corpus-core test-corpus-builder validate-format validate-sources smoke-corpus format-python
+.PHONY: help check check-all test-mobile test-desktop build-runtime-corpus run-desktop run-desktop-real download-runtime-model test-corpus-core test-corpus-builder validate-format validate-sources smoke-corpus format-python
 
 help:
 	@echo "Sibyl repository targets:"
@@ -6,6 +6,7 @@ help:
 	@echo "  check-all            Run lightweight checks plus Android and desktop shared tests"
 	@echo "  test-mobile          Run Android shared host tests"
 	@echo "  test-desktop         Run shared plus Desktop runtime JVM tests"
+	@echo "  build-runtime-corpus Build one runtime corpus from all locally prepared source sets"
 	@echo "  run-desktop          Run the interactive Compose Desktop demo"
 	@echo "  run-desktop-real     Run Desktop against a built local corpus (CORPUS_DIR/MODEL_DIR)"
 	@echo "  download-runtime-model  Download the local ONNX/tokenizer bundle for real Desktop retrieval"
@@ -32,8 +33,20 @@ test-desktop:
 run-desktop:
 	cd mobile && ./gradlew :desktopApp:run
 
-CORPUS_DIR ?= corpus-builder/data/output/dostoevsky
+RUNTIME_CORPUS_DIR ?= corpus-builder/data/output
+PREPARED_SOURCE_ROOT ?= corpus-builder/data/work
+QUESTIONS_PATH ?= corpus-curation/questions.json
+CURATION_ROOT ?= corpus-curation/curated
+CORPUS_DIR ?= $(RUNTIME_CORPUS_DIR)
 MODEL_DIR ?= corpus-builder/data/runtime-models/multilingual-e5-small
+
+build-runtime-corpus:
+	PYTHONPATH=corpus-core/src:corpus-builder/src python -m sibyl_corpus_builder.cli build-available \
+		--config corpus-builder/config/real-text.toml \
+		--source-root "$(PREPARED_SOURCE_ROOT)" \
+		--questions "$(QUESTIONS_PATH)" \
+		--curation-root "$(CURATION_ROOT)" \
+		--output "$(RUNTIME_CORPUS_DIR)"
 
 run-desktop-real:
 	@test -f "$(CORPUS_DIR)/manifest.json" || (echo "Corpus manifest not found: $(CORPUS_DIR)/manifest.json" && exit 1)

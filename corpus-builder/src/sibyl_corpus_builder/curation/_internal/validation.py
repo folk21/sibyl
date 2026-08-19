@@ -12,7 +12,6 @@ from pathlib import Path
 from sibyl_corpus_core.hashing import sha256_text
 from sibyl_corpus_core.locators import parse_character_locator
 from sibyl_corpus_core.models import SourceDocument
-from sibyl_corpus_core.prepared_sources import load_prepared_sources
 from sibyl_corpus_core.text import word_count
 
 _PROPOSAL_ID = re.compile(r"[a-z0-9][a-z0-9._-]*")
@@ -56,10 +55,12 @@ def verified_document_hash(document: SourceDocument) -> str:
     return actual
 
 
-def document_index(source_dir: Path) -> dict[tuple[str, str], tuple[SourceDocument, str]]:
+def document_index(
+    documents: list[SourceDocument],
+) -> dict[tuple[str, str], tuple[SourceDocument, str]]:
     """Indexes prepared text versions and pins each to its verified canonical hash."""
     index: dict[tuple[str, str], tuple[SourceDocument, str]] = {}
-    for document in load_prepared_sources(source_dir):
+    for document in documents:
         key = (document.source_id, document.text_version_id)
         if key in index:
             raise ValueError(f"Duplicate prepared text version: {key[0]}/{key[1]}")

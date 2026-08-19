@@ -1,13 +1,15 @@
 """Embedding orchestration for the automatic corpus-build path.
 
 This module sits between semantic hints and persisted vectors. It owns provider selection,
-configuration fingerprints, resumable cache lookups, batching, and progress output. It does not
-select passages or write runtime corpus artifacts.
+configuration fingerprints, resumable cache lookups, batching, and progress output. Multi-source
+builds read compatible caches from every prepared input directory and write newly computed
+vectors to the first source cache. It does not select passages or write runtime corpus artifacts.
 """
 
 import hashlib
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 from ..config import BuilderConfig
@@ -64,12 +66,40 @@ def _render_progress(completed: int, total: int) -> None:
     )
 
 
+def _normalize_source_dirs(source_dir: Path | Sequence[Path]) -> list[Path]:
+    if isinstance(source_dir, Path):
+        return [source_dir]
+    result = [Path(value) for value in source_dir]
+    if not result:
+        raise ValueError("At least one embedding cache source directory is required")
+    return result
+
+
+def _load_cache_hits(
+    *,
+    cache_paths: list[Path],
+    keys: list[str],
+    dimensions: int,
+) -> dict[str, list[float]]:
+    """Loads each requested exact-text vector from the first compatible source cache that has it."""
+    found: dict[str, list[float]] = {}
+    for path in cache_paths:
+        if not path.is_file():
+            continue
+        missing = [key for key in keys if key not in found]
+        if not missing:
+            break
+        with EmbeddingCache(path, dimensions) as cache:
+            found.update(cache.get_many(missing))
+    return found
+
+
 def resolve_embeddings(
     config: BuilderConfig,
     hints: list[SemanticHint],
-    source_dir: Path,
+    source_dir: Path | Sequence[Path],
 ) -> dict[str, list[float]]:
-    """Reuses cached vectors and computes only missing exact embedding inputs."""
+    """Reuses all compatible source caches and computes only missing exact embedding inputs."""
     unique_inputs: dict[str, str] = {}
     hint_keys: dict[str, str] = {}
     for hint in hints:
@@ -77,14 +107,23 @@ def resolve_embeddings(
         unique_inputs.setdefault(key, hint.text)
         hint_keys[hint.hint_id] = key
 
-    cache_path = source_dir / ".embedding-cache" / f"{_embedding_fingerprint(config)}.sqlite3"
+    source_dirs = _normalize_source_dirs(source_dir)
+    fingerprint = _embedding_fingerprint(config)
+    cache_paths = [
+        directory.resolve() / ".embedding-cache" / f"{fingerprint}.sqlite3"
+        for directory in source_dirs
+    ]
     cached: dict[str, list[float]] = {}
 
-    cache: EmbeddingCache | None = None
+    primary_cache: EmbeddingCache | None = None
     try:
         if config.embeddings.cache:
-            cache = EmbeddingCache(cache_path, config.embeddings.dimensions)
-            cached = cache.get_many(list(unique_inputs))
+            cached = _load_cache_hits(
+                cache_paths=cache_paths,
+                keys=list(unique_inputs),
+                dimensions=config.embeddings.dimensions,
+            )
+            primary_cache = EmbeddingCache(cache_paths[0], config.embeddings.dimensions)
 
         missing_keys = [key for key in unique_inputs if key not in cached]
         print(
@@ -94,7 +133,11 @@ def resolve_embeddings(
             flush=True,
         )
         if config.embeddings.cache:
-            print(f"Embedding cache: {cache_path}", flush=True)
+            print("Embedding cache sources:", flush=True)
+            for cache_path in cache_paths:
+                print(f"  {cache_path}", flush=True)
+            if len(cache_paths) > 1:
+                print(f"Embedding cache writes: {cache_paths[0]}", flush=True)
 
         if missing_keys:
             model_label = config.embeddings.model_id or config.embeddings.provider
@@ -117,8 +160,8 @@ def resolve_embeddings(
                         "Embedding provider returned a different number of vectors than inputs"
                     )
                 batch = dict(zip(batch_keys, batch_vectors, strict=True))
-                if cache is not None:
-                    cache.put_many(batch)
+                if primary_cache is not None:
+                    primary_cache.put_many(batch)
                 cached.update(batch)
                 _render_progress(len(cached), len(unique_inputs))
         else:
@@ -128,5 +171,5 @@ def resolve_embeddings(
             raise ValueError("Embedding generation did not produce all required vectors")
         return {hint.hint_id: cached[hint_keys[hint.hint_id]] for hint in hints}
     finally:
-        if cache is not None:
-            cache.close()
+        if primary_cache is not None:
+            primary_cache.close()

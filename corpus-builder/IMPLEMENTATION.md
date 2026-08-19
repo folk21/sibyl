@@ -109,7 +109,7 @@ sources/adapters/
 - `_internal/preparation.py` — the final source-ingestion stage that materializes deterministic canonical input shared by build and curation;
 - `_internal/registration.py` — converts reviewed acquired Lib.ru selection items into disabled candidate registry records.
 
-The important handoff is the prepared directory under `data/work/<name>/`. `corpus-core.prepared_sources.load_prepared_sources()` reads that directory; neither `build` nor `curation` reaches back into source `_internal` implementation.
+The important handoff is the prepared directory under `data/work/<name>/`. `corpus-core.prepared_sources.load_prepared_sources()` reads one directory, while `load_prepared_source_sets()` composes multiple independently prepared directories for corpus assembly and rejects ambiguous duplicate identities. Neither `build` nor `curation` reaches back into source `_internal` implementation.
 
 ## `build`: automatic retrieval plus format-v4 runtime corpus assembly
 
@@ -128,20 +128,23 @@ flowchart TD
     Q --> A[Atomic publish]
 ```
 
-The automatic splitter/embedding branch remains the fallback/open-ended path for arbitrary user questions. Runtime publication can additionally consume validated curated metadata through the public `curation` API and materialize exact guided passages/mappings into the same format-v4 database; `build` never imports `curation._internal`.
+The automatic splitter/embedding branch remains the fallback/open-ended path for arbitrary user questions. Runtime publication can compose one or more prepared source sets, consume validated curated metadata through the public `curation` API, and materialize exact guided passages/mappings into the same format-v4 database; `build` never imports `curation._internal`. Curation validation receives the already composed canonical documents, so no temporary hand-merged prepared directory is required.
+
+`build-available` is the normal incremental assembly entry point. It discovers immediate prepared children beneath a local work root, filters curated metadata by required `(work_id, text_version_id)` identities, skips curation for entirely unavailable source sets, rejects partial curation availability, and then delegates to the same `build_corpus()` pipeline. The explicit repeatable `build --source ...` path remains for focused/manual selection and later filtering support.
 
 ### Main files
 
-- `build/command.py` — CLI adapter for `inspect-passages`, `build`, `validate`, and runtime-model download;
+- `build/command.py` — CLI adapter for `inspect-passages`, explicit `build`, all-available `build-available`, `validate`, and runtime-model download;
 - `build/api.py` — high-level automatic pipeline. Reading this file should show the processing order without requiring knowledge of implementation details;
 - `build/config.py` — immutable build configuration models and eager validation.
 
 ### Build internals
 
+- `_internal/available_inputs.py` — deterministic discovery of prepared `data/work/*` inputs plus curated metadata selection based on locally available text-version identities;
 - `_internal/splitter.py` — paragraph/sentence-aware exact automatic ranges with deterministic IDs;
 - `_internal/hints.py` — deterministic or exact-passage retrieval text;
 - `_internal/embeddings.py` — hash fixture provider and opt-in Sentence Transformers provider;
-- `_internal/embedding_pipeline.py` — provider selection, cache fingerprints, batching, progress, and cache reuse;
+- `_internal/embedding_pipeline.py` — provider selection, cache fingerprints, batching, progress, and cache reuse across all prepared source inputs; new vectors are written to the first source cache;
 - `_internal/embedding_cache.py` — SQLite cache of completed embedding inputs;
 - `_internal/database.py` — runtime SQLite writer for automatic passages plus validated curated `passage`/`passage_text` and `guided_question*` rows; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
 - `_internal/manifest.py` — runtime artifact/embedding compatibility manifest plus guided question/mapping counts;
@@ -167,7 +170,7 @@ flowchart TD
 ### Main files
 
 - `curation/command.py` — CLI adapter for export/import/validate commands;
-- `curation/api.py` — public feature facade for export/import/revalidation plus validated exact-slice loading used by corpus assembly;
+- `curation/api.py` — public feature facade for export/import/revalidation, curated source-identity inspection, and validated exact-slice loading used by corpus assembly;
 - `curation/models.py` — public guided-question catalog models.
 
 ### Curation internals

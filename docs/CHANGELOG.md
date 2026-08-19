@@ -17,7 +17,8 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 - added author-centric Lib.ru discovery with editable selection, resilient TXT -> HTML -> FB2 acquisition, deterministic canonical preparation, and optional source registration;
 - added Project Gutenberg acquisition and reviewed local-file import paths;
 - introduced reusable prepared canonical-source artifacts shared by automatic corpus builds and LLM curation;
-- added exact automatic passage extraction with reproducible character locators and resumable embedding caching for real-text builds.
+- added exact automatic passage extraction with reproducible character locators and resumable embedding caching for real-text builds;
+- added incremental all-available runtime corpus assembly: independently prepared authors are auto-discovered from the local work root, compatible curated metadata is included automatically, and existing embedding caches are reused without maintaining a separate aggregate prepared corpus.
 
 ### Local semantic retrieval
 

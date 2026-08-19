@@ -1,4 +1,4 @@
-"""Loads the deterministic canonical source set produced by source preparation.
+"""Loads deterministic canonical source sets produced by source preparation.
 
 Pipeline position:
 
@@ -6,11 +6,12 @@ Pipeline position:
                                       -> THIS MODULE
                                       -> automatic build and LLM curation
 
-This module owns only the shared read boundary. It does not acquire sources, split passages,
-generate embeddings, or interpret LLM curation metadata.
+This module owns only the shared read/composition boundary. It does not acquire sources, split
+passages, generate embeddings, or interpret LLM curation metadata.
 """
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
 
 from .models import SourceDocument
@@ -21,7 +22,7 @@ _ALLOWED_TEXT_ROLES = {"original", "human_translation", "machine_translation"}
 
 
 def load_prepared_sources(source_dir: Path) -> list[SourceDocument]:
-    """Loads prepared canonical documents while validating shared controlled fields."""
+    """Loads one prepared canonical source set while validating shared controlled fields."""
     manifest_path = source_dir / "manifest.json"
     entries = json.loads(manifest_path.read_text(encoding="utf-8"))["works"]
     documents: list[SourceDocument] = []
@@ -61,4 +62,45 @@ def load_prepared_sources(source_dir: Path) -> list[SourceDocument]:
                 provenance=entry.get("provenance", entry.get("source_name", entry["file"])),
             )
         )
+    return documents
+
+
+def load_prepared_source_sets(source_dirs: Iterable[Path]) -> list[SourceDocument]:
+    """Composes prepared sets and rejects ambiguous duplicate text/work identities.
+
+    Input directories remain independent preparation artifacts. Composition is deterministic and
+    in-memory so corpus assembly does not need a copied/hand-merged prepared directory.
+    """
+    resolved_dirs = [Path(source_dir) for source_dir in source_dirs]
+    if not resolved_dirs:
+        raise ValueError("At least one prepared source directory is required")
+
+    documents: list[SourceDocument] = []
+    seen_versions: set[tuple[str, str]] = set()
+    work_identity: dict[str, tuple[str, str, str, str]] = {}
+    for source_dir in resolved_dirs:
+        for document in load_prepared_sources(source_dir):
+            version_key = (document.source_id, document.text_version_id)
+            if version_key in seen_versions:
+                raise ValueError(
+                    "Duplicate prepared text version across source sets: "
+                    f"{document.source_id}/{document.text_version_id}"
+                )
+            seen_versions.add(version_key)
+
+            identity = (
+                document.author,
+                document.work,
+                document.original_language,
+                document.category,
+            )
+            previous = work_identity.get(document.source_id)
+            if previous is not None and previous != identity:
+                raise ValueError(
+                    "Conflicting prepared work identity across source sets: "
+                    f"{document.source_id}"
+                )
+            work_identity[document.source_id] = identity
+            documents.append(document)
+
     return documents
