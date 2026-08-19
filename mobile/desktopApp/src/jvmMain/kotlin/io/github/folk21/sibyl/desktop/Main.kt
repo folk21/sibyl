@@ -33,6 +33,7 @@ fun main() {
                         retrievalService = runtime.retrievalService,
                         isDemo = false,
                         runtimeLabel = runtime.label,
+                        guidedRetrievalService = runtime.guidedRetrievalService,
                     )
                 }
             }

@@ -3,11 +3,16 @@
 The external model chooses meaningful ranges and question relationships. This module never trusts
 model-produced literary wording: it resolves every locator against local canonical sources,
 verifies hashes, derives deterministic curated passage IDs, and writes only Git-safe metadata.
+The same trust boundary also exposes exact validated slices to the runtime-corpus builder through
+the public curation API.
 """
 
 import json
 from pathlib import Path
 
+from sibyl_corpus_core.locators import parse_character_locator
+
+from ..models import CuratedQuestionMatch, ValidatedCuratedPassage, ValidatedCuration
 from .questions import load_question_catalog
 from .validation import (
     document_index,
@@ -89,16 +94,16 @@ def import_curation(
     return output_path
 
 
-def validate_curated_curation(
+def load_validated_curation(
     *, source_dir: Path, questions_path: Path, curation_path: Path
-) -> None:
-    """Revalidates Git-tracked curated metadata against the current prepared canonical sources."""
+) -> ValidatedCuration:
+    """Revalidates curated metadata and returns exact canonical slices for corpus assembly."""
     catalog = load_question_catalog(questions_path)
     documents = document_index(source_dir)
     raw = json.loads(curation_path.read_text(encoding="utf-8"))
     if raw.get("schema_version") != 1:
         raise ValueError(f"Unsupported curated curation schema_version in {curation_path}")
-    validate_proposal_id(raw.get("curation_id"), label="curation_id")
+    curation_id = validate_proposal_id(raw.get("curation_id"), label="curation_id")
     validate_bundle_id(raw.get("source_bundle_id"), label="source_bundle_id")
     if raw.get("question_catalog_id") != catalog.catalog_id:
         raise ValueError("Curated mapping question_catalog_id does not match question catalog")
@@ -108,6 +113,7 @@ def validate_curated_curation(
     if not isinstance(raw_passages, list) or not raw_passages:
         raise ValueError("Curated mapping contains no passages")
 
+    passages: list[ValidatedCuratedPassage] = []
     seen_ids: set[str] = set()
     for raw_passage in raw_passages:
         if not isinstance(raw_passage, dict):
@@ -126,3 +132,45 @@ def validate_curated_curation(
         if passage_id in seen_ids:
             raise ValueError(f"Duplicate curated passage_id: {passage_id}")
         seen_ids.add(passage_id)
+
+        work_id = str(normalized["work_id"])
+        text_version_id = str(normalized["text_version_id"])
+        document, _document_hash = documents[(work_id, text_version_id)]
+        character_range = parse_character_locator(str(normalized["source_locator"]))
+        text = character_range.extract(document.text)
+        passages.append(
+            ValidatedCuratedPassage(
+                passage_id=passage_id,
+                work_id=work_id,
+                text_version_id=text_version_id,
+                source_locator=str(normalized["source_locator"]),
+                canonical_sha256=str(normalized["canonical_sha256"]),
+                text_sha256=str(normalized["text_sha256"]),
+                text=text,
+                word_count=int(normalized["word_count"]),
+                matches=tuple(
+                    CuratedQuestionMatch(
+                        question_id=str(match["question_id"]),
+                        strength=float(match["strength"]),
+                    )
+                    for match in normalized["matches"]
+                ),
+            )
+        )
+
+    return ValidatedCuration(
+        curation_id=curation_id,
+        question_catalog_id=catalog.catalog_id,
+        passages=tuple(passages),
+    )
+
+
+def validate_curated_curation(
+    *, source_dir: Path, questions_path: Path, curation_path: Path
+) -> None:
+    """Revalidates Git-tracked curated metadata against the current prepared canonical sources."""
+    load_validated_curation(
+        source_dir=source_dir,
+        questions_path=questions_path,
+        curation_path=curation_path,
+    )

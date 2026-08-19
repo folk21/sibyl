@@ -24,11 +24,15 @@ data class SelectionPolicy(
     val preferredLength: PassageLength,
 ) {
     companion object {
+        /** Default policy for free-form semantic retrieval. */
         fun defaults(): SelectionPolicy = SelectionPolicy(
             minSemanticScore = 0.20,
             semanticExponent = 1.5,
             preferredLength = PassageLength.SHORT,
         )
+
+        /** Guided mappings are prevalidated relevance gates, so no additional semantic threshold is applied. */
+        fun guidedDefaults(): SelectionPolicy = defaults().copy(minSemanticScore = 0.0)
     }
 }
 

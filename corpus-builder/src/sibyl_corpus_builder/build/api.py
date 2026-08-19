@@ -6,12 +6,14 @@ Pipeline position:
         -> automatic natural-boundary splitting
         -> semantic hints
         -> embeddings (with resumable cache)
+        + optional validated guided curation
         -> corpus.db + vectors.json + manifest.json
         -> validation
         -> atomic publication
 
-This is the mechanical/open-ended retrieval path kept for arbitrary user questions. It remains
-separate from LLM curation, which selects its own meaningful canonical ranges for guided prompts.
+The automatic path remains the mechanical/open-ended retrieval path for arbitrary user questions.
+Optional guided curation is revalidated through the public curation boundary and materialized as
+exact stored passages plus question mappings in the same runtime corpus.
 """
 
 import json
@@ -20,7 +22,8 @@ from pathlib import Path
 from sibyl_corpus_core.atomic import staging_directory
 from sibyl_corpus_core.prepared_sources import load_prepared_sources
 
-from .config import BuilderConfig, load_config
+from ..curation import load_question_catalog, load_validated_curation
+from ..curation.models import QuestionCatalog, ValidatedCuratedPassage
 from ._internal.database import create_database
 from ._internal.embedding_pipeline import resolve_embeddings
 from ._internal.hints import DeterministicHintGenerator, PassageTextHintGenerator
@@ -28,6 +31,7 @@ from ._internal.manifest import write_manifest
 from ._internal.runtime_model import download_runtime_model
 from ._internal.splitter import split_document
 from ._internal.validation import validate_corpus
+from .config import BuilderConfig, load_config
 
 
 def _hint_generator(config: BuilderConfig):
@@ -36,6 +40,59 @@ def _hint_generator(config: BuilderConfig):
     if config.hints.provider == "passage_text":
         return PassageTextHintGenerator()
     raise ValueError(f"Unsupported hint provider: {config.hints.provider}")
+
+
+def _load_guided_inputs(
+    *,
+    source_dir: Path,
+    questions_path: Path | None,
+    curation_paths: list[Path],
+) -> tuple[QuestionCatalog | None, list[ValidatedCuratedPassage]]:
+    if curation_paths and questions_path is None:
+        raise ValueError("--questions is required when --curation is supplied")
+    if questions_path is None:
+        return None, []
+
+    catalog = load_question_catalog(questions_path)
+    curated: list[ValidatedCuratedPassage] = []
+    seen_passage_ids: set[str] = set()
+    seen_mappings: set[tuple[str, str]] = set()
+    for curation_path in curation_paths:
+        validated = load_validated_curation(
+            source_dir=source_dir,
+            questions_path=questions_path,
+            curation_path=curation_path,
+        )
+        if validated.question_catalog_id != catalog.catalog_id:
+            raise ValueError(
+                f"Curation {curation_path} uses catalog {validated.question_catalog_id}, "
+                f"expected {catalog.catalog_id}"
+            )
+        for passage in validated.passages:
+            if passage.passage_id in seen_passage_ids:
+                raise ValueError(
+                    f"Duplicate curated passage_id across build inputs: {passage.passage_id}"
+                )
+            seen_passage_ids.add(passage.passage_id)
+            for match in passage.matches:
+                mapping = (match.question_id, passage.passage_id)
+                if mapping in seen_mappings:
+                    raise ValueError(
+                        "Duplicate guided question/passage mapping across build inputs: "
+                        f"{match.question_id}/{passage.passage_id}"
+                    )
+                seen_mappings.add(mapping)
+            curated.append(passage)
+
+    curated.sort(
+        key=lambda passage: (
+            passage.work_id,
+            passage.text_version_id,
+            int(passage.source_locator.split(":")[1]),
+            passage.passage_id,
+        )
+    )
+    return catalog, curated
 
 
 def inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None:
@@ -63,15 +120,38 @@ def inspect_passages(config_path: Path, source_dir: Path, output: Path) -> None:
     print(f"Wrote {len(records)} passage candidates to {output}")
 
 
-def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> None:
-    """Builds, validates, and atomically publishes automatic runtime corpus artifacts."""
-    print("[1/5] Loading sources and extracting passages...", flush=True)
+def build_corpus(
+    config: BuilderConfig,
+    source_dir: Path,
+    output_dir: Path,
+    *,
+    questions_path: Path | None = None,
+    curation_paths: list[Path] | None = None,
+) -> None:
+    """Builds, validates, and atomically publishes free-form plus optional guided runtime data."""
+    curation_paths = list(curation_paths or [])
+    print("[1/5] Loading sources, passages, and guided curation...", flush=True)
     documents = load_prepared_sources(source_dir)
     passages = [
         passage
         for document in documents
         for passage in split_document(document, config.passages)
     ]
+    question_catalog, curated_passages = _load_guided_inputs(
+        source_dir=source_dir,
+        questions_path=questions_path,
+        curation_paths=curation_paths,
+    )
+
+    automatic_ids = {passage.passage_id for passage in passages}
+    duplicate_ids = automatic_ids.intersection(
+        passage.passage_id for passage in curated_passages
+    )
+    if duplicate_ids:
+        raise ValueError(
+            "Curated passage IDs conflict with automatic passages: "
+            f"{sorted(duplicate_ids)}"
+        )
 
     hint_generator = _hint_generator(config)
     hints = [
@@ -79,9 +159,12 @@ def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> N
         for passage in passages
         for hint in hint_generator.generate(passage, config.hints.hints_per_passage)
     ]
+    guided_mapping_count = sum(len(passage.matches) for passage in curated_passages)
 
     print(
-        f"Prepared {len(documents)} works, {len(passages)} passages, {len(hints)} embedding hints.",
+        f"Prepared {len(documents)} works, {len(passages)} automatic passages, "
+        f"{len(curated_passages)} curated passages, {len(hints)} embedding hints, "
+        f"{guided_mapping_count} guided mappings.",
         flush=True,
     )
     print("[2/5] Resolving embeddings...", flush=True)
@@ -101,6 +184,8 @@ def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> N
             documents=documents,
             passages=passages,
             hints=hints,
+            question_catalog=question_catalog,
+            curated_passages=curated_passages,
         )
         (staging_dir / "vectors.json").write_text(
             json.dumps(vectors, ensure_ascii=False, separators=(",", ":")),
@@ -110,8 +195,10 @@ def build_corpus(config: BuilderConfig, source_dir: Path, output_dir: Path) -> N
             staging_dir / "manifest.json",
             config=config,
             documents=documents,
-            passage_count=len(passages),
+            passage_count=len(passages) + len(curated_passages),
             hint_count=len(hints),
+            guided_question_count=(len(question_catalog.items) if question_catalog else 0),
+            guided_mapping_count=guided_mapping_count,
         )
 
         print("[4/5] Validating corpus...", flush=True)

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import tomllib
 
+_CURRENT_FORMAT_VERSION = 4
+
 
 @dataclass(frozen=True)
 class PassageConfig:
@@ -83,6 +85,10 @@ def load_config(path: Path) -> BuilderConfig:
 
 def validate_config(config: BuilderConfig) -> None:
     """Rejects inconsistent automatic-build settings before network/model/disk-heavy work."""
+    if config.format_version != _CURRENT_FORMAT_VERSION:
+        raise ValueError(
+            f"corpus.format_version must be {_CURRENT_FORMAT_VERSION}; got {config.format_version}"
+        )
     p = config.passages
     if p.min_words <= 0:
         raise ValueError("passages.min_words must be positive")

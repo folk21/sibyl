@@ -5,7 +5,7 @@ It does not implement source parsing, passage splitting, embedding logic, or LLM
 it composes three feature command adapters:
 
     sources  -> external text to prepared canonical sources
-    build    -> prepared sources to automatic runtime corpus artifacts
+    build    -> prepared sources plus optional validated curation to runtime corpus artifacts
     curation -> prepared sources through large-LLM selection to verified curated metadata
 
 For the end-to-end operational sequence, start with ``docs/WORKFLOW.md``. For implementation

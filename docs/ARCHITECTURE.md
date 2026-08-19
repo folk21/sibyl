@@ -89,7 +89,7 @@ It must not know about source-specific sites, automatic embeddings, large-LLM pr
 The build-time Python application is organized as three feature boundaries around `corpus-core`:
 
 - `sources` — external catalogs/artifacts to deterministic prepared canonical sources;
-- `build` — automatic passage splitting, embeddings, and current runtime corpus publication;
+- `build` — automatic passage splitting/embeddings plus assembly of validated guided curation into runtime corpus publication;
 - `curation` — deterministic export to a large LLM and local exact-text validation of returned mappings.
 
 The package root is a thin CLI composition layer. Features expose public APIs and keep implementation-private helpers under their own `_internal` packages. A feature must not depend on another feature's `_internal` implementation. Source-specific parsing/fetching/normalization is grouped under `sources/adapters/<source>/`.
@@ -113,7 +113,7 @@ A strong external LLM may be used as an explicit developer-controlled build-time
 
 The LLM is authoritative only for **curation intent**. It is not authoritative for literary wording. Returned mappings must pin the concrete canonical version and exact character locator/hash; local deterministic tooling re-resolves the slice from canonical text and rejects any mismatch before normalized curation metadata is accepted. Committed curation metadata does not need to copy the literary passage text.
 
-This creates two build-time passage sources that may coexist: automatic natural-boundary candidates for generic free-form retrieval, and LLM-curated passage mappings for prepared guided questions. Both must converge on exact canonical text before they can become runtime data.
+This creates two build-time passage sources that may coexist: automatic natural-boundary candidates for generic free-form retrieval, and LLM-curated exact ranges for prepared guided questions. The public curation boundary revalidates curated metadata against prepared canonical text, then the build feature materializes both sources into the versioned runtime corpus. Runtime never reads curation proposal files or prepared canonical books directly.
 
 ### Corpus source registry
 
@@ -135,21 +135,36 @@ See [`CORPUS_FORMAT.md`](CORPUS_FORMAT.md).
 
 ## Runtime retrieval
 
+Sibyl has two local retrieval modes that converge on the same candidate/selection/display boundary.
+
+Free-form text uses local semantic retrieval:
+
 ```mermaid
 flowchart TD
-    Q[Question] --> E[Local query embedding]
+    Q[Own question text] --> E[Local query embedding]
     E --> V[Vector retrieval]
     V --> G[Semantic relevance gate]
     G --> D[Deduplicate by passage]
     D --> W[Quality / history / diversity / filters]
-    W --> R[Controlled-random sample]
+    W --> R[SelectionEngine controlled-random sample]
     R --> T[Choose prepared text variant]
     T --> O[Display exact stored text]
 ```
 
-Vector retrieval must return multiple plausible matches. Semantic relevance determines eligibility and weight but is not the sole decision rule. Repetition is allowed; recency may reduce probability without creating a permanent blacklist.
+Guided questions use precomputed mappings and do not require query embedding:
 
-The final display path resolves to stored passage text. Internal semantic hints or generated metadata do not become quotations.
+```mermaid
+flowchart TD
+    Q[Stable guided question ID] --> L[Local guided SQLite lookup]
+    L --> C[Curated Candidate pool with strength]
+    C --> R[SelectionEngine controlled-random sample]
+    R --> T[Choose prepared text variant]
+    T --> O[Display exact stored text]
+```
+
+Both paths must return multiple plausible candidates where available. Free-form semantic relevance is a gate/weight; guided curated membership is already the relevance gate, so low-strength validated mappings remain eligible while strength changes selection probability. Repetition is allowed; recency may reduce probability without creating a permanent blacklist.
+
+The final display path always resolves to stored `passage_text` data. Internal semantic hints and generated curation metadata never become quotations.
 
 ## Build-time publication
 
@@ -161,13 +176,14 @@ flowchart TD
     X --> L[External curator proposal]
     L --> Q[Local locator/hash validation]
     A --> H[Semantic metadata + embeddings]
-    H --> B[Corpus assembly]
     Q --> M[Validated curated mappings]
+    H --> B[Format-v4 corpus assembly]
+    M --> B
     B --> V[Runtime corpus validation]
     V --> O[Published immutable corpus]
 ```
 
-The validated curated-mapping branch is currently prepared for later runtime integration and is not yet included in the published corpus-format artifacts.
+Validated curated ranges are re-resolved against the same prepared canonical source during assembly. Their exact slices are inserted as normal `passage` / `passage_text` rows and related to stable guided questions through format-v4 mapping tables. Stale hashes/locators, unknown question IDs, duplicate mappings, or dangling references fail before atomic publication.
 
 A published corpus is treated as generated immutable output. Expensive reusable preparation may be cached, but a corpus release should be assembled and validated as a coherent artifact instead of incrementally mutating a previously published database in place.
 
@@ -179,7 +195,9 @@ Core literary concepts are:
 - `TextVersion` — original, human translation, or machine translation;
 - `Passage` — semantic location in a work;
 - `PassageText` — exact text for one text version and prepared length;
-- `SemanticHint` — internal retrieval metadata linked to a passage.
+- `SemanticHint` — internal free-form retrieval metadata linked to a passage;
+- `GuidedQuestion` — stable prepared prompt persisted in the runtime corpus;
+- `GuidedQuestionPassage` — curated question/passage relationship with normalized strength.
 
 Core user concepts include history and `SavedEncounter`, which preserves the user question together with the selected passage.
 

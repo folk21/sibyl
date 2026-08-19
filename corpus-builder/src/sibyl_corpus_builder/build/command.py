@@ -25,6 +25,18 @@ def register_commands(subparsers) -> None:
     build = subparsers.add_parser("build", help="Build a runtime corpus from prepared source input")
     build.add_argument("--config", type=Path, required=True)
     build.add_argument("--source", type=Path, required=True)
+    build.add_argument(
+        "--questions",
+        type=Path,
+        help="Optional guided-question catalog to persist; required when --curation is used",
+    )
+    build.add_argument(
+        "--curation",
+        type=Path,
+        action="append",
+        default=[],
+        help="Validated curated metadata to materialize; repeat for multiple curation sets",
+    )
     build.add_argument("--output", type=Path, required=True)
 
     runtime_model = subparsers.add_parser(
@@ -46,7 +58,13 @@ def dispatch(args) -> bool:
         inspect_passages(args.config, args.source, args.output)
     elif args.command == "build":
         config = load_config(args.config)
-        build_corpus(config, args.source, args.output)
+        build_corpus(
+            config,
+            args.source,
+            args.output,
+            questions_path=args.questions,
+            curation_paths=args.curation,
+        )
         validate_corpus(args.output / "corpus.db")
         print(f"Built and validated corpus in {args.output}")
     elif args.command == "download-runtime-model":

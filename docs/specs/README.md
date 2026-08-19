@@ -43,4 +43,4 @@ Requirements should have stable IDs such as `R1`, and scenarios should reference
 
 ## Active specs
 
-- [`active/guided-question-runtime.md`](active/guided-question-runtime.md) — publish validated curated mappings into runtime corpus format and expose guided-question selection in Desktop while preserving free-form retrieval.
+- [`active/guided-question-runtime.md`](active/guided-question-runtime.md) — implementation complete and pending acceptance; publishes validated curated mappings into runtime corpus format and exposes guided-question selection in Desktop while preserving free-form retrieval.

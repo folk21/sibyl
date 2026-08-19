@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This is Sibyl's canonical **where do I start and what do I run next?** guide. It connects source preparation, optional large-LLM curation, the existing automatic embedding corpus, and the current Desktop real-corpus runtime.
+This is Sibyl's canonical **where do I start and what do I run next?** guide. It connects source preparation, optional large-LLM curation, format-v4 corpus assembly, and the current Desktop real-corpus runtime.
 
 Keep the happy-path sequence here. Use [`USAGE.md`](USAGE.md) for command syntax, optional flags, and alternate source inputs; [`SOURCES.md`](SOURCES.md) for provenance/rights/normalization policy; and implementation guides when you need code ownership.
 
@@ -13,7 +13,7 @@ Keep the happy-path sequence here. Use [`USAGE.md`](USAGE.md) for command syntax
 | A new supported author/catalog URL | [Prepare canonical works](#1-prepare-canonical-works) |
 | A reviewed `selection.toml` | Acquire the included works, then prepare canonical input |
 | Cached source artifacts | Materialize prepared canonical input |
-| A prepared `data/work/<author>/` directory | Choose [LLM curation](#2-large-llm-curation-path) and/or [automatic retrieval](#5-automatic-embedding-retrieval-path) |
+| A prepared `data/work/<author>/` directory | Choose [LLM curation](#2-large-llm-curation-path) and/or build the [runtime corpus](#5-build-the-runtime-corpus) |
 | An LLM proposal patch | [Import and validate the proposal](#4-import-and-validate-the-llm-proposal) |
 | A built corpus directory | [Run the real Desktop runtime](#6-run-the-current-real-desktop-runtime) |
 | Only a clean checkout | Follow [`INSTALLATION.md`](INSTALLATION.md), then start with a source or `make smoke-corpus` |
@@ -37,11 +37,12 @@ flowchart TD
     C --> L[Large-LLM curation]
     C --> A[Automatic splitter + E5 embeddings]
     L --> M[Validated curated mappings]
-    A --> R[Current generic runtime corpus]
-    M --> F[Future guided-question runtime index]
+    A --> B[Format-v4 corpus assembly]
+    M --> B
+    B --> R[Desktop free-form + guided runtime]
 ```
 
-Current real Desktop retrieval consumes the **automatic** corpus; Android still uses demo retrieval. Curated guided-question mappings are build-time data until runtime integration is implemented.
+Desktop real mode now supports both paths from the same published corpus: own questions use E5/vector retrieval, while mapped guided questions use SQLite curation mappings and the same `SelectionEngine`. Android still uses demo retrieval.
 
 ## 1. Prepare canonical works
 
@@ -213,11 +214,11 @@ sibyl-corpus validate-curation \
 
 Any stale locator/hash fails. Re-curate or deliberately migrate the mapping; never silently retarget an old locator.
 
-## 5. Automatic embedding retrieval path
+## 5. Build the runtime corpus
 
-This remains the runtime path for arbitrary free-form questions.
+The runtime corpus always includes the automatic splitter/E5 branch for arbitrary free-form questions. Guided curation is optional and is assembled into the same format-v4 `corpus.db` when supplied.
 
-Inspect mechanical passage boundaries from the same prepared canonical directory:
+Inspect mechanical automatic passage boundaries when needed:
 
 ```bash
 sibyl-corpus inspect-passages \
@@ -226,22 +227,33 @@ sibyl-corpus inspect-passages \
   --output data/work/tolstoy-passages.jsonl
 ```
 
-Then build and validate the runtime corpus:
+Build free-form retrieval only:
 
 ```bash
 sibyl-corpus build \
   --config config/real-text.toml \
   --source data/work/tolstoy \
   --output data/output/tolstoy
+```
+
+Build free-form plus the validated Tolstoy guided mappings:
+
+```bash
+sibyl-corpus build \
+  --config config/real-text.toml \
+  --source data/work/tolstoy \
+  --questions ../corpus-curation/questions.json \
+  --curation ../corpus-curation/curated/tolstoy-v1.json \
+  --output data/output/tolstoy
 
 sibyl-corpus validate --corpus data/output/tolstoy/corpus.db
 ```
 
-The current real-text configuration uses the deterministic splitter and local `multilingual-e5-small` embeddings. Completed embedding inputs are reusable through the local cache when their exact text/configuration identity has not changed.
+`--curation` is repeatable for multiple validated sets that reference prepared text versions present in `--source`. If any curation is supplied, `--questions` is required. Each curated range is revalidated against canonical text during assembly; stale hashes/locators or duplicate mappings fail before publication. A build without curation is still a valid v4 corpus and simply exposes no guided questions.
+
+The current real-text configuration uses the deterministic splitter and local `multilingual-e5-small` embeddings for free-form retrieval. Completed embedding inputs are reusable through the local cache when their exact text/configuration identity has not changed.
 
 ## 6. Run the current real Desktop runtime
-
-The real Desktop path consumes the automatic runtime artifacts, not curated mappings yet.
 
 Prepare the matching local runtime model once if needed, then run from the repository root:
 
@@ -249,6 +261,8 @@ Prepare the matching local runtime model once if needed, then run from the repos
 make download-runtime-model
 make run-desktop-real CORPUS_DIR=corpus-builder/data/output/tolstoy
 ```
+
+For a v4 corpus built with guided mappings, Desktop shows a **Guided question** mode containing only prompts that actually have candidates in that corpus, plus the existing **Own question** mode. Guided actions use local SQLite mappings only; free-form actions continue to use the local E5 model/vector index. Existing v3 development corpora remain free-form-only.
 
 Use [`USAGE.md`](USAGE.md) for alternate corpus/model paths and [`INSTALLATION.md`](INSTALLATION.md) for host-specific native setup.
 
@@ -260,15 +274,18 @@ Implemented now:
 - deterministic canonical-text export for an explicit external large-LLM step;
 - Git-safe proposal/curated metadata with no copied passage text;
 - exact local locator/hash validation and deterministic curated passage IDs;
-- automatic splitter + E5 runtime corpus for free-form retrieval;
-- deterministic offline tests for both corpus paths.
+- format-v4 assembly of curated exact passages and many-to-many question mappings;
+- automatic splitter + E5 retrieval for free-form questions;
+- Desktop guided-question dropdown and `question_id -> curated candidates -> SelectionEngine` routing without runtime embedding;
+- v3 Desktop free-form read compatibility during the migration;
+- deterministic offline tests for build/format/shared guided selection and Desktop SQLite lookup.
 
-Not implemented yet:
+Still later:
 
-- Desktop/Android loading of curated mappings;
-- guided-question UI;
-- `question_id -> curated candidates -> SelectionEngine` runtime routing;
-- assembly of curated mappings across authors into a runtime index.
+- Android real-corpus guided integration;
+- richer thematic guided-question browsing;
+- assembly/product packaging of larger curated sets across many authors;
+- persistent history/saved encounters and prepared short/extended curated variants.
 
 ## 8. Repository/data boundaries
 

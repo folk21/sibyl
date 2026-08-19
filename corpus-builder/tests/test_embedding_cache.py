@@ -40,7 +40,7 @@ class _RecordingProvider:
 
 def _config() -> BuilderConfig:
     return BuilderConfig(
-        format_version=3,
+        format_version=4,
         language="en",
         passages=PassageConfig(1, 2, 4, 0),
         hints=HintConfig(provider="passage_text", hints_per_passage=1),

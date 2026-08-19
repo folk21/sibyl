@@ -91,7 +91,7 @@ corpus-builder/data/runtime-models/multilingual-e5-small
 
 Override them with `CORPUS_DIR=... MODEL_DIR=...`.
 
-The current Desktop real-corpus implementation reads `manifest.json`, `corpus.db`, and `vectors.json`, embeds the question locally with ONNX Runtime, performs exhaustive cosine search for the small development corpus, resolves exact SQLite passage text, and delegates final choice to the shared `SelectionEngine`.
+The current Desktop real-corpus implementation supports two local modes from the same published corpus. **Own question** embeds text locally with ONNX Runtime and performs exhaustive cosine search for the small development corpus. **Guided question** (format v4 with mappings) lists only prompts that have curated candidates and reads those candidates directly from SQLite without query embedding. Both paths resolve exact stored `passage_text` and delegate final choice to the shared `SelectionEngine`. Existing v3 development corpora remain free-form-only.
 
 Intel macOS currently needs additional native-tokenizer setup for DJL; see [`docs/INSTALLATION.md`](docs/INSTALLATION.md) and [`mobile/IMPLEMENTATION.md`](mobile/IMPLEMENTATION.md).
 
@@ -103,7 +103,7 @@ A current Lib.ru author starts with:
 discover -> review selection -> acquire -> prepare-selection
 ```
 
-From the prepared canonical directory, choose the LLM-curation path, the existing `inspect-passages -> build -> validate` generic retrieval path, or both.
+From the prepared canonical directory, optionally run the LLM-curation path, then build a format-v4 runtime corpus. The build always keeps the automatic splitter/E5 free-form path and can additionally materialize validated `--curation` mappings into the same `corpus.db`.
 
 Start with [`docs/WORKFLOW.md`](docs/WORKFLOW.md) to choose the end-to-end path, then use [`corpus-builder/README.md`](corpus-builder/README.md) or [`docs/USAGE.md`](docs/USAGE.md) for command details.
 

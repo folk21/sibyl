@@ -5,7 +5,7 @@ help:
 	@echo "  check                Run lightweight checks (no Android/model/network required)"
 	@echo "  check-all            Run lightweight checks plus Android and desktop shared tests"
 	@echo "  test-mobile          Run Android shared host tests"
-	@echo "  test-desktop         Run shared tests on the desktop JVM target"
+	@echo "  test-desktop         Run shared plus Desktop runtime JVM tests"
 	@echo "  run-desktop          Run the interactive Compose Desktop demo"
 	@echo "  run-desktop-real     Run Desktop against a built local corpus (CORPUS_DIR/MODEL_DIR)"
 	@echo "  download-runtime-model  Download the local ONNX/tokenizer bundle for real Desktop retrieval"
@@ -27,7 +27,7 @@ test-mobile:
 	cd mobile && ./gradlew :shared:testAndroidHostTest
 
 test-desktop:
-	cd mobile && ./gradlew :shared:desktopTest
+	cd mobile && ./gradlew :shared:desktopTest :desktopApp:jvmTest
 
 run-desktop:
 	cd mobile && ./gradlew :desktopApp:run

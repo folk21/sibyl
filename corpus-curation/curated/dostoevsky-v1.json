@@ -1,0 +1,1138 @@
+{
+  "schema_version": 1,
+  "curation_id": "dostoevsky-v1",
+  "question_catalog_id": "sibyl-guided-questions-ru-v1",
+  "curation_method": "large_llm",
+  "source_bundle_id": "cb_0af81e44b0464fc71d51",
+  "passages": [
+    {
+      "passage_id": "cp_d50820b72bc8860f9873",
+      "work_id": "libru-dostoewskij-f-m-text-0010",
+      "text_version_id": "libru-dostoewskij-f-m-text-0010-libru",
+      "canonical_sha256": "b7bea7013e1b24fc48a3c2839cfc0c79e94bc09d090b17abfbbb3191c8b0ab46",
+      "source_locator": "chars:100055:100544",
+      "text_sha256": "68dc96b978d7f7d5aa33687dcb9724b5ec7bcc60290b62acab2e465760593d74",
+      "word_count": 89,
+      "matches": [
+        {
+          "question_id": "books_and_inner_life",
+          "strength": 0.98
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.76
+        },
+        {
+          "question_id": "value_of_books",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_8a3ba83e808165048bbe",
+      "work_id": "libru-dostoewskij-f-m-text-0010",
+      "text_version_id": "libru-dostoewskij-f-m-text-0010-libru",
+      "canonical_sha256": "b7bea7013e1b24fc48a3c2839cfc0c79e94bc09d090b17abfbbb3191c8b0ab46",
+      "source_locator": "chars:179415:179829",
+      "text_sha256": "afee47ec0d102fa845ff08081211be94265cfc34ecc188eaa45be5610ded9aa1",
+      "word_count": 66,
+      "matches": [
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.94
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.78
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.92
+        },
+        {
+          "question_id": "no_strength_left",
+          "strength": 0.9
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.82
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_6efd4d87cf01d9f3bd58",
+      "work_id": "libru-dostoewskij-f-m-text-0020",
+      "text_version_id": "libru-dostoewskij-f-m-text-0020-libru",
+      "canonical_sha256": "ad1704ff379cb662c957f884c6cfeec4682a454464d6a7134b042d425193575a",
+      "source_locator": "chars:81676:82263",
+      "text_sha256": "fdc413ac78dbb2af29345705b2a503a385b6e0088cc86f667c0dd8029ee835f3",
+      "word_count": 105,
+      "matches": [
+        {
+          "question_id": "envy_of_others",
+          "strength": 0.8
+        },
+        {
+          "question_id": "fight_or_let_go",
+          "strength": 0.9
+        },
+        {
+          "question_id": "jealousy_in_love",
+          "strength": 0.99
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.87
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_a09e17735838c953eed8",
+      "work_id": "libru-dostoewskij-f-m-text-0030",
+      "text_version_id": "libru-dostoewskij-f-m-text-0030-libru",
+      "canonical_sha256": "1188b7695a55952a854af387c28d1ca407f972c2e03ad2afceebb0100cea1436",
+      "source_locator": "chars:34982:35789",
+      "text_sha256": "8e944a68020ec2ead2b36863660f49c70137a587fc8bdf2735ec86ff91dc96e1",
+      "word_count": 122,
+      "matches": [
+        {
+          "question_id": "dignity_of_work",
+          "strength": 0.97
+        },
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.85
+        },
+        {
+          "question_id": "meaningful_work",
+          "strength": 0.99
+        },
+        {
+          "question_id": "others_expectations",
+          "strength": 0.84
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_a53e393b9d902d5b239a",
+      "work_id": "libru-dostoewskij-f-m-text-0030",
+      "text_version_id": "libru-dostoewskij-f-m-text-0030-libru",
+      "canonical_sha256": "1188b7695a55952a854af387c28d1ca407f972c2e03ad2afceebb0100cea1436",
+      "source_locator": "chars:36413:37034",
+      "text_sha256": "1f318c77a1deb981ee9212b9ceddebd870eee791e261298a1d719d886cc04168",
+      "word_count": 92,
+      "matches": [
+        {
+          "question_id": "dignity_of_work",
+          "strength": 0.99
+        },
+        {
+          "question_id": "diligence",
+          "strength": 0.98
+        },
+        {
+          "question_id": "meaningful_work",
+          "strength": 0.9
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.76
+        },
+        {
+          "question_id": "overcoming_laziness",
+          "strength": 0.84
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_17e8e135ca1f0731daef",
+      "work_id": "libru-dostoewskij-f-m-text-0030",
+      "text_version_id": "libru-dostoewskij-f-m-text-0030-libru",
+      "canonical_sha256": "1188b7695a55952a854af387c28d1ca407f972c2e03ad2afceebb0100cea1436",
+      "source_locator": "chars:37036:37384",
+      "text_sha256": "dbfd402afdc7f54e5a41c72aed64ccf71d8f0b491b893b9c6e26338c96a318d7",
+      "word_count": 56,
+      "matches": [
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.93
+        },
+        {
+          "question_id": "meaningful_work",
+          "strength": 0.79
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_2397e832d3fe8bbc6a35",
+      "work_id": "libru-dostoewskij-f-m-text-0030",
+      "text_version_id": "libru-dostoewskij-f-m-text-0030-libru",
+      "canonical_sha256": "1188b7695a55952a854af387c28d1ca407f972c2e03ad2afceebb0100cea1436",
+      "source_locator": "chars:180780:181833",
+      "text_sha256": "3afe90784ecabb701d4133c52f5d7c57ea9db548b3717da2cbaea9a9e1ebf362",
+      "word_count": 154,
+      "matches": [
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.96
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.99
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.85
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_e15f3e9c451bdb82d8ee",
+      "work_id": "libru-dostoewskij-f-m-text-0050",
+      "text_version_id": "libru-dostoewskij-f-m-text-0050-libru",
+      "canonical_sha256": "48ec5ed8084fe1194a7908d245465895dc75a66fed1068de7de1c87cdd094eed",
+      "source_locator": "chars:52736:53354",
+      "text_sha256": "59a4853061c931956fc88348902dd1987b94e9ddab8b57209f1819aae3b4dc4b",
+      "word_count": 103,
+      "matches": [
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.91
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.8
+        },
+        {
+          "question_id": "risking_failure",
+          "strength": 0.99
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.9
+        },
+        {
+          "question_id": "uncertainty",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_e45cb5032ec6aaaea9c5",
+      "work_id": "libru-dostoewskij-f-m-text-0050",
+      "text_version_id": "libru-dostoewskij-f-m-text-0050-libru",
+      "canonical_sha256": "48ec5ed8084fe1194a7908d245465895dc75a66fed1068de7de1c87cdd094eed",
+      "source_locator": "chars:81603:82297",
+      "text_sha256": "8ce21b9670a70ae151818072cf6524a0dce3f0d04373acc0dd38104b1e98c7c8",
+      "word_count": 118,
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.93
+        },
+        {
+          "question_id": "comparison_with_others",
+          "strength": 0.8
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.9
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.99
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.9
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_9ed9dab7730827356955",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:42473:43033",
+      "text_sha256": "756fd320e076b5a6accfebacae3f100671cabd15a8072670c482913330d41f36",
+      "word_count": 103,
+      "matches": [
+        {
+          "question_id": "forgiving_someone",
+          "strength": 0.98
+        },
+        {
+          "question_id": "living_with_injustice",
+          "strength": 0.76
+        },
+        {
+          "question_id": "no_strength_left",
+          "strength": 0.86
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.93
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_18bfaf2dca92a43dcb14",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:310715:311312",
+      "text_sha256": "7f75ce251bd80b6e53d8ae90ba8047eb387e57948bcff1decb415917d2ad6c9a",
+      "word_count": 103,
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.99
+        },
+        {
+          "question_id": "limited_time",
+          "strength": 0.97
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.9
+        },
+        {
+          "question_id": "unfinished_life",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_a288e8f9fd90edc247f4",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:824486:824681",
+      "text_sha256": "1808f8945e4e5ff58a19272f3ec860504ecf6c1904b57afd6d38aeca72005e40",
+      "word_count": 38,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.84
+        },
+        {
+          "question_id": "consequences_of_mistakes",
+          "strength": 0.96
+        },
+        {
+          "question_id": "irreversible_mistake",
+          "strength": 0.98
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.87
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_0fce194cb4b1413b7b58",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:901873:902152",
+      "text_sha256": "db5e4a82ff1086d180508b9139a1d25cf57959cbe77d8e763ff416b623db7c60",
+      "word_count": 50,
+      "matches": [
+        {
+          "question_id": "being_authentic",
+          "strength": 0.84
+        },
+        {
+          "question_id": "finding_my_place",
+          "strength": 0.8
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.94
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_e8746424d1d9473aff89",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:1079566:1080172",
+      "text_sha256": "e0145b9154d460cfd43fb7737c964786cbf1726b31560df311c9600ff207c817",
+      "word_count": 101,
+      "matches": [
+        {
+          "question_id": "hope_or_acceptance",
+          "strength": 0.84
+        },
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.86
+        },
+        {
+          "question_id": "no_strength_left",
+          "strength": 0.88
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.99
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_cf923d096a2b82480cd5",
+      "work_id": "libru-dostoewskij-f-m-text-0060",
+      "text_version_id": "libru-dostoewskij-f-m-text-0060-libru",
+      "canonical_sha256": "9a8571ecb3750195520bf67c59a53ae06da87f0684aa9f0f98c8812dd7dfe0cd",
+      "source_locator": "chars:1081982:1082546",
+      "text_sha256": "6374a907145105b9d2991df9c37c3f2965eaf6c0bef995a4ea65ef1f63e4e8df",
+      "word_count": 87,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.91
+        },
+        {
+          "question_id": "changing_identity",
+          "strength": 0.94
+        },
+        {
+          "question_id": "consequences_of_mistakes",
+          "strength": 0.89
+        },
+        {
+          "question_id": "fear_of_future",
+          "strength": 0.8
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.98
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_ff50da07d07ce51746f4",
+      "work_id": "libru-dostoewskij-f-m-text-0070",
+      "text_version_id": "libru-dostoewskij-f-m-text-0070-libru",
+      "canonical_sha256": "2a64d092e5a12e6324f6f5839102486aea8493135f5348d8a2d2323ad39a8423",
+      "source_locator": "chars:124963:126078",
+      "text_sha256": "4b832eb700b49a39f149349f12e1aa63f4278ee6d2c14a229a0e978291130210",
+      "word_count": 185,
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.99
+        },
+        {
+          "question_id": "limited_time",
+          "strength": 0.99
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.97
+        },
+        {
+          "question_id": "unfinished_life",
+          "strength": 0.91
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_b7ae44bb92943780f609",
+      "work_id": "libru-dostoewskij-f-m-text-0070",
+      "text_version_id": "libru-dostoewskij-f-m-text-0070-libru",
+      "canonical_sha256": "2a64d092e5a12e6324f6f5839102486aea8493135f5348d8a2d2323ad39a8423",
+      "source_locator": "chars:126121:126833",
+      "text_sha256": "6006b83db54fb8c764fc204031a25294896b7363e75e7957c636067e64140db6",
+      "word_count": 122,
+      "matches": [
+        {
+          "question_id": "limited_time",
+          "strength": 0.98
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.97
+        },
+        {
+          "question_id": "starting_over",
+          "strength": 0.91
+        },
+        {
+          "question_id": "wasted_time",
+          "strength": 0.99
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_7449d29e7467c640f784",
+      "work_id": "libru-dostoewskij-f-m-text-0070",
+      "text_version_id": "libru-dostoewskij-f-m-text-0070-libru",
+      "canonical_sha256": "2a64d092e5a12e6324f6f5839102486aea8493135f5348d8a2d2323ad39a8423",
+      "source_locator": "chars:475559:476838",
+      "text_sha256": "44dfeaee51f7b99cf126b6078dc5f1a5dad45bc17b6117872f0a042b974940e1",
+      "word_count": 191,
+      "matches": [
+        {
+          "question_id": "inner_core",
+          "strength": 0.8
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.92
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.86
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.84
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_be72eb3933c00a1596a8",
+      "work_id": "libru-dostoewskij-f-m-text-0070",
+      "text_version_id": "libru-dostoewskij-f-m-text-0070-libru",
+      "canonical_sha256": "2a64d092e5a12e6324f6f5839102486aea8493135f5348d8a2d2323ad39a8423",
+      "source_locator": "chars:485958:486562",
+      "text_sha256": "65cece05777a54c7038e0bf7ec86c92598d5ca96d26d2c85ef6d12878585a4ff",
+      "word_count": 94,
+      "matches": [
+        {
+          "question_id": "forgiving_someone",
+          "strength": 0.99
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.86
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.88
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.91
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_21c3a69221b288f3e008",
+      "work_id": "libru-dostoewskij-f-m-text-0090",
+      "text_version_id": "libru-dostoewskij-f-m-text-0090-libru",
+      "canonical_sha256": "dc7999f92804ab4d7004a4a31f6d797e5ffed5ab8a965b41573a11dd77a81b49",
+      "source_locator": "chars:30169:31492",
+      "text_sha256": "99d0dec87a4b434be3fcee0ee0ee50931bd71c2b7e3e7c5754d8da949eec1cb2",
+      "word_count": 219,
+      "matches": [
+        {
+          "question_id": "being_authentic",
+          "strength": 0.9
+        },
+        {
+          "question_id": "fear_of_closeness",
+          "strength": 0.89
+        },
+        {
+          "question_id": "holding_to_familiar",
+          "strength": 0.82
+        },
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.88
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.92
+        },
+        {
+          "question_id": "lonely_among_people",
+          "strength": 0.92
+        },
+        {
+          "question_id": "understood_or_self",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_22339af352bcaf284b7b",
+      "work_id": "libru-dostoewskij-f-m-text-0090",
+      "text_version_id": "libru-dostoewskij-f-m-text-0090-libru",
+      "canonical_sha256": "dc7999f92804ab4d7004a4a31f6d797e5ffed5ab8a965b41573a11dd77a81b49",
+      "source_locator": "chars:86006:86863",
+      "text_sha256": "7b7c629fea081b8fd3d12d8ee36bf9ec4d56e2b92ec9cfe43461691fcbc48a80",
+      "word_count": 137,
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.99
+        },
+        {
+          "question_id": "comparison_with_others",
+          "strength": 0.92
+        },
+        {
+          "question_id": "money_and_freedom",
+          "strength": 0.96
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_1e91d451356457a3f1b8",
+      "work_id": "libru-dostoewskij-f-m-text-0100",
+      "text_version_id": "libru-dostoewskij-f-m-text-0100-libru",
+      "canonical_sha256": "c923e6945b5d6b43cb2f9929bf44b2fe2628cba70d1d6a5e2645e9d1ade31f1f",
+      "source_locator": "chars:58383:59455",
+      "text_sha256": "6570a00e106c221a7ee7bfef9021a3ba102ebdc1a9e9fdc99611b3e4e38d8797",
+      "word_count": 163,
+      "matches": [
+        {
+          "question_id": "being_authentic",
+          "strength": 0.86
+        },
+        {
+          "question_id": "changing_identity",
+          "strength": 0.8
+        },
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.92
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.89
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_69de9c2ff68dde127c28",
+      "work_id": "libru-dostoewskij-f-m-text-0100",
+      "text_version_id": "libru-dostoewskij-f-m-text-0100-libru",
+      "canonical_sha256": "c923e6945b5d6b43cb2f9929bf44b2fe2628cba70d1d6a5e2645e9d1ade31f1f",
+      "source_locator": "chars:129103:130126",
+      "text_sha256": "af00c476852eb10f448e838a2fe1ef1def5ae1caa314bacee67769403718507e",
+      "word_count": 174,
+      "matches": [
+        {
+          "question_id": "fear_of_closeness",
+          "strength": 0.99
+        },
+        {
+          "question_id": "lonely_among_people",
+          "strength": 0.9
+        },
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.84
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.92
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.91
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_8efcecc4e89df71ddf7a",
+      "work_id": "libru-dostoewskij-f-m-text-0100",
+      "text_version_id": "libru-dostoewskij-f-m-text-0100-libru",
+      "canonical_sha256": "c923e6945b5d6b43cb2f9929bf44b2fe2628cba70d1d6a5e2645e9d1ade31f1f",
+      "source_locator": "chars:131514:132608",
+      "text_sha256": "1b2aac951d41af79c5ea774c242bcef02197700fd341386e12ec36b7cb124fca",
+      "word_count": 179,
+      "matches": [
+        {
+          "question_id": "diligence",
+          "strength": 0.95
+        },
+        {
+          "question_id": "fight_or_let_go",
+          "strength": 0.84
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.88
+        },
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.93
+        },
+        {
+          "question_id": "overcoming_laziness",
+          "strength": 0.87
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_a950cecc99a8285a6ff6",
+      "work_id": "libru-dostoewskij-f-m-text-0100",
+      "text_version_id": "libru-dostoewskij-f-m-text-0100-libru",
+      "canonical_sha256": "c923e6945b5d6b43cb2f9929bf44b2fe2628cba70d1d6a5e2645e9d1ade31f1f",
+      "source_locator": "chars:252326:252691",
+      "text_sha256": "74e0a414c5ab50eb966d2a28c2628ad8eb06ca23602a8ceca4f800185af0a2e1",
+      "word_count": 57,
+      "matches": [
+        {
+          "question_id": "changing_identity",
+          "strength": 0.85
+        },
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.99
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.88
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_7b40785e3132df439f61",
+      "work_id": "libru-dostoewskij-f-m-text-0110",
+      "text_version_id": "libru-dostoewskij-f-m-text-0110-libru",
+      "canonical_sha256": "473a583a2f636620c4ea1e3cae52b7fc31d0e525c997389b8da8339763546096",
+      "source_locator": "chars:161851:162294",
+      "text_sha256": "6d7e334298b604f6e9f8cdca54acaec86fe1ca15b7a0988db4b2772daa351d3a",
+      "word_count": 77,
+      "matches": [
+        {
+          "question_id": "lost_old_meanings",
+          "strength": 0.99
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.98
+        },
+        {
+          "question_id": "no_strength_left",
+          "strength": 0.84
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.88
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_cfdfb1d5cc2a80efe9e4",
+      "work_id": "libru-dostoewskij-f-m-text-0110",
+      "text_version_id": "libru-dostoewskij-f-m-text-0110-libru",
+      "canonical_sha256": "473a583a2f636620c4ea1e3cae52b7fc31d0e525c997389b8da8339763546096",
+      "source_locator": "chars:196234:197228",
+      "text_sha256": "a7edc47ed3b9dd3050c7b4a103801adb55dd759f482b9d965b812038b4a9b37d",
+      "word_count": 174,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.82
+        },
+        {
+          "question_id": "hatred",
+          "strength": 0.88
+        },
+        {
+          "question_id": "living_with_injustice",
+          "strength": 0.99
+        },
+        {
+          "question_id": "revenge",
+          "strength": 0.8
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.8
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_78cc00300452e7e67bc3",
+      "work_id": "libru-dostoewskij-f-m-text-0110",
+      "text_version_id": "libru-dostoewskij-f-m-text-0110-libru",
+      "canonical_sha256": "473a583a2f636620c4ea1e3cae52b7fc31d0e525c997389b8da8339763546096",
+      "source_locator": "chars:213793:214590",
+      "text_sha256": "f0e6dd251776968be2a25998d76a60e03774343a128ba544e79039a414c3e514",
+      "word_count": 128,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.9
+        },
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.99
+        },
+        {
+          "question_id": "others_expectations",
+          "strength": 0.8
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.86
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_f6d6359ecc3916871847",
+      "work_id": "libru-dostoewskij-f-m-text-0130",
+      "text_version_id": "libru-dostoewskij-f-m-text-0130-libru",
+      "canonical_sha256": "e5dbf750853280aaff48f930b49b771cad8f7a6e4edfe5db517fc24f815e7da4",
+      "source_locator": "chars:178223:178489",
+      "text_sha256": "6f6d1adbad99cd361c0048462186ab025e0e39902ea373ac2ad8301c74b730c4",
+      "word_count": 52,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.99
+        },
+        {
+          "question_id": "consequences_of_mistakes",
+          "strength": 0.85
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.86
+        },
+        {
+          "question_id": "responsibility_to_next_generations",
+          "strength": 0.79
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_009d8438b825f18caca7",
+      "work_id": "libru-dostoewskij-f-m-text-0130",
+      "text_version_id": "libru-dostoewskij-f-m-text-0130-libru",
+      "canonical_sha256": "e5dbf750853280aaff48f930b49b771cad8f7a6e4edfe5db517fc24f815e7da4",
+      "source_locator": "chars:618444:619973",
+      "text_sha256": "150278b7403492c13badbdd818d9b6601cfd3071c4f656a00ef13068c64e2a7b",
+      "word_count": 258,
+      "matches": [
+        {
+          "question_id": "future_beyond_my_life",
+          "strength": 0.98
+        },
+        {
+          "question_id": "inner_core",
+          "strength": 0.94
+        },
+        {
+          "question_id": "responsibility_to_next_generations",
+          "strength": 0.97
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_a688f682e39ac7f4d309",
+      "work_id": "libru-dostoewskij-f-m-text-0190",
+      "text_version_id": "libru-dostoewskij-f-m-text-0190-libru",
+      "canonical_sha256": "0b3588cf0f85810378bb63e3bbb37b82a574f31f204038f3a2999689b5b9bef1",
+      "source_locator": "chars:55696:56005",
+      "text_sha256": "f9a21b231f5b9af070b086739f604802f862ebe2d359d34913e9f94e1f927fcf",
+      "word_count": 55,
+      "matches": [
+        {
+          "question_id": "burden_of_responsibility",
+          "strength": 0.97
+        },
+        {
+          "question_id": "duty_or_desire",
+          "strength": 0.86
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.88
+        },
+        {
+          "question_id": "no_right_choice",
+          "strength": 0.8
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.9
+        },
+        {
+          "question_id": "uncertainty",
+          "strength": 0.85
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_d445aef0b40f1f304695",
+      "work_id": "libru-dostoewskij-f-m-text-0230",
+      "text_version_id": "libru-dostoewskij-f-m-text-0230-libru",
+      "canonical_sha256": "07618630e228f417163b6cd7af49185d00c7a052606ce62f5e4c5d3cb5c6ba2e",
+      "source_locator": "chars:747:1608",
+      "text_sha256": "d7849c013a04392b5922616bc3aeca1fd6f96b7176a48d9193dc8cfb8f3e868c",
+      "word_count": 156,
+      "matches": [
+        {
+          "question_id": "fear_of_closeness",
+          "strength": 0.8
+        },
+        {
+          "question_id": "feeling_out_of_place",
+          "strength": 0.94
+        },
+        {
+          "question_id": "lonely_among_people",
+          "strength": 0.99
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.96
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_ba7bff4d52c478bf672d",
+      "work_id": "libru-dostoewskij-f-m-text-0230",
+      "text_version_id": "libru-dostoewskij-f-m-text-0230-libru",
+      "canonical_sha256": "07618630e228f417163b6cd7af49185d00c7a052606ce62f5e4c5d3cb5c6ba2e",
+      "source_locator": "chars:102216:102860",
+      "text_sha256": "3a519b0740b6dd239b45202b8197b527cbbc64269b19816a47c6c91944b7d640",
+      "word_count": 104,
+      "matches": [
+        {
+          "question_id": "fight_or_let_go",
+          "strength": 0.98
+        },
+        {
+          "question_id": "forgiving_someone",
+          "strength": 0.92
+        },
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.99
+        },
+        {
+          "question_id": "regret_about_past",
+          "strength": 0.8
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_cd8d22473698605a6488",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:1223:1512",
+      "text_sha256": "36c6d73e6af47c87461a3664be3954e8b4f9adf0d6c4f13d1e514e0c1247de91",
+      "word_count": 48,
+      "matches": [
+        {
+          "question_id": "caring_for_health",
+          "strength": 0.76
+        },
+        {
+          "question_id": "hatred",
+          "strength": 0.9
+        },
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.86
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.92
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_72b98b5d86f5df9936f1",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:9686:10456",
+      "text_sha256": "4e91b3d8cc937d344121c0c4593bebacbf0c35c739033f05dc3187b49e3117a7",
+      "word_count": 109,
+      "matches": [
+        {
+          "question_id": "hatred",
+          "strength": 0.82
+        },
+        {
+          "question_id": "irreversible_mistake",
+          "strength": 0.92
+        },
+        {
+          "question_id": "regret_about_past",
+          "strength": 0.97
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.96
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.99
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_991402a2bd1d0b211834",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:10457:11641",
+      "text_sha256": "0519b1be49fe073ac51857c14bbaa9ef80cc21ce4ea229148ce39feef909075d",
+      "word_count": 180,
+      "matches": [
+        {
+          "question_id": "holding_to_familiar",
+          "strength": 0.84
+        },
+        {
+          "question_id": "laziness",
+          "strength": 0.98
+        },
+        {
+          "question_id": "overcoming_laziness",
+          "strength": 0.95
+        },
+        {
+          "question_id": "possibility_of_change",
+          "strength": 0.82
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.97
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_0492a8be0dc1c4d9659b",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:55896:56709",
+      "text_sha256": "740eaa808e3aa4330a512dc1eaad3aedc1897f8b757144a8d947642394976904",
+      "word_count": 132,
+      "matches": [
+        {
+          "question_id": "being_authentic",
+          "strength": 0.94
+        },
+        {
+          "question_id": "freedom_or_peace",
+          "strength": 0.97
+        },
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.9
+        },
+        {
+          "question_id": "others_expectations",
+          "strength": 0.82
+        },
+        {
+          "question_id": "self_deception",
+          "strength": 0.84
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_9cfa6cb7e5f6d80cec7e",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:59236:60468",
+      "text_sha256": "2149be8b7a8f5fdc11d03a81543504914c74df318b4c3a6b626c12311ffb3f50",
+      "word_count": 178,
+      "matches": [
+        {
+          "question_id": "ambition",
+          "strength": 0.88
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.95
+        },
+        {
+          "question_id": "success_and_happiness",
+          "strength": 0.92
+        },
+        {
+          "question_id": "what_really_matters",
+          "strength": 0.9
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_21b5c1381afefbd5ac19",
+      "work_id": "libru-dostoewskij-f-m-text-0290",
+      "text_version_id": "libru-dostoewskij-f-m-text-0290-libru",
+      "canonical_sha256": "0feb357398eb49524581c8be86db63bc44f21085041013e6286893505852ae9b",
+      "source_locator": "chars:221986:222373",
+      "text_sha256": "cb07cad67f739db92ed7503c09cb2de86fafb8af8430d06b69242ca26c51df77",
+      "word_count": 67,
+      "matches": [
+        {
+          "question_id": "fear_of_closeness",
+          "strength": 0.97
+        },
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.91
+        },
+        {
+          "question_id": "need_other_people",
+          "strength": 0.92
+        },
+        {
+          "question_id": "reconciliation",
+          "strength": 0.82
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.94
+        }
+      ]
+    }
+  ]
+}

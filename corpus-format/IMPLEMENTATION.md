@@ -2,18 +2,18 @@
 
 ## Scope
 
-`corpus-format/` is the persisted compatibility contract between corpus construction and runtime readers. It contains no source acquisition or retrieval ranking logic.
+`corpus-format/` is the persisted compatibility contract between corpus construction and runtime readers. It contains no source acquisition, literary curation, or retrieval ranking logic.
 
-Current format version: **3**.
+Current format version: **4**.
 
 ## Owning files
 
-- `VERSION` — integer format version understood by builder/readers;
+- `VERSION` — integer current format version emitted by the builder;
 - `schema.sql` — canonical relational schema semantics;
-- `manifest.schema.json` — JSON manifest contract;
-- `tools/validate_schema.py` — self-check for required SQL tables and VERSION/schema consistency.
+- `manifest.schema.json` — current JSON manifest contract;
+- `tools/validate_schema.py` — self-check for required SQL tables/constraints and VERSION/schema consistency.
 
-Detailed field semantics and versioning rules live in [`../docs/CORPUS_FORMAT.md`](../docs/CORPUS_FORMAT.md).
+Detailed field semantics and migration behavior live in [`../docs/CORPUS_FORMAT.md`](../docs/CORPUS_FORMAT.md).
 
 ## Runtime artifact relationship
 
@@ -25,7 +25,7 @@ corpus.db
 vectors.json
 ```
 
-`corpus.db` persists authors, works, text versions, semantic passages, exact passage texts, and semantic hints. `vectors.json` maps hint IDs to embedding vectors in the current development implementation. `manifest.json` records format and embedding compatibility information plus artifact filenames/counts.
+`corpus.db` persists authors, works, text versions, exact passages/texts, semantic hints, guided-question catalog rows, and guided question/passage mappings. `vectors.json` maps semantic-hint IDs to embedding vectors for the current free-form development implementation. `manifest.json` records format/embedding compatibility information plus artifact filenames and counts.
 
 ## Writer and reader locations
 
@@ -40,12 +40,10 @@ Because writer and readers are implemented in separate projects, format changes 
 
 ## Exact-text relationship
 
-`passage` identifies a semantic location in a work. `passage_text` stores the concrete text for one text version and prepared length. Displayed literary text must come from `passage_text.text` rather than generated semantic metadata.
+`passage` identifies a semantic location in a work. `passage_text` stores the concrete text for one text version and prepared length. Both automatic and curated runtime passages use this representation; displayed literary text must come from `passage_text.text` rather than generated semantic/curation metadata.
 
-`semantic_hint` is intentionally separate. It can change retrieval behavior without becoming display text.
+`semantic_hint` is free-form retrieval metadata. `guided_question_passage.strength` is guided curated relevance. Neither becomes quotation text.
 
 ## Version compatibility
 
-Additive optional manifest metadata may remain compatible when old readers can safely ignore it. Changes that alter required persisted semantics, remove/rename required fields, or change identity relationships require a new format version.
-
-Desktop currently rejects unsupported format versions before opening runtime resources.
+New builder output is v4. Desktop currently accepts v3 and v4 so existing development corpora can continue free-form retrieval; guided lookup is available only from v4 persisted tables. Unknown versions are rejected before runtime resources are opened.

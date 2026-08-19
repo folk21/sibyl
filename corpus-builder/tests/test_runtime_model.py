@@ -10,7 +10,7 @@ from sibyl_corpus_builder.build.api import download_runtime_model
 def _config(tmp_path: Path, query_prefix: str = "query: ") -> Path:
     path = tmp_path / "config.toml"
     path.write_text(
-        f'''\n[corpus]\nformat_version = 3\nlanguage = "ru"\n\n[passages]\nmin_words = 5\npreferred_words = 10\nmax_words = 40\noverlap_paragraphs = 0\n\n[hints]\nhints_per_passage = 1\nprovider = "passage_text"\n\n[embeddings]\nprovider = "sentence_transformers"\nmodel_id = "intfloat/multilingual-e5-small"\ndimensions = 384\nnormalize = true\npassage_prefix = "passage: "\nquery_prefix = "{query_prefix}"\n'''.strip(),
+        f'''\n[corpus]\nformat_version = 4\nlanguage = "ru"\n\n[passages]\nmin_words = 5\npreferred_words = 10\nmax_words = 40\noverlap_paragraphs = 0\n\n[hints]\nhints_per_passage = 1\nprovider = "passage_text"\n\n[embeddings]\nprovider = "sentence_transformers"\nmodel_id = "intfloat/multilingual-e5-small"\ndimensions = 384\nnormalize = true\npassage_prefix = "passage: "\nquery_prefix = "{query_prefix}"\n'''.strip(),
         encoding="utf-8",
     )
     return path

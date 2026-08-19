@@ -1,6 +1,6 @@
 # Sibyl corpus builder
 
-`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the current automatic retrieval corpus, and supports external large-LLM curation. It is never part of runtime question answering.
+`corpus-builder/` is Sibyl's local build-time Python application. It turns reviewed literary sources into deterministic canonical input, builds the free-form retrieval corpus, supports external large-LLM curation, and assembles validated guided mappings into the current format-v4 runtime corpus. It is never part of runtime question answering.
 
 ## Pipeline
 
@@ -10,8 +10,9 @@ flowchart TD
     S --> P[Prepared canonical sources]
     P --> B[Automatic build]
     P --> C[Large-LLM curation]
-    B --> R[Runtime corpus artifacts]
     C --> M[Validated curated metadata]
+    M --> B
+    B --> R[Format-v4 runtime corpus artifacts]
 ```
 
 Importing the package performs no downloads, model loading, or generated-data writes. Network/model work happens only through explicit commands.

@@ -135,13 +135,25 @@ The splitter preserves exact canonical `chars:start:end` locators and natural bo
 
 ### `build`
 
-Builds the current runtime corpus from prepared canonical sources.
+Builds the current format-v4 runtime corpus from prepared canonical sources. The automatic splitter/embedding branch is always built for free-form retrieval; validated guided curation can be materialized into the same SQLite database.
+
+Free-form only:
 
 ```text
 sibyl-corpus build --config <config.toml> --source <prepared-dir> --output <corpus-dir>
 ```
 
-With `config/real-text.toml`, the build uses the optional Sentence Transformers provider and `intfloat/multilingual-e5-small`. Completed embedding inputs are cached under the prepared source directory and are reused when their exact text/configuration identity still matches.
+With guided curation:
+
+```text
+sibyl-corpus build --config <config.toml> --source <prepared-dir> \
+  --questions <questions.json> --curation <curated.json> [--curation <curated-2.json> ...] \
+  --output <corpus-dir>
+```
+
+`--curation` is repeatable. Supplying any `--curation` requires `--questions`. `--questions` by itself is allowed and persists the selected catalog with zero mappings. Curation inputs are revalidated against the prepared canonical sources during assembly; stale hashes/locators, unknown question IDs, duplicate curated passage IDs, or duplicate mappings fail before atomic publication.
+
+With `config/real-text.toml`, the free-form branch uses the optional Sentence Transformers provider and `intfloat/multilingual-e5-small`. Completed embedding inputs are cached under the prepared source directory and are reused when their exact text/configuration identity still matches. Curated passages do not receive query embeddings merely to support guided lookup.
 
 ### `validate`
 
@@ -149,7 +161,7 @@ With `config/real-text.toml`, the build uses the optional Sentence Transformers 
 sibyl-corpus validate --corpus <corpus.db>
 ```
 
-Validates required runtime database metadata, foreign keys, and non-empty passage/hint content.
+Validates required format-v4 runtime metadata, foreign keys, guided schema integrity, and non-empty free-form passage/hint content.
 
 ### `download-runtime-model`
 

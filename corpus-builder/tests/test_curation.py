@@ -10,6 +10,7 @@ from sibyl_corpus_builder.curation import (
     export_curation_bundle,
     import_curation,
     load_question_catalog,
+    load_validated_curation,
     validate_curated_curation,
 )
 
@@ -321,6 +322,16 @@ def test_import_curation_verifies_exact_slice_and_writes_git_safe_metadata(
         source_dir=source,
         questions_path=questions,
         curation_path=output,
+    )
+
+    validated = load_validated_curation(
+        source_dir=source,
+        questions_path=questions,
+        curation_path=output,
+    )
+    assert validated.question_catalog_id == "fixture-questions-v1"
+    assert validated.passages[0].text == (
+        "The second paragraph accepts uncertainty and chooses a different road."
     )
 
 

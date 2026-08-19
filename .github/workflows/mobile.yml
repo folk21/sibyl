@@ -21,5 +21,5 @@ jobs:
           java-version: "17"
       - uses: android-actions/setup-android@v3
       - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - run: ./gradlew :shared:testAndroidHostTest :shared:desktopTest :desktopApp:compileKotlinJvm :androidApp:assembleDebug
+      - run: ./gradlew :shared:testAndroidHostTest :shared:desktopTest :desktopApp:jvmTest :desktopApp:compileKotlinJvm :androidApp:assembleDebug
         working-directory: mobile

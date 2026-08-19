@@ -70,6 +70,15 @@ data class Passage(
     val variants: Map<PassageLength, PassageVariant>,
 )
 
+
+/** Stable guided prompt persisted in a runtime corpus and selectable without query embedding. */
+data class GuidedQuestion(
+    val id: String,
+    val text: String,
+    val kind: String? = null,
+    val theme: String? = null,
+)
+
 /** Retrieved passage plus independent weights consumed by controlled-random selection. */
 data class Candidate(
     val passage: Passage,

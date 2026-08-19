@@ -35,7 +35,7 @@ def test_builder_creates_valid_artifacts(tmp_path: Path) -> None:
     config_path.write_text(
         """
 [corpus]
-format_version = 3
+format_version = 4
 language = "en"
 [passages]
 min_words = 5
@@ -58,7 +58,7 @@ query_prefix = "query: "
     validate_corpus(output / "corpus.db")
 
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["format_version"] == 3
+    assert manifest["format_version"] == 4
     assert manifest["counts"]["passages"] >= 1
     assert manifest["embedding"]["query_prefix"] == "query: "
 

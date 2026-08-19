@@ -59,6 +59,58 @@ class SelectionEngineTest {
         assertEquals("other", answer?.passage?.id)
     }
 
+
+    @Test
+    fun `guided policy keeps low strength curated candidates eligible`() {
+        val engine = SelectionEngine(RandomSource { 0.99 })
+        val answer = engine.select(
+            question = "guided prompt",
+            candidates = listOf(candidate("strong", 0.90), candidate("low", 0.05)),
+            policy = SelectionPolicy.guidedDefaults(),
+        )
+
+        assertEquals("low", answer?.passage?.id)
+        assertEquals("guided prompt", answer?.question)
+    }
+
+    @Test
+    fun `guided strength changes probability without forcing top one`() {
+        val candidates = listOf(candidate("strong", 0.90), candidate("weaker", 0.40))
+        val strong = SelectionEngine(RandomSource { 0.0 }).select(
+            question = "guided",
+            candidates = candidates,
+            policy = SelectionPolicy.guidedDefaults(),
+        )
+        val weaker = SelectionEngine(RandomSource { 0.99 }).select(
+            question = "guided",
+            candidates = candidates,
+            policy = SelectionPolicy.guidedDefaults(),
+        )
+
+        assertEquals("strong", strong?.passage?.id)
+        assertEquals("weaker", weaker?.passage?.id)
+    }
+
+    @Test
+    fun `guided selection does not permanently blacklist a repeated passage`() {
+        val engine = SelectionEngine(RandomSource { 0.0 })
+        val candidates = listOf(candidate("repeatable", 0.90), candidate("other", 0.50))
+
+        val first = engine.select(
+            question = "guided",
+            candidates = candidates,
+            policy = SelectionPolicy.guidedDefaults(),
+        )
+        val second = engine.select(
+            question = "guided",
+            candidates = candidates,
+            policy = SelectionPolicy.guidedDefaults(),
+        )
+
+        assertEquals("repeatable", first?.passage?.id)
+        assertEquals("repeatable", second?.passage?.id)
+    }
+
     private fun candidate(id: String, score: Double): Candidate = Candidate(
         passage = Passage(
             id = id,

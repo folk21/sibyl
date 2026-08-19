@@ -1,5 +1,7 @@
 package io.github.folk21.sibyl.desktop.runtime
 
+import io.github.folk21.sibyl.retrieval.GuidedRetrievalService
+import io.github.folk21.sibyl.retrieval.LocalGuidedRetrievalService
 import io.github.folk21.sibyl.retrieval.LocalRetrievalService
 import io.github.folk21.sibyl.retrieval.RetrievalService
 import java.nio.file.Files
@@ -7,15 +9,16 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * Owns the Desktop-only resources required for real local corpus retrieval.
+ * Owns the Desktop-only resources required for real local free-form and guided corpus retrieval.
  *
- * The factory validates corpus/model manifests before opening expensive native resources, then wires the shared
- * `LocalRetrievalService` to JVM implementations for ONNX query embedding, brute-force vector search, and SQLite
- * passage hydration. The runtime owns the closeable embedding engine and database connection for the full window
- * lifetime; partial initialization is cleaned up before an exception escapes.
+ * The factory validates corpus/model manifests before opening expensive native resources, then wires shared local
+ * retrieval to JVM ONNX/vector/SQLite adapters. Format-v4 guided lookup reuses the same read-only SQLite repository
+ * but never calls the embedding engine or vector index. V3 keeps only free-form retrieval. All closeable resources
+ * live for the window lifetime and partial initialization is cleaned up before an exception escapes.
  */
 class DesktopRuntime private constructor(
     val retrievalService: RetrievalService,
+    val guidedRetrievalService: GuidedRetrievalService?,
     val label: String,
     private val embeddingEngine: OnnxE5EmbeddingEngine,
     private val repository: SqliteCorpusRepository,
@@ -30,8 +33,8 @@ class DesktopRuntime private constructor(
          * Loads one published corpus and a compatible local embedding-model bundle.
          *
          * Manifest compatibility is checked before inference starts so model ID, dimensions, normalization, E5
-         * query prefix, pooling, and corpus format cannot drift silently. Resource construction is ordered so every
-         * successfully opened resource is closed if a later adapter fails to initialize.
+         * query prefix, pooling, and corpus format cannot drift silently. Guided service construction depends only on
+         * the persisted format version and SQLite repository; the embedding/vector adapters remain free-form-only.
          */
         fun load(corpusDir: Path, modelDir: Path): DesktopRuntime {
             require(Files.isDirectory(corpusDir)) { "Corpus directory not found: $corpusDir" }
@@ -55,16 +58,29 @@ class DesktopRuntime private constructor(
                     dimensions = corpusManifest.embedding.dimensions,
                 )
                 val repository = SqliteCorpusRepository(
-                    corpusDir.resolve(corpusManifest.artifacts.corpus),
+                    corpusPath = corpusDir.resolve(corpusManifest.artifacts.corpus),
+                    formatVersion = corpusManifest.formatVersion,
                 )
                 return try {
+                    val guidedService = if (supportsGuidedRetrieval(corpusManifest)) {
+                        LocalGuidedRetrievalService(repository)
+                    } else {
+                        null
+                    }
                     DesktopRuntime(
                         retrievalService = LocalRetrievalService(
                             embeddingEngine = embeddingEngine,
                             vectorIndex = vectorIndex,
                             corpusRepository = repository,
                         ),
-                        label = "${corpusManifest.counts.works} works · ${corpusManifest.counts.passages} passages",
+                        guidedRetrievalService = guidedService,
+                        label = buildString {
+                            append("${corpusManifest.counts.works} works · ")
+                            append("${corpusManifest.counts.passages} passages")
+                            if (corpusManifest.formatVersion >= 4) {
+                                append(" · ${corpusManifest.counts.guidedMappings} guided mappings")
+                            }
+                        },
                         embeddingEngine = embeddingEngine,
                         repository = repository,
                     )

@@ -29,11 +29,12 @@ flowchart TD
     S --> P[Prepared canonical SourceDocument values]
     P --> B[sibyl_corpus_builder.build]
     P --> C[sibyl_corpus_builder.curation]
-    B --> R[corpus.db + vectors.json + manifest.json]
-    C --> M[Validated curated locator/hash metadata]
+    C --> M[Validated curated exact ranges]
+    M --> B
+    B --> R[format-v4 corpus.db + vectors.json + manifest.json]
 ```
 
-`sibyl_corpus_builder.cli` is only the command composition root. `sources` owns discovery, acquisition, normalization, and prepared-source publication. `build` owns mechanical passage extraction, retrieval text, embeddings, runtime-artifact writing, validation, and publication. `curation` exports canonical texts plus the stable guided-question catalog and validates external LLM locator/hash proposals locally.
+`sibyl_corpus_builder.cli` is only the command composition root. `sources` owns discovery, acquisition, normalization, and prepared-source publication. `curation` exports canonical texts plus the stable guided-question catalog, validates external LLM locator/hash proposals locally, and exposes validated exact slices through its public API. `build` owns mechanical free-form passage extraction/embeddings plus materialization of those validated curated slices and mappings into format-v4 runtime artifacts.
 
 The shared `sibyl_corpus_core` package owns only feature-neutral prepared-source contracts and deterministic primitives. It does not own source adapters, embeddings, curation proposal semantics, or persisted runtime corpus format.
 
@@ -42,22 +43,25 @@ The current automatic real-text build uses `intfloat/multilingual-e5-small`. Exa
 ## Runtime wiring
 
 ```mermaid
-flowchart LR
-    UI[SibylApp] --> R[LocalRetrievalService]
-    R --> E[EmbeddingEngine]
-    R --> I[VectorIndex]
-    R --> C[CorpusRepository]
-    R --> S[SelectionEngine]
+flowchart TD
+    UI[SibylApp] --> FR[LocalRetrievalService]
+    UI --> GR[LocalGuidedRetrievalService]
+    FR --> E[EmbeddingEngine]
+    FR --> I[VectorIndex]
+    FR --> C[CorpusRepository]
+    GR --> G[GuidedCorpusRepository]
+    C --> SQ[SqliteCorpusRepository]
+    G --> SQ
     E --> OE[OnnxE5EmbeddingEngine]
     I --> JV[JsonBruteForceVectorIndex]
-    C --> SQ[SqliteCorpusRepository]
+    UI --> S[SelectionEngine]
 ```
 
-Shared Kotlin owns retrieval contracts, candidate resolution, selection, and UI-facing behavior. The current Desktop development host supplies JVM implementations for local ONNX query embedding, brute-force cosine search over `vectors.json`, and read-only SQLite passage lookup.
+Shared Kotlin keeps free-form and guided lookup as separate contracts. `LocalRetrievalService` embeds own-question text, retrieves a broader vector pool, hydrates stored passages, and deduplicates by passage ID. `LocalGuidedRetrievalService` accepts stable question IDs and reads curated candidates from a `GuidedCorpusRepository`; it has no embedding/vector dependency. Both return candidate pools and delegate final controlled-random choice to `SelectionEngine`.
 
-`LocalRetrievalService` retrieves a broader semantic pool, resolves hint matches to stored passages, deduplicates by passage ID while keeping the strongest score, and delegates final controlled-random choice to `SelectionEngine`. The displayed literary text is always resolved from stored corpus data.
+The Desktop development host uses one read-only `SqliteCorpusRepository` for both corpus hydration paths. Format-v4 guided lookup reads only persisted `guided_question*` tables and exact `passage_text`; free-form lookup continues to use ONNX E5 plus `vectors.json`. Format v3 remains readable for free-form development corpora, while guided mode is unavailable.
 
-The guided-question curation metadata is **not yet wired into Desktop or Android runtime**. Current real runtime retrieval still consumes the automatic corpus artifacts.
+`SibylApp` exposes a guided-question selector only when the runtime reports at least one mapped question, otherwise the existing free-form input remains the only mode. “Another passage” repeats the same retrieval mode/prompt and runs `SelectionEngine` again.
 
 ## Runtime artifacts and compatibility
 
@@ -69,7 +73,7 @@ vectors.json
 manifest.json
 ```
 
-The Desktop embedding bundle is separate and contains the ONNX model, tokenizer data, and `model-manifest.json`. Corpus and model manifests are compared before retrieval so format version, model identity, vector dimensions, normalization, E5 query-prefix, and pooling assumptions cannot drift silently.
+The Desktop embedding bundle is separate and contains the ONNX model, tokenizer data, and `model-manifest.json`. Corpus and model manifests are compared before retrieval so supported format version (v3/v4), model identity, vector dimensions, normalization, E5 query-prefix, and pooling assumptions cannot drift silently. V4 manifest counts also expose guided-question/mapping diagnostics; v3 readers default those counts to zero.
 
 Generated corpus/model data remains under ignored `corpus-builder/data/` paths and is not committed or included in shareable archives.
 

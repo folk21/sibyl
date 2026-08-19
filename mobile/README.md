@@ -22,7 +22,7 @@ Real local corpus mode:
 make run-desktop-real
 ```
 
-The default real mode expects a corpus at `corpus-builder/data/output/dostoevsky` and a model bundle at `corpus-builder/data/runtime-models/multilingual-e5-small`. Override with `CORPUS_DIR=... MODEL_DIR=...`.
+The default real mode expects a corpus at `corpus-builder/data/output/dostoevsky` and a model bundle at `corpus-builder/data/runtime-models/multilingual-e5-small`. Override with `CORPUS_DIR=... MODEL_DIR=...`. Format-v4 corpora built with guided mappings expose a guided-question dropdown; format-v3 corpora remain free-form-only.
 
 On Intel macOS, real mode may also require the locally built DJL tokenizer native library through `RUST_LIBRARY_PATH`; see [`../docs/INSTALLATION.md`](../docs/INSTALLATION.md).
 

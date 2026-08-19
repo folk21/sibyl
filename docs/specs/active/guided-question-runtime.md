@@ -1,6 +1,6 @@
 # Guided-question runtime
 
-**Status:** active specification; implementation not yet present  
+**Status:** implementation complete; pending acceptance and archival  
 **Roadmap:** `C-12`, `P-13`  
 **Target slice:** Desktop real-corpus runtime first; shared KMP contracts/UI where practical
 
@@ -18,7 +18,7 @@ flowchart TD
     S --> P[Exact stored passage]
 ```
 
-## Current state
+## Baseline before implementation
 
 - `corpus-format` is version 3 and persists works, text versions, automatic passages, passage texts, semantic hints, and embedding compatibility metadata. It has no guided-question tables.
 - `corpus-curation/questions.json` owns stable guided-question IDs and prompt metadata.

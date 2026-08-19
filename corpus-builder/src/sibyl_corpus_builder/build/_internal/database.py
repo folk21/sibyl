@@ -1,16 +1,18 @@
-"""SQLite materialization for automatic corpus-build artifacts.
+"""SQLite materialization for automatic and curated runtime corpus artifacts.
 
 Pipeline position:
 
-    canonical documents + automatic passages + hints -> THIS MODULE -> corpus.db
+    canonical documents + automatic passages/hints + validated curated passages
+        -> THIS MODULE -> corpus.db
 
-The SQL schema is owned by ``corpus-format/schema.sql``. This writer must stay byte-for-byte
-aligned with that canonical schema; it does not own persisted format semantics.
+The SQL schema is owned by ``corpus-format/schema.sql``. This writer mirrors that canonical
+schema and only persists literary wording supplied by exact prepared-source slices.
 """
 
 import sqlite3
 from pathlib import Path
 
+from sibyl_corpus_builder.curation.models import QuestionCatalog, ValidatedCuratedPassage
 from sibyl_corpus_core.models import SourceDocument
 
 from .models import PassageCandidate, SemanticHint
@@ -83,11 +85,35 @@ CREATE TABLE semantic_hint (
     semantic_cluster TEXT
 );
 
+CREATE TABLE guided_question_catalog (
+    id TEXT PRIMARY KEY,
+    language TEXT NOT NULL
+);
+
+CREATE TABLE guided_question (
+    id TEXT PRIMARY KEY,
+    catalog_id TEXT NOT NULL REFERENCES guided_question_catalog(id),
+    ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+    kind TEXT NOT NULL CHECK (kind IN ('question', 'state')),
+    theme TEXT NOT NULL,
+    text TEXT NOT NULL,
+    UNIQUE (catalog_id, ordinal)
+);
+
+CREATE TABLE guided_question_passage (
+    question_id TEXT NOT NULL REFERENCES guided_question(id),
+    passage_id TEXT NOT NULL REFERENCES passage(id),
+    strength REAL NOT NULL CHECK (strength >= 0.0 AND strength <= 1.0),
+    PRIMARY KEY (question_id, passage_id)
+);
+
 CREATE INDEX idx_text_version_work ON text_version(work_id);
 CREATE INDEX idx_passage_work ON passage(work_id);
 CREATE INDEX idx_passage_text_passage ON passage_text(passage_id);
 CREATE INDEX idx_passage_text_version ON passage_text(text_version_id);
-CREATE INDEX idx_hint_passage ON semantic_hint(passage_id);"""
+CREATE INDEX idx_hint_passage ON semantic_hint(passage_id);
+CREATE INDEX idx_guided_question_catalog ON guided_question(catalog_id, ordinal);
+CREATE INDEX idx_guided_mapping_passage ON guided_question_passage(passage_id);"""
 
 
 def create_database(
@@ -101,8 +127,11 @@ def create_database(
     documents: list[SourceDocument],
     passages: list[PassageCandidate],
     hints: list[SemanticHint],
+    question_catalog: QuestionCatalog | None = None,
+    curated_passages: list[ValidatedCuratedPassage] | None = None,
 ) -> None:
-    """Materializes the format-owned SQLite corpus from exact prepared documents and passages."""
+    """Materializes the format-owned SQLite corpus from exact automatic and curated passages."""
+    curated_passages = curated_passages or []
     if path.exists():
         path.unlink()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -167,6 +196,7 @@ def create_database(
                 ),
             )
 
+        next_ordinal_by_work: dict[str, int] = {}
         for passage in passages:
             connection.execute(
                 """
@@ -200,8 +230,80 @@ def create_database(
                     passage.source_locator,
                 ),
             )
+            next_ordinal_by_work[passage.source_id] = max(
+                next_ordinal_by_work.get(passage.source_id, 0), passage.ordinal + 1
+            )
 
         connection.executemany(
             "INSERT INTO semantic_hint(id, passage_id, text) VALUES (?, ?, ?)",
             [(hint.hint_id, hint.passage_id, hint.text) for hint in hints],
         )
+
+        if question_catalog is not None:
+            connection.execute(
+                "INSERT INTO guided_question_catalog(id, language) VALUES (?, ?)",
+                (question_catalog.catalog_id, question_catalog.language),
+            )
+            connection.executemany(
+                """
+                INSERT INTO guided_question(id, catalog_id, ordinal, kind, theme, text)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        question.id,
+                        question_catalog.catalog_id,
+                        ordinal,
+                        question.kind,
+                        question.theme,
+                        question.text,
+                    )
+                    for ordinal, question in enumerate(question_catalog.items)
+                ],
+            )
+
+        for curated in curated_passages:
+            ordinal = next_ordinal_by_work.get(curated.work_id, 0)
+            next_ordinal_by_work[curated.work_id] = ordinal + 1
+            connection.execute(
+                """
+                INSERT INTO passage(
+                    id, work_id, ordinal, source_locator, quality_score,
+                    context_dependency, spoiler_risk
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    curated.passage_id,
+                    curated.work_id,
+                    ordinal,
+                    curated.source_locator,
+                    None,
+                    None,
+                    None,
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO passage_text(
+                    passage_id, text_version_id, variant, text, word_count, source_locator
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    curated.passage_id,
+                    curated.text_version_id,
+                    "standard",
+                    curated.text,
+                    curated.word_count,
+                    curated.source_locator,
+                ),
+            )
+            connection.executemany(
+                """
+                INSERT INTO guided_question_passage(question_id, passage_id, strength)
+                VALUES (?, ?, ?)
+                """,
+                [
+                    (match.question_id, curated.passage_id, match.strength)
+                    for match in curated.matches
+                ],
+            )

@@ -1,4 +1,4 @@
-"""Runtime manifest assembly for the automatic corpus build."""
+"""Runtime manifest assembly for automatic and guided corpus build output."""
 
 import json
 from pathlib import Path
@@ -15,8 +15,10 @@ def write_manifest(
     documents: list[SourceDocument],
     passage_count: int,
     hint_count: int,
+    guided_question_count: int = 0,
+    guided_mapping_count: int = 0,
 ) -> None:
-    """Writes format/embedding compatibility metadata beside generated runtime artifacts."""
+    """Writes format/embedding compatibility metadata and guided diagnostics."""
     embedding_manifest: dict[str, object] = {
         "provider": config.embeddings.provider,
         "dimensions": config.embeddings.dimensions,
@@ -43,6 +45,8 @@ def write_manifest(
             "works": len(documents),
             "passages": passage_count,
             "hints": hint_count,
+            "guided_questions": guided_question_count,
+            "guided_mappings": guided_mapping_count,
         },
         "artifacts": {"corpus": "corpus.db", "vectors": "vectors.json"},
     }

@@ -30,7 +30,7 @@ Current concepts:
 
 ### `[corpus]`
 
-- `format_version` — target corpus-format version (currently `3`);
+- `format_version` — target corpus-format version (currently `4`);
 - `language` — primary target/display language.
 
 ### `[passages]`
@@ -62,7 +62,7 @@ The published manifest must preserve model/provider identity and vector assumpti
 
 ## Guided questions and LLM curation
 
-The stable guided-question product catalog is not builder TOML configuration. It lives in `corpus-curation/questions.json` and has its own `catalog_id`; curation mappings reference stable question IDs. A semantic catalog rewrite requires a new catalog ID rather than silently reinterpreting existing mappings.
+The stable guided-question product catalog is not builder TOML configuration. The `build` command accepts it explicitly through `--questions` and accepts repeatable validated curation inputs through `--curation`. It lives in `corpus-curation/questions.json` and has its own `catalog_id`; curation mappings reference stable question IDs. A semantic catalog rewrite requires a new catalog ID rather than silently reinterpreting existing mappings.
 
 LLM curation proposals and normalized mappings live under `corpus-curation/`. Full canonical text exported for the external model belongs only to ignored local `corpus-builder/data/curation/`. See [`WORKFLOW.md`](WORKFLOW.md).
 

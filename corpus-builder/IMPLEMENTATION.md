@@ -12,8 +12,9 @@ flowchart TD
     S --> P[Prepared canonical sources]
     P --> B
     P --> C
-    B --> R[Automatic runtime corpus]
     C --> M[Validated curated metadata]
+    M --> B
+    B --> R[Format-v4 runtime corpus]
 ```
 
 The package root intentionally contains only:
@@ -110,7 +111,7 @@ sources/adapters/
 
 The important handoff is the prepared directory under `data/work/<name>/`. `corpus-core.prepared_sources.load_prepared_sources()` reads that directory; neither `build` nor `curation` reaches back into source `_internal` implementation.
 
-## `build`: automatic passages and current generic runtime corpus
+## `build`: automatic retrieval plus format-v4 runtime corpus assembly
 
 Public surface: `sibyl_corpus_builder.build.api`.
 
@@ -127,7 +128,7 @@ flowchart TD
     Q --> A[Atomic publish]
 ```
 
-This remains the fallback/open-ended path for arbitrary user questions. It is intentionally mechanical and independent of large-LLM curation.
+The automatic splitter/embedding branch remains the fallback/open-ended path for arbitrary user questions. Runtime publication can additionally consume validated curated metadata through the public `curation` API and materialize exact guided passages/mappings into the same format-v4 database; `build` never imports `curation._internal`.
 
 ### Main files
 
@@ -142,9 +143,9 @@ This remains the fallback/open-ended path for arbitrary user questions. It is in
 - `_internal/embeddings.py` — hash fixture provider and opt-in Sentence Transformers provider;
 - `_internal/embedding_pipeline.py` — provider selection, cache fingerprints, batching, progress, and cache reuse;
 - `_internal/embedding_cache.py` — SQLite cache of completed embedding inputs;
-- `_internal/database.py` — runtime SQLite writer; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
-- `_internal/manifest.py` — runtime artifact/embedding compatibility manifest;
-- `_internal/validation.py` — final persisted database checks before publication;
+- `_internal/database.py` — runtime SQLite writer for automatic passages plus validated curated `passage`/`passage_text` and `guided_question*` rows; its `SCHEMA` must remain aligned with `corpus-format/schema.sql`;
+- `_internal/manifest.py` — runtime artifact/embedding compatibility manifest plus guided question/mapping counts;
+- `_internal/validation.py` — final format-v4 metadata/foreign-key/guided-schema checks before publication;
 - `_internal/runtime_model/specs.py` / `download.py` — explicit recipes and download/publish logic for the Desktop ONNX/tokenizer bundle.
 
 The automatic splitter is not considered a literary curator. Its module documentation explicitly identifies it as a mechanical fallback used for generic retrieval.
@@ -166,14 +167,14 @@ flowchart TD
 ### Main files
 
 - `curation/command.py` — CLI adapter for export/import/validate commands;
-- `curation/api.py` — public feature facade and workflow contract;
+- `curation/api.py` — public feature facade for export/import/revalidation plus validated exact-slice loading used by corpus assembly;
 - `curation/models.py` — public guided-question catalog models.
 
 ### Curation internals
 
 - `_internal/questions.py` — guided-question catalog loading/ID validation;
 - `_internal/bundle.py` — deterministic ZIP export containing pinned canonical texts and questions, with strict/approved-only/explicit-override rights modes;
-- `_internal/proposal.py` — proposal import and normalized curated-mapping revalidation;
+- `_internal/proposal.py` — proposal import and normalized curated-mapping revalidation; it also constructs public validated exact-slice models after the same trust-boundary checks;
 - `_internal/validation.py` — the trust boundary that resolves local canonical slices and verifies hashes/question links.
 
 The external LLM decides literary relevance and natural boundaries. Local Python remains authoritative for exact text identity. Git-tracked curated metadata stores locators/hashes/matches rather than copied literary passages.

@@ -25,6 +25,7 @@ mobile/
 - `PassageText` — exact display text plus translation metadata;
 - `PassageVariant` — texts available for one prepared length;
 - `Passage` — literary metadata and variants;
+- `GuidedQuestion` — stable persisted prompt ID/text plus optional kind/theme metadata;
 - `Candidate` — a passage plus selection weights;
 - `Answer` — the user question, selected passage, and chosen variant;
 - `SavedEncounter` — persistence-oriented question/passage reference.
@@ -33,7 +34,7 @@ mobile/
 
 ## Retrieval contracts and orchestration
 
-`retrieval/RetrievalContracts.kt` defines the platform boundaries:
+`retrieval/RetrievalContracts.kt` keeps the two lookup modes separate. Free-form retrieval uses:
 
 ```kotlin
 EmbeddingEngine
@@ -41,7 +42,14 @@ VectorIndex
 RetrievalService
 ```
 
-`retrieval/LocalRetrievalService.kt` adds `CorpusRepository` and implements the shared query flow:
+Guided retrieval uses:
+
+```kotlin
+GuidedCorpusRepository
+GuidedRetrievalService
+```
+
+`LocalRetrievalService.kt` implements the free-form flow:
 
 ```mermaid
 sequenceDiagram
@@ -52,7 +60,7 @@ sequenceDiagram
     participant C as CorpusRepository
     participant S as SelectionEngine
 
-    UI->>R: candidates(question, 50)
+    UI->>R: candidates(question text, 50)
     R->>E: embed(question)
     E-->>R: query vector
     R->>V: search(vector, expanded limit)
@@ -61,26 +69,43 @@ sequenceDiagram
     C-->>R: Candidate[]
     R-->>UI: deduplicated candidates
     UI->>S: select(question, candidates)
-    S-->>UI: Answer?
 ```
 
-The retrieval multiplier intentionally asks the vector index for more hint matches than final passages. Multiple hints can point to one passage; `LocalRetrievalService` deduplicates them and keeps the strongest semantic score before truncating the candidate pool.
+`LocalGuidedRetrievalService.kt` implements the guided flow without `EmbeddingEngine` or `VectorIndex`:
+
+```mermaid
+sequenceDiagram
+    participant UI as SibylApp
+    participant G as LocalGuidedRetrievalService
+    participant C as GuidedCorpusRepository
+    participant S as SelectionEngine
+
+    UI->>G: candidates(questionId, 50)
+    G->>C: candidates(questionId, 50)
+    C-->>G: curated Candidate[]
+    G-->>UI: distinct strength-ranked candidates
+    UI->>S: select(prompt text, candidates, guided policy)
+```
+
+The free-form retrieval multiplier intentionally asks the vector index for more hint matches than final passages. Multiple hints can point to one passage; `LocalRetrievalService` deduplicates them and keeps the strongest semantic score. Guided membership is already curated, so `LocalGuidedRetrievalService` preserves low-strength candidates rather than applying the free-form threshold.
 
 ## Controlled selection
 
-`selection/SelectionEngine.kt` owns final choice. `SelectionPolicy` currently contains:
+`selection/SelectionEngine.kt` owns final choice for both modes. `SelectionPolicy` currently contains:
 
 - minimum semantic score;
 - semantic exponent;
 - preferred prepared length.
 
-Candidate semantic relevance is multiplied by independent quality/history/diversity weights. `RandomSource` is injected so tests can make the sampling deterministic. If no eligible candidate exists, selection returns `null`; it never silently falls back to generated text.
+Candidate relevance (vector similarity for free-form, curation strength for guided) is multiplied by independent quality/history/diversity weights. `SelectionPolicy.guidedDefaults()` sets only the minimum semantic gate to zero so the full validated curated pool remains eligible while preserving the same exponent/weights/length fallback. `RandomSource` is injected so tests can make the sampling deterministic. If no eligible candidate exists, selection returns `null`; it never silently falls back to generated text.
 
 ## Shared Compose UI
 
-`ui/SibylApp.kt` is the common UI entry point. The zero-argument overload creates `DemoRetrievalService`; the injected overload accepts any `RetrievalService` and is used by real Desktop mode.
+`ui/SibylApp.kt` is the common UI entry point. The zero-argument overload creates `DemoRetrievalService`; the injected overload accepts free-form `RetrievalService` plus an optional `GuidedRetrievalService`.
 
-The UI owns presentation state and in-memory development history only. It does not parse corpus files or implement ranking. Machine-translated text is visibly labelled.
+When mapped guided questions are available, the UI shows explicit **Guided question** and **Own question** modes. Guided mode loads the available prompt list from the service, uses a simple dropdown, sends the stable ID to guided retrieval, and passes the selected prompt text to `SelectionEngine`/`Answer`. **Another passage** keeps the same mode/prompt and performs a new controlled-random selection. If no guided questions exist (including v3 corpora), the guided selector stays hidden and free-form remains usable.
+
+The UI owns presentation state and in-memory development history only. It does not parse corpus files, perform vector ranking, or read curation metadata. Machine-translated text is visibly labelled.
 
 ## Android host
 
@@ -97,7 +122,7 @@ The UI owns presentation state and in-memory development history only. It does n
 
 ### `RuntimeManifests.kt`
 
-Parses the subset of `manifest.json` and `model-manifest.json` required by Desktop. `validateRuntimeCompatibility()` rejects unsupported corpus versions and mismatches in model ID, dimensions, normalization, E5 query prefix, or pooling.
+Parses the subset of `manifest.json` and `model-manifest.json` required by Desktop. `validateRuntimeCompatibility()` accepts format v3/v4 during migration, rejects unknown versions, and validates model ID, dimensions, normalization, E5 query prefix, and pooling. V3 manifests default guided counts to zero.
 
 ### `OnnxE5EmbeddingEngine`
 
@@ -116,7 +141,7 @@ Loads `vectors.json` once, validates vector dimensions, precomputes stored vecto
 
 ### `SqliteCorpusRepository`
 
-Opens `corpus.db` read-only through Xerial SQLite JDBC. Retrieved semantic-hint IDs are joined to passages, works, authors, text versions, and `passage_text` rows. Exact persisted `passage_text.text` values are copied into immutable runtime models; the repository never synthesizes display text.
+Opens `corpus.db` read-only through Xerial SQLite JDBC and implements both `CorpusRepository` and `GuidedCorpusRepository`. Free-form semantic-hint IDs are joined to passages as before. Format-v4 guided queries list only questions with mappings and hydrate strength-ranked passage candidates directly from `guided_question_passage`. Both paths copy exact persisted `passage_text.text` into immutable runtime models; the repository never synthesizes display text. Format v3 guided methods return empty without querying absent tables.
 
 ## Main dependencies
 
@@ -132,8 +157,8 @@ Dependency versions are centralized in `gradle/libs.versions.toml`.
 
 ## Tests
 
-- `shared/commonTest` covers retrieval deduplication and deterministic selection behavior;
-- `desktopApp/jvmTest` covers manifest compatibility and brute-force vector behavior;
+- `shared/commonTest` covers free-form deduplication, guided candidate normalization, and deterministic free-form/guided selection behavior;
+- `desktopApp/jvmTest` covers v3/v4 manifest compatibility, brute-force vector behavior, and guided SQLite question/candidate hydration;
 - Android host compilation is checked separately through the Android Gradle task.
 
 See [`../docs/TESTS.md`](../docs/TESTS.md) for the command matrix.

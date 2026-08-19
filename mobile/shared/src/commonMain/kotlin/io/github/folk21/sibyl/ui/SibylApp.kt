@@ -1,6 +1,7 @@
 package io.github.folk21.sibyl.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,11 +13,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,12 +31,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.folk21.sibyl.demo.DemoRetrievalService
 import io.github.folk21.sibyl.domain.Answer
+import io.github.folk21.sibyl.domain.GuidedQuestion
 import io.github.folk21.sibyl.domain.PassageTextRole
+import io.github.folk21.sibyl.retrieval.GuidedRetrievalService
 import io.github.folk21.sibyl.retrieval.RetrievalService
 import io.github.folk21.sibyl.selection.RandomSource
 import io.github.folk21.sibyl.selection.SelectionEngine
+import io.github.folk21.sibyl.selection.SelectionPolicy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+
+/** Selects whether the shared input delegates to stable guided IDs or free-form semantic retrieval. */
+private enum class QuestionInputMode {
+    GUIDED,
+    FREE_FORM,
+}
 
 /**
  * Runs the shared application UI with the clearly labelled synthetic demo retrieval service.
@@ -47,12 +60,12 @@ fun SibylApp() {
 }
 
 /**
- * Runs the shared Compose UI against an injected retrieval implementation.
+ * Runs the shared Compose UI against injected free-form and optional guided retrieval implementations.
  *
- * Compose owns only interaction state and presentation. A question is delegated to [RetrievalService] for a candidate
- * pool, then [SelectionEngine] performs the controlled-random final choice. The UI renders the selected stored
- * `PassageVariant`, keeps temporary in-memory history/saved encounters, and never performs vector ranking or corpus
- * parsing itself.
+ * Compose owns only interaction state and presentation. Free-form text delegates to [RetrievalService]; guided
+ * prompts delegate to [GuidedRetrievalService] by stable ID. Both modes then use the same [SelectionEngine] for the
+ * controlled-random final choice, and the UI renders only stored `PassageVariant` text. Guided mode is shown only
+ * when the installed corpus exposes at least one mapped question.
  *
  * [isDemo] controls synthetic-fixture labelling only; it does not change retrieval or selection semantics.
  */
@@ -61,26 +74,72 @@ fun SibylApp(
     retrievalService: RetrievalService,
     isDemo: Boolean,
     runtimeLabel: String? = null,
+    guidedRetrievalService: GuidedRetrievalService? = null,
 ) {
     MaterialTheme {
-        val retrieval = retrievalService
         val selector = remember { SelectionEngine(RandomSource { kotlin.random.Random.nextDouble() }) }
         val scope = rememberCoroutineScope()
         val history = remember { mutableStateListOf<Answer>() }
         val savedEncounters = remember { mutableStateListOf<Answer>() }
-        var question by remember { mutableStateOf("") }
+        var freeFormQuestion by remember { mutableStateOf("") }
+        var inputMode by remember { mutableStateOf(QuestionInputMode.FREE_FORM) }
+        var guidedQuestions by remember { mutableStateOf<List<GuidedQuestion>>(emptyList()) }
+        var selectedGuidedQuestion by remember { mutableStateOf<GuidedQuestion?>(null) }
+        var guidedMenuExpanded by remember { mutableStateOf(false) }
         var answer by remember { mutableStateOf<Answer?>(null) }
         var retrievalError by remember { mutableStateOf<String?>(null) }
+
+        LaunchedEffect(guidedRetrievalService) {
+            guidedQuestions = emptyList()
+            selectedGuidedQuestion = null
+            inputMode = QuestionInputMode.FREE_FORM
+            val service = guidedRetrievalService ?: return@LaunchedEffect
+            try {
+                guidedQuestions = service.availableQuestions()
+                selectedGuidedQuestion = guidedQuestions.firstOrNull()
+                if (guidedQuestions.isNotEmpty()) {
+                    inputMode = QuestionInputMode.GUIDED
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                guidedQuestions = emptyList()
+                selectedGuidedQuestion = null
+            }
+        }
 
         // Keep the asynchronous request boundary in UI state while retrieval and ranking remain outside Compose.
         fun requestAnswer() {
             scope.launch {
                 retrievalError = null
                 try {
-                    val candidates = retrieval.candidates(question = question, limit = 50)
-                    val selected = selector.select(question = question, candidates = candidates)
+                    val selected = when (inputMode) {
+                        QuestionInputMode.FREE_FORM -> {
+                            val question = freeFormQuestion
+                            val candidates = retrievalService.candidates(question = question, limit = 50)
+                            selector.select(question = question, candidates = candidates)
+                        }
+                        QuestionInputMode.GUIDED -> {
+                            val guided = selectedGuidedQuestion
+                            val service = guidedRetrievalService
+                            if (guided == null || service == null) {
+                                retrievalError = "No guided question is available in this corpus."
+                                return@launch
+                            }
+                            val candidates = service.candidates(questionId = guided.id, limit = 50)
+                            selector.select(
+                                question = guided.text,
+                                candidates = candidates,
+                                policy = SelectionPolicy.guidedDefaults(),
+                            )
+                        }
+                    }
                     if (selected == null) {
-                        retrievalError = "No sufficiently relevant passage was found."
+                        retrievalError = if (inputMode == QuestionInputMode.GUIDED) {
+                            "No curated passage is available for this question."
+                        } else {
+                            "No sufficiently relevant passage was found."
+                        }
                     } else {
                         answer = selected
                         history += selected
@@ -105,7 +164,7 @@ fun SibylApp(
                 if (isDemo) {
                     "Ask a question. This demo uses clearly labelled synthetic fixtures."
                 } else {
-                    "Ask a question. Answers are selected from the loaded local corpus."
+                    "Choose a prepared question or ask your own. Answers come from the loaded local corpus."
                 },
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -113,19 +172,89 @@ fun SibylApp(
                 Text(it, style = MaterialTheme.typography.labelMedium)
             }
 
-            OutlinedTextField(
-                value = question,
-                onValueChange = { question = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Your question") },
-                minLines = 3,
-            )
+            if (guidedQuestions.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (inputMode == QuestionInputMode.GUIDED) {
+                        Button(onClick = {
+                            inputMode = QuestionInputMode.GUIDED
+                            answer = null
+                            retrievalError = null
+                        }) {
+                            Text("Guided question")
+                        }
+                    } else {
+                        OutlinedButton(onClick = {
+                            inputMode = QuestionInputMode.GUIDED
+                            answer = null
+                            retrievalError = null
+                        }) {
+                            Text("Guided question")
+                        }
+                    }
+                    if (inputMode == QuestionInputMode.FREE_FORM) {
+                        Button(onClick = {
+                            inputMode = QuestionInputMode.FREE_FORM
+                            answer = null
+                            retrievalError = null
+                        }) {
+                            Text("Own question")
+                        }
+                    } else {
+                        OutlinedButton(onClick = {
+                            inputMode = QuestionInputMode.FREE_FORM
+                            answer = null
+                            retrievalError = null
+                        }) {
+                            Text("Own question")
+                        }
+                    }
+                }
+            }
+
+            if (inputMode == QuestionInputMode.GUIDED && guidedQuestions.isNotEmpty()) {
+                Text("Standard question", style = MaterialTheme.typography.labelLarge)
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = { guidedMenuExpanded = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(selectedGuidedQuestion?.text ?: "Choose a question")
+                    }
+                    DropdownMenu(
+                        expanded = guidedMenuExpanded,
+                        onDismissRequest = { guidedMenuExpanded = false },
+                    ) {
+                        guidedQuestions.forEach { guided ->
+                            DropdownMenuItem(
+                                text = { Text(guided.text) },
+                                onClick = {
+                                    selectedGuidedQuestion = guided
+                                    guidedMenuExpanded = false
+                                    answer = null
+                                    retrievalError = null
+                                },
+                            )
+                        }
+                    }
+                }
+            } else {
+                OutlinedTextField(
+                    value = freeFormQuestion,
+                    onValueChange = { freeFormQuestion = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Your question") },
+                    minLines = 3,
+                )
+            }
 
             Button(
                 onClick = ::requestAnswer,
-                enabled = question.isNotBlank(),
+                enabled = when (inputMode) {
+                    QuestionInputMode.GUIDED -> selectedGuidedQuestion != null
+                    QuestionInputMode.FREE_FORM -> freeFormQuestion.isNotBlank()
+                },
             ) {
-                Text("Ask the library")
+                Text("Find passage")
             }
 
             retrievalError?.let { message ->
@@ -144,7 +273,9 @@ fun SibylApp(
                             "${current.passage.author} — ${current.passage.work}",
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        current.passage.location?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                        current.passage.location?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall)
+                        }
                         if (displayText.role == PassageTextRole.MACHINE_TRANSLATION) {
                             Text("Machine translation", style = MaterialTheme.typography.labelSmall)
                         }
@@ -171,7 +302,7 @@ fun SibylApp(
                         Text(if (isSaved) "Saved" else "Remember this")
                     }
                     OutlinedButton(onClick = ::requestAnswer) {
-                        Text("Another answer")
+                        Text("Another passage")
                     }
                 }
             }

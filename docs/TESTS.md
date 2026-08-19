@@ -17,14 +17,14 @@ Current coverage:
 | Command | Purpose | Prerequisites |
 |---|---|---|
 | `make check` | corpus-core + builder behavior/structural tests + corpus-format/source-registry validation | Python 3.11+ and Python corpus dev dependencies |
-| `make check-all` | `make check` + Android host tests + desktop JVM shared tests | Python 3.11+, JDK 17+, Android SDK |
+| `make check-all` | `make check` + Android host tests + shared/Desktop JVM tests | Python 3.11+, JDK 17+, Android SDK |
 | `make test-corpus-core` | Shared Python contract/primitive tests | Python 3.11+, `pytest` available |
 | `make test-corpus-builder` | Builder unit/integration + architecture, package-documentation, and repository-hygiene regression tests | Python 3.11+, `pytest` available |
-| `make validate-format` | Validate corpus-format v3 schema/fixtures | Python 3.11+ |
+| `make validate-format` | Validate corpus-format v4 schema/constraints | Python 3.11+ |
 | `make validate-sources` | Validate source TOML records and collection references | Python 3.11+ |
 | `make smoke-corpus` | Build and validate a temporary synthetic corpus | Python 3.11+ |
 | `make test-mobile` | Run Android shared host tests | JDK 17+, Android SDK |
-| `make test-desktop` | Run shared tests on the desktop JVM target | JDK 17+ |
+| `make test-desktop` | Run shared JVM tests plus Desktop runtime repository/manifest tests | JDK 17+ |
 | `make run-desktop` | Run the interactive desktop development app | JDK 17+ |
 
 The first Gradle invocation may need network access to obtain the configured Gradle distribution and dependencies if they are not cached.
@@ -35,9 +35,9 @@ Default tests must be deterministic and require no production model download, ex
 
 ### Shared runtime and application hosts
 
-The active Gradle targets are Android and JVM Desktop. iOS targets are intentionally not configured. `make check-all` runs the shared tests on both active targets; the desktop app itself is primarily a manual development harness.
+The active Gradle targets are Android and JVM Desktop. iOS targets are intentionally not configured. `make check-all` runs shared tests on both active targets and the Desktop runtime JVM tests.
 
-Use deterministic injected randomness for selection behavior. When the corresponding behavior exists, cover:
+Use deterministic injected randomness for both free-form and guided selection behavior. When the corresponding behavior exists, cover:
 
 - semantic thresholding;
 - candidate deduplication;
@@ -45,10 +45,10 @@ Use deterministic injected randomness for selection behavior. When the correspon
 - response-length fallback;
 - repeat/recency weighting;
 - author/work/semantic-cluster diversity;
-- corpus-format compatibility;
+- corpus-format compatibility, including v3 free-form fallback and v4 guided semantics;
 - language and translation-role selection.
 
-Platform inference/index adapters should have focused integration tests. Desktop currently tests manifest compatibility and brute-force cosine ranking without downloading models. A separate opt-in golden embedding test should later compare ONNX query output against the Python Sentence Transformers build stack; default tests must remain model/network-free.
+Platform inference/index adapters should have focused integration tests. Desktop currently tests v3/v4 manifest compatibility, brute-force cosine ranking, and guided SQLite question/candidate hydration without downloading models. A separate opt-in golden embedding test should later compare ONNX query output against the Python Sentence Transformers build stack; default tests must remain model/network-free.
 
 ### Corpus core and builder
 
@@ -58,11 +58,11 @@ Platform inference/index adapters should have focused integration tests. Desktop
 - package documentation: every Python package must keep a meaningful `__init__.py` docstring describing its architectural role;
 - repository hygiene: Git ignore rules, archive helpers, and source snapshots must preserve the architectural `sibyl_corpus_builder/build/` source package rather than confusing it with generated build output.
 
-Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg. LLM-curation tests must remain external-model-free: validate the guided-question catalog and stable IDs, deterministic export bundle construction, rights gating, exact locator/hash import, deterministic curated passage IDs, and rejection of altered canonical slices.
+Use `pytest` with synthetic fixtures. Cover natural-boundary splitting, configuration validation, deterministic IDs, metadata population, staged publication, provenance retention, and failure on invalid artifacts. Catalog discovery/selection classification, Lib.ru TXT/HTML/FB2 fallback, HTML literary-body extraction, malformed-artifact handling, and per-work acquisition reporting must be covered with local fixtures; default tests never fetch Lib.ru or Gutenberg. LLM-curation tests must remain external-model-free: validate the guided-question catalog and stable IDs, deterministic export bundle construction, rights gating, exact locator/hash import, deterministic curated passage IDs, public exact-slice revalidation, and rejection of altered canonical slices. Builder integration tests cover v4 materialization, guided counts/mappings, duplicate curation inputs, and atomic failure on stale canonical hashes.
 
 ### Corpus format
 
-Validate SQL creation, foreign keys, required metadata, text-version roles, manifest/version consistency, hint/vector identity assumptions, and compatibility behavior.
+Validate SQL creation, foreign keys, required metadata, text-version roles, guided catalog/mapping uniqueness and strength bounds, manifest/version consistency, hint/vector identity assumptions, and compatibility behavior.
 
 ### Source registry
 

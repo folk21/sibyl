@@ -65,8 +65,32 @@ CREATE TABLE semantic_hint (
     semantic_cluster TEXT
 );
 
+CREATE TABLE guided_question_catalog (
+    id TEXT PRIMARY KEY,
+    language TEXT NOT NULL
+);
+
+CREATE TABLE guided_question (
+    id TEXT PRIMARY KEY,
+    catalog_id TEXT NOT NULL REFERENCES guided_question_catalog(id),
+    ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+    kind TEXT NOT NULL CHECK (kind IN ('question', 'state')),
+    theme TEXT NOT NULL,
+    text TEXT NOT NULL,
+    UNIQUE (catalog_id, ordinal)
+);
+
+CREATE TABLE guided_question_passage (
+    question_id TEXT NOT NULL REFERENCES guided_question(id),
+    passage_id TEXT NOT NULL REFERENCES passage(id),
+    strength REAL NOT NULL CHECK (strength >= 0.0 AND strength <= 1.0),
+    PRIMARY KEY (question_id, passage_id)
+);
+
 CREATE INDEX idx_text_version_work ON text_version(work_id);
 CREATE INDEX idx_passage_work ON passage(work_id);
 CREATE INDEX idx_passage_text_passage ON passage_text(passage_id);
 CREATE INDEX idx_passage_text_version ON passage_text(text_version_id);
 CREATE INDEX idx_hint_passage ON semantic_hint(passage_id);
+CREATE INDEX idx_guided_question_catalog ON guided_question(catalog_id, ordinal);
+CREATE INDEX idx_guided_mapping_passage ON guided_question_passage(passage_id);

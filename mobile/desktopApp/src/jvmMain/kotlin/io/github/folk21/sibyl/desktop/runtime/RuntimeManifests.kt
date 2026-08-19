@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 private val runtimeJson = Json { ignoreUnknownKeys = true }
+private val supportedCorpusFormats = setOf(3, 4)
 
 /** Embedding compatibility metadata persisted with a published corpus. */
 @Serializable
@@ -26,19 +27,20 @@ data class CorpusArtifactsManifest(
     val vectors: String,
 )
 
-/** Lightweight corpus counts used for diagnostics and the Desktop runtime label. */
+/** Lightweight corpus counts used for diagnostics and guided availability hints. */
 @Serializable
 data class CorpusCountsManifest(
     val works: Int,
     val passages: Int,
     val hints: Int,
+    @SerialName("guided_questions") val guidedQuestions: Int = 0,
+    @SerialName("guided_mappings") val guidedMappings: Int = 0,
 )
 
 /**
  * Minimal subset of the published corpus manifest required by the Desktop reader.
  *
- * Keeping this reader model narrow lets Desktop ignore builder-only metadata while still validating every field that
- * affects embedding compatibility or artifact location.
+ * Guided count fields default to zero so existing format-v3 manifests remain readable during the v4 migration.
  */
 @Serializable
 data class CorpusManifest(
@@ -81,16 +83,18 @@ fun loadRuntimeModelManifest(modelDir: Path): RuntimeModelManifest {
     return runtimeJson.decodeFromString(Files.readString(path))
 }
 
+/** Returns whether persisted guided-question tables are part of the corpus contract. */
+fun supportsGuidedRetrieval(corpus: CorpusManifest): Boolean = corpus.formatVersion >= 4
+
 /**
- * Rejects corpus/model combinations that could produce semantically invalid query vectors.
+ * Rejects corpus/model combinations that could produce semantically invalid free-form query vectors.
  *
- * The check is intentionally strict: a matching vector dimension alone is insufficient if model identity,
- * normalization, E5 query prefix, pooling behavior, or persisted corpus format differs. Failing before model/session
- * startup makes configuration drift explicit instead of returning plausible but unrelated literary passages.
+ * Desktop intentionally reads both format v3 and v4 during migration. V3 remains free-form only; v4 adds guided
+ * SQLite semantics. Unknown older/newer formats are rejected before native model or database resources are opened.
  */
 fun validateRuntimeCompatibility(corpus: CorpusManifest, model: RuntimeModelManifest) {
-    require(corpus.formatVersion == 3) {
-        "Unsupported corpus format ${corpus.formatVersion}; Desktop currently supports format 3"
+    require(corpus.formatVersion in supportedCorpusFormats) {
+        "Unsupported corpus format ${corpus.formatVersion}; Desktop supports formats 3 and 4"
     }
     require(model.schemaVersion == 1) { "Unsupported runtime model manifest ${model.schemaVersion}" }
     require(corpus.embedding.modelId == model.modelId) {

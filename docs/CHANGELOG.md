@@ -6,6 +6,7 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 
 ### Guided questions and literary curation
 
+- added the first Desktop guided-question runtime: format-v4 persisted catalog/mappings, exact curated passage materialization, local SQLite guided lookup, and a shared guided/free-form selector using the existing controlled-random `SelectionEngine`;
 - added a stable Russian guided-question catalog while preserving free-form local retrieval;
 - added build-time large-LLM literary curation with deterministic bundle export, proposal import, and local exact-text/hash validation;
 - kept curated guided retrieval conceptually separate from the automatic splitter/E5 path so arbitrary user questions can continue to use local semantic retrieval;
@@ -26,6 +27,7 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 
 ### Architecture and persisted contracts
 
+- advanced the corpus format to v4 with guided-question catalog and question-to-passage mapping semantics while retaining Desktop v3 free-form read compatibility during migration;
 - advanced the corpus format to v3 with exact source locators plus raw-artifact and canonical-text SHA-256 provenance;
 - introduced `corpus-core` as the feature-neutral Python boundary for canonical source documents, exact hashing/locators, prepared-source loading, and atomic publication;
 - separated `corpus-builder` into explicit `sources`, `build`, and `curation` feature boundaries;

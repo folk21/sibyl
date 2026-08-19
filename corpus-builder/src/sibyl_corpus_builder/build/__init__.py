@@ -1,9 +1,11 @@
-"""Automatic corpus-build feature for generic local semantic retrieval.
+"""Runtime corpus-build feature for free-form retrieval and guided curation assembly.
 
 It consumes prepared canonical sources and owns mechanical passage extraction,
-retrieval text, embeddings/cache, runtime artifact writing, validation, and
-atomic publication. Large-LLM literary curation is a separate feature; callers
-should use this package's public API rather than ``build._internal``."""
+retrieval text, embeddings/cache, format-v4 artifact writing, validation, and
+atomic publication. Validated large-LLM curation remains owned by the separate
+``curation`` feature; this build feature consumes only its public exact-slice
+contract and never imports ``curation._internal``.
+"""
 
 from .api import build_corpus, inspect_passages, validate_corpus
 

@@ -8,18 +8,24 @@ Pipeline position:
         -> import proposal
         -> local exact-text/hash validation
         -> Git-safe curated metadata
+        -> validated exact slices for runtime-corpus assembly
 
 The LLM decides literary relevance; local Python remains authoritative for canonical text
-identity. Runtime consumption of curated mappings is intentionally a later feature boundary.
+identity. Runtime code consumes only published corpus artifacts, never curation source files.
 """
 
 from ._internal.bundle import export_curation_bundle
-from ._internal.proposal import import_curation, validate_curated_curation
+from ._internal.proposal import (
+    import_curation,
+    load_validated_curation,
+    validate_curated_curation,
+)
 from ._internal.questions import load_question_catalog
 
 __all__ = [
     "export_curation_bundle",
     "import_curation",
     "load_question_catalog",
+    "load_validated_curation",
     "validate_curated_curation",
 ]

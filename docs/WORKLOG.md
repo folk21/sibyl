@@ -4,6 +4,16 @@ This is the detailed engineering and maintenance history of Sibyl. It intentiona
 
 For the concise history of meaningful product, architecture, data-contract, and capability evolution, see [`CHANGELOG.md`](CHANGELOG.md). This file is not required reading for normal implementation work; consult it when the history of a specific decision or maintenance change is relevant.
 
+## 2026-08-19 — Implement Desktop guided-question runtime
+
+- advanced runtime corpus publication to format v4 with persisted guided-question catalog rows, deterministic ordinals, question/passage mappings, and strength constraints;
+- added a public validated-curation loading boundary so `build` can revalidate exact canonical slices without importing `curation._internal`;
+- extended `sibyl-corpus build` with `--questions` and repeatable `--curation`, materializing curated exact passages into normal `passage` / `passage_text` rows before atomic validation/publication;
+- added shared `GuidedQuestion`, `GuidedCorpusRepository`, `GuidedRetrievalService`, and `LocalGuidedRetrievalService` contracts while leaving free-form `RetrievalService` unchanged;
+- extended Desktop SQLite/runtime compatibility to format v4 guided lookup while retaining format-v3 free-form support and rejecting unknown versions;
+- added the shared guided/free-form mode selector, guided question dropdown, and “Another passage” behavior through the existing `SelectionEngine` with a zero-threshold guided policy;
+- added focused Python/format/common/Desktop tests and included Desktop JVM runtime tests in `make test-desktop` / mobile CI.
+
 ## 2026-08-18 — Introduce active change specifications
 
 - added `docs/specs/` as a lightweight change-spec layer for significant planned/in-progress work without creating a second canonical description of the current system;
