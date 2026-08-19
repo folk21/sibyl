@@ -45,6 +45,8 @@ Current real Desktop retrieval consumes the **automatic** corpus; Android still 
 
 ## 1. Prepare canonical works
 
+The commands below assume that the corpus-builder Python environment has already been installed and activated as described in [`INSTALLATION.md`](INSTALLATION.md). Installing the package exposes the `sibyl-corpus` CLI entry point.
+
 For a new Lib.ru author, run the following from `corpus-builder/`.
 
 ### 1.1 Discover the author catalog
@@ -80,7 +82,9 @@ sibyl-corpus prepare-selection \
   --output data/work/tolstoy
 ```
 
-`data/work/tolstoy/` is the important handoff boundary: both later paths consume the same pinned canonical text versions.
+`data/work/tolstoy/` is the important handoff boundary: both later paths consume the same pinned canonical text versions. `prepare-selection` has already materialized only works with `decision = "include"`; entries left as `review` or `exclude` do not appear in this prepared directory.
+
+Selection decisions and source-version rights status are independent. `decision = "include"` controls which discovered works are prepared, while `rights_status = "approved"` or `"review_required"` controls whether a prepared text version may be exported to an external curation service without an explicit override. Curation export flags such as `--approved-only` do not revisit the selection decisions.
 
 **For LLM curation, stop here. Do not run `inspect-passages` first.** The curator selects meaningful ranges directly from canonical text; the automatic splitter is a separate generic-retrieval path.
 
