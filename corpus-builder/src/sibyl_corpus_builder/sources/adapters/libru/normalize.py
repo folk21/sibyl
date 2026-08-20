@@ -37,9 +37,14 @@ def _decode_text(raw: bytes) -> str:
 
 
 class _HtmlTextParser(HTMLParser):
-    """Extracts readable Lib.ru body blocks while ignoring obvious page chrome containers."""
+    """Extracts readable Lib.ru body blocks while ignoring non-literary control content.
 
-    _SKIP = {"head", "script", "style", "form", "select", "option", "noscript"}
+    Lib.ru may wrap the entire readable document in a ``form`` element, so forms are
+    structural containers here rather than an automatic skip boundary.
+    """
+
+    _HARD_SKIP = {"head", "script", "style", "noscript"}
+    _SELECT_CONTENT = {"option", "optgroup"}
     _BLOCKS = {
         "address", "article", "blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5",
         "h6", "hr", "li", "p", "pre", "section", "table", "td", "tr",
@@ -49,7 +54,8 @@ class _HtmlTextParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.blocks: list[str] = []
         self._parts: list[str] = []
-        self._skip_depth = 0
+        self._hard_skip_depth = 0
+        self._select_depth = 0
         self._pre_depth = 0
 
     def _flush(self) -> None:
@@ -66,11 +72,23 @@ class _HtmlTextParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         lower = tag.casefold()
-        if lower in self._SKIP:
-            self._skip_depth += 1
+        if lower in self._HARD_SKIP:
+            self._hard_skip_depth += 1
             return
-        if self._skip_depth:
+        if self._hard_skip_depth:
             return
+
+        if lower == "select":
+            self._select_depth += 1
+            return
+        if self._select_depth:
+            if lower in self._SELECT_CONTENT:
+                return
+            # Old Lib.ru markup can leave a navigation <select> unclosed. Browsers
+            # implicitly close it when incompatible content such as <input>, headings,
+            # or the literary <pre> starts; HTMLParser does not perform that recovery.
+            self._select_depth = 0
+
         if lower in self._BLOCKS:
             self._flush()
         if lower == "pre":
@@ -78,19 +96,29 @@ class _HtmlTextParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         lower = tag.casefold()
-        if lower in self._SKIP:
-            if self._skip_depth:
-                self._skip_depth -= 1
+        if lower in self._HARD_SKIP:
+            if self._hard_skip_depth:
+                self._hard_skip_depth -= 1
             return
-        if self._skip_depth:
+        if self._hard_skip_depth:
             return
+
+        if lower == "select":
+            if self._select_depth:
+                self._select_depth -= 1
+            return
+        if lower in self._SELECT_CONTENT and self._select_depth:
+            return
+        if self._select_depth:
+            return
+
         if lower in self._BLOCKS:
             self._flush()
         if lower == "pre" and self._pre_depth:
             self._pre_depth -= 1
 
     def handle_data(self, data: str) -> None:
-        if not self._skip_depth:
+        if not self._hard_skip_depth and not self._select_depth:
             self._parts.append(data)
 
     def close(self) -> None:
@@ -179,7 +207,7 @@ def _detect_kind(raw: bytes) -> str:
     prefix = raw[:8192]
     if _XML_MARKER.search(prefix):
         return "fb2"
-    if _HTML_MARKER.search(prefix) or b"<body" in prefix.casefold():
+    if _HTML_MARKER.search(prefix) or b"<body" in prefix.lower():
         return "html"
     return "txt"
 

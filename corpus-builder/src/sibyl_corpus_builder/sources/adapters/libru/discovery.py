@@ -19,9 +19,11 @@ from ...models import SelectionManifest, SelectionWork
 _AUTHOR_TITLE_PATTERNS = (
     re.compile(r"Lib\.ru/Классика[:.]\s*(.+?)\.\s*Полное собрание", re.I),
     re.compile(r"Lib\.Ru\s*/\s*Классика:\s*(.+?)(?::|$)", re.I),
+    re.compile(r"Lib\.Ru:\s*(.+?)$", re.I),
 )
 _YEAR = re.compile(r"\[([12]\d{3})\]")
 _TEXT_PAGE = re.compile(r"^text_[^/?#]+\.shtml$", re.I)
+_DIRECT_TEXT = re.compile(r"^[^/?#]+\.txt$", re.I)
 _INCLUDE_MARKERS = (
     "проза", "роман", "повесть", "рассказ", "поэзия", "драматургия", "сказки", "детская",
 )
@@ -99,7 +101,7 @@ class _DocumentParser(HTMLParser):
             absolute = urljoin(canonical_base, href)
             parsed = urlparse(absolute)
             file_name = parsed.path.rsplit("/", 1)[-1]
-            if not _TEXT_PAGE.fullmatch(file_name):
+            if not (_TEXT_PAGE.fullmatch(file_name) or _DIRECT_TEXT.fullmatch(file_name)):
                 continue
             all_work_indexes.append(index)
             if parsed.netloc == parsed_base.netloc and parsed.path.startswith(base_dir):
@@ -173,8 +175,14 @@ def _classify(title: str, context: str) -> tuple[str, str]:
     return "review", "automatic: category could not be classified safely"
 
 
-def discover_author_page(url: str, raw_html: bytes) -> SelectionManifest:
-    """Builds a developer-review selection from one Lib.ru author catalog page."""
+def discover_author_page(
+    url: str,
+    raw_html: bytes,
+    *,
+    language: str = "ru",
+    original_language: str | None = None,
+) -> SelectionManifest:
+    """Builds a language-aware review selection from one Lib.ru author/catalog page."""
     canonical_url = url.rstrip("/") + "/"
     parser = _DocumentParser()
     parser.feed(decode_html(raw_html))
@@ -206,8 +214,8 @@ def discover_author_page(url: str, raw_html: bytes) -> SelectionManifest:
         source_family="libru",
         source_url=canonical_url,
         author=author,
-        language="ru",
-        original_language="ru",
+        language=language,
+        original_language=original_language or language,
         category="literature",
         works=tuple(works),
     )

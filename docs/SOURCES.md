@@ -31,9 +31,9 @@ flowchart TD
 
 Network access occurs only through explicit source commands. Importing corpus-builder never discovers or downloads sources.
 
-## Lib.ru author-page discovery
+## Lib.ru catalog discovery
 
-The current catalog adapter supports Lib.ru/Классика author pages. `sibyl-corpus discover` creates a **developer review artifact**, not permanent registry state, and performs no acquisition or approval.
+The catalog adapter supports both Lib.ru/Классика `text_*.shtml` author pages and same-catalog direct `.txt` literary entries such as foreign-language collections. `sibyl-corpus discover` creates a **developer review artifact**, not permanent registry state, and performs no acquisition or approval. Russian catalogs retain the `ru` default; foreign originals must pass an explicit discovery language so the selection and later prepared text version preserve the correct language metadata.
 
 Each discovered work has one explicit decision:
 
@@ -54,8 +54,8 @@ Developers may edit decisions, delete candidates, or assign `registry_work_id` b
 
 For every included work, acquisition:
 
-1. opens the selected work page;
-2. tries an exposed or derivable TXT artifact first;
+1. downloads a selected direct `.txt` catalog entry with paced retry attempts when discovery already points at one; otherwise it opens the selected work page;
+2. tries an exposed or derivable TXT artifact first for work-page entries;
 3. falls back to the already downloaded work-page HTML and extracts the literary body;
 4. tries FB2/FB2 ZIP only if earlier candidates cannot be normalized safely;
 5. stores the first usable raw artifact plus canonical literary text and raw/canonical SHA-256 values.
@@ -64,7 +64,7 @@ The fallback is lazy: FB2 is not downloaded after TXT or HTML succeeds. Failures
 
 Normalizer IDs are `libru_txt_v1`, `libru_html_v1`, and `libru_fb2_v1`. Any change that can alter canonical text requires a new normalizer version and focused tests because downstream hashes and exact character locators depend on the canonical bytes.
 
-Lib.ru's format documentation describes TXT as internal text storage and HTML as generated rendering. Sibyl therefore prefers TXT when available; the versioned HTML literary-body extractor is a deliberate fallback, and FB2 remains final because some generated FB2 artifacts are malformed.
+Lib.ru's format documentation describes TXT as internal text storage and HTML as generated rendering. A public `.txt` URL may therefore arrive as an HTML rendering; content sniffing selects the appropriate normalizer. Direct-TXT acquisition is deliberately paced and retries when a response resolves to an unusable transient/service representation. Sibyl still prefers TXT when available; the versioned HTML literary-body extractor is a deliberate fallback, and FB2 remains final because some generated FB2 artifacts are malformed.
 
 ## Permanent registration
 

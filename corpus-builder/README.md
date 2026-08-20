@@ -53,7 +53,7 @@ The optional semantic embedding environment uses the `ml` extra and currently su
 
 | Goal | Commands | Owning docs |
 |---|---|---|
-| Discover/acquire/prepare sources | `discover`, `acquire`, `prepare-selection`, `fetch`, `import-file`, `prepare` | [`WORKFLOW`](../docs/WORKFLOW.md), [`SOURCES`](../docs/SOURCES.md) |
+| Discover/acquire/prepare sources (including language-aware Lib.ru direct TXT catalogs) | `discover`, `acquire`, `prepare-selection`, `fetch`, `import-file`, `prepare` | [`WORKFLOW`](../docs/WORKFLOW.md), [`SOURCES`](../docs/SOURCES.md) |
 | Persist reviewed source metadata | `register` | [`SOURCES`](../docs/SOURCES.md) |
 | Curate guided-question passages | `export-curation-bundle`, `import-curation`, `validate-curation` | [`WORKFLOW`](../docs/WORKFLOW.md) |
 | Translate curated foreign passages | `export-translation-bundle`, `import-translation`, `validate-translation` | [`WORKFLOW`](../docs/WORKFLOW.md) |

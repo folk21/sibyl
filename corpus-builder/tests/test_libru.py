@@ -29,6 +29,20 @@ _AUTHOR_PAGE = """
 </html>
 """.encode()
 
+
+_SHAKESPEARE_ENGLISH_CATALOG = """
+<html>
+<head><title>Lib.Ru: William Shakespeare</title></head>
+<body>
+<a href="hamlet_en.txt_Contents">огл</a>
+<a href="hamlet_en.txt">The Tragedy Of Hamlet, Prince Of Denmark</a>
+<a href="macbeth_en.txt_Contents">огл</a>
+<a href="macbeth_en.txt">The Tragedy Of Macbeth</a>
+<a href="../romeo_ru.txt">Russian translation outside this catalog</a>
+</body>
+</html>
+""".encode()
+
 _WORK_PAGE = """
 <html><head><title>Lib.ru/Классика: Достоевский. Преступление и наказание</title></head>
 <body>
@@ -91,6 +105,39 @@ def test_discover_libru_author_page_classifies_literature_and_correspondence(tmp
     assert loaded == manifest
 
 
+def test_discover_libru_direct_txt_catalog_preserves_explicit_foreign_language():
+    manifest = discover_libru_author_page(
+        "https://lib.ru/SHAKESPEARE/ENGL/",
+        _SHAKESPEARE_ENGLISH_CATALOG,
+        language="en",
+    )
+
+    assert manifest.author == "William Shakespeare"
+    assert manifest.language == "en"
+    assert manifest.original_language == "en"
+    assert [work.title for work in manifest.works] == [
+        "The Tragedy Of Hamlet, Prince Of Denmark",
+        "The Tragedy Of Macbeth",
+    ]
+    assert [work.source_url for work in manifest.works] == [
+        "https://lib.ru/SHAKESPEARE/ENGL/hamlet_en.txt",
+        "https://lib.ru/SHAKESPEARE/ENGL/macbeth_en.txt",
+    ]
+    assert all(work.decision == "review" for work in manifest.works)
+
+
+def test_discover_language_override_can_preserve_different_original_language():
+    manifest = discover_libru_author_page(
+        "https://lib.ru/SHAKESPEARE/ENGL/",
+        _SHAKESPEARE_ENGLISH_CATALOG,
+        language="ru",
+        original_language="en",
+    )
+
+    assert manifest.language == "ru"
+    assert manifest.original_language == "en"
+
+
 def test_libru_artifact_candidates_prefer_txt_then_html_then_fb2():
     candidates = discover_libru_artifact_candidates(
         "https://az.lib.ru/d/dostoewskij_f_m/text_0060.shtml", _WORK_PAGE
@@ -123,6 +170,58 @@ def test_libru_html_normalization_extracts_literary_body_and_removes_page_chrome
     assert "Скачать FB2" not in text
     assert "Ваша оценка" not in text
     assert "Вернуться на страницу автора" not in text
+
+
+def test_libru_html_normalization_keeps_literary_text_inside_page_wide_form():
+    wrapped = (
+        b"<html><head><title>William Shakespeare. King Richard The Second</title></head>"
+        b"<body><form action='/search'>"
+        b"<select><option>site navigation</option></select>"
+        b"<h1>King Richard The Second</h1>"
+        b"<pre>ACT I. SCENE I.\nLondon. The palace\n\n"
+        b"KING RICHARD. Old John of Gaunt, time-honoured Lancaster,\n"
+        b"Hast thou, according to thy oath and band,\n"
+        b"Brought hither Henry Hereford, thy bold son?</pre>"
+        b"</form></body></html>"
+    )
+
+    text, normalizer = canonicalize_source(
+        wrapped,
+        "libru",
+        work_title="King Richard The Second",
+        artifact_kind="txt",
+    )
+
+    assert normalizer == "libru_html_v1"
+    assert text.startswith("King Richard The Second\n\nACT I. SCENE I.")
+    assert "Old John of Gaunt" in text
+    assert "site navigation" not in text
+
+def test_libru_html_normalization_recovers_from_unclosed_navigation_select():
+    malformed = (
+        b"<html><head><title>William Shakespeare. King Richard The Second</title></head>"
+        b"<body><form action='/search'>"
+        b"<select><option>site navigation</option>"
+        b"<input type='submit' value='search'>"
+        b"<h1>King Richard The Second</h1>"
+        b"<pre>ACT I. SCENE I.\nLondon. The palace\n\n"
+        b"KING RICHARD. Old John of Gaunt, time-honoured Lancaster,\n"
+        b"Hast thou, according to thy oath and band,\n"
+        b"Brought hither Henry Hereford, thy bold son?</pre>"
+        b"</form></body></html>"
+    )
+
+    text, normalizer = canonicalize_source(
+        malformed,
+        "libru",
+        work_title="King Richard The Second",
+        artifact_kind="txt",
+    )
+
+    assert normalizer == "libru_html_v1"
+    assert text.startswith("King Richard The Second\n\nACT I. SCENE I.")
+    assert "Old John of Gaunt" in text
+    assert "site navigation" not in text
 
 
 def test_libru_content_sniff_overrides_misleading_txt_candidate_kind():
@@ -169,3 +268,25 @@ decision = "maybe"
     )
     with pytest.raises(ValueError, match="Invalid selection decision"):
         load_selection(path)
+
+
+def test_discover_cli_accepts_foreign_language_overrides():
+    from sibyl_corpus_builder.cli import build_parser
+
+    args = build_parser().parse_args(
+        [
+            "discover",
+            "--url",
+            "https://lib.ru/SHAKESPEARE/ENGL/",
+            "--language",
+            "en",
+            "--original-language",
+            "en",
+            "--output",
+            "data/work/shakespeare-selection.toml",
+        ]
+    )
+
+    assert args.command == "discover"
+    assert args.language == "en"
+    assert args.original_language == "en"

@@ -11,11 +11,14 @@ are isolated so malformed/unavailable representations do not prevent trying the 
 
 from dataclasses import dataclass
 from html.parser import HTMLParser
+from time import sleep
 from urllib.parse import urljoin, urlparse
 
 from ..._internal.http import download
 from ..._internal.registry import RegistryTextVersion
 from .discovery import decode_html
+
+_DIRECT_TXT_ATTEMPT_DELAYS_SECONDS = (0.4, 1.0, 2.0, 4.0)
 
 
 @dataclass(frozen=True)
@@ -117,11 +120,30 @@ def discover_fb2_uri(work_url: str, raw_html: bytes) -> str:
     raise ValueError(f"No FB2 download link found on Lib.ru work page: {work_url}")
 
 
+def _iter_direct_txt_candidates(uri: str):
+    """Yields paced retries because Lib.ru sometimes serves transient HTML for TXT URLs."""
+    for delay_seconds in _DIRECT_TXT_ATTEMPT_DELAYS_SECONDS:
+        sleep(delay_seconds)
+        raw = download(
+            uri,
+            accept="text/plain,text/html;q=0.9,*/*;q=0.1",
+        )
+        yield FetchedSourceCandidate("txt", raw, uri)
+
+
 def iter_candidates(version: RegistryTextVersion):
-    """Downloads Lib.ru representations in fallback order, skipping unavailable candidates."""
+    """Downloads direct Lib.ru TXT artifacts or work-page fallbacks in deterministic order."""
     if version.download_uri:
-        raw = download(version.download_uri)
-        yield FetchedSourceCandidate("auto", raw, version.download_uri)
+        if urlparse(version.download_uri).path.casefold().endswith(".txt"):
+            yield from _iter_direct_txt_candidates(version.download_uri)
+        else:
+            raw = download(version.download_uri)
+            yield FetchedSourceCandidate("auto", raw, version.download_uri)
+        return
+
+    source_path = urlparse(version.source_uri).path.casefold()
+    if source_path.endswith(".txt"):
+        yield from _iter_direct_txt_candidates(version.source_uri)
         return
 
     work_page = download(version.source_uri, accept="text/html")

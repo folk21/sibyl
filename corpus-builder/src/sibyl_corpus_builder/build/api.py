@@ -24,12 +24,23 @@ from sibyl_corpus_core.atomic import staging_directory
 from sibyl_corpus_core.models import SourceDocument
 from sibyl_corpus_core.prepared_sources import load_prepared_source_sets, load_prepared_sources
 
-from ..curation import load_question_catalog, load_validated_curation_from_documents
+from ..curation import (
+    curation_passage_ids,
+    load_question_catalog,
+    load_validated_curation_from_documents,
+)
 from ..curation.models import QuestionCatalog, ValidatedCuratedPassage
+from ..translation import (
+    load_validated_translation_from_documents,
+    translation_source_curation_id,
+)
+from ..translation.models import ValidatedMachineTranslation
 from ._internal.available_inputs import (
     discover_curation_paths,
     discover_prepared_source_dirs,
+    discover_translation_paths,
     select_available_curations,
+    select_available_translations,
 )
 from ._internal.database import create_database
 from ._internal.embedding_pipeline import resolve_embeddings
@@ -64,14 +75,15 @@ def _load_guided_inputs(
     documents: list[SourceDocument],
     questions_path: Path | None,
     curation_paths: list[Path],
-) -> tuple[QuestionCatalog | None, list[ValidatedCuratedPassage]]:
+) -> tuple[QuestionCatalog | None, list[ValidatedCuratedPassage], dict[str, Path]]:
     if curation_paths and questions_path is None:
         raise ValueError("--questions is required when --curation is supplied")
     if questions_path is None:
-        return None, []
+        return None, [], {}
 
     catalog = load_question_catalog(questions_path)
     curated: list[ValidatedCuratedPassage] = []
+    curation_by_id: dict[str, Path] = {}
     seen_passage_ids: set[str] = set()
     seen_mappings: set[tuple[str, str]] = set()
     for curation_path in curation_paths:
@@ -80,6 +92,7 @@ def _load_guided_inputs(
             questions_path=questions_path,
             curation_path=curation_path,
         )
+        existing_curation_path = curation_by_id.get(validated.curation_id)
         if validated.question_catalog_id != catalog.catalog_id:
             raise ValueError(
                 f"Curation {curation_path} uses catalog {validated.question_catalog_id}, "
@@ -100,6 +113,9 @@ def _load_guided_inputs(
                     )
                 seen_mappings.add(mapping)
             curated.append(passage)
+        if existing_curation_path is not None:
+            raise ValueError(f"Duplicate curation_id across build inputs: {validated.curation_id}")
+        curation_by_id[validated.curation_id] = curation_path
 
     curated.sort(
         key=lambda passage: (
@@ -109,7 +125,53 @@ def _load_guided_inputs(
             passage.passage_id,
         )
     )
-    return catalog, curated
+    return catalog, curated, curation_by_id
+
+
+def _load_translation_inputs(
+    *,
+    documents: list[SourceDocument],
+    questions_path: Path | None,
+    curation_by_id: dict[str, Path],
+    translation_paths: list[Path],
+) -> list[ValidatedMachineTranslation]:
+    if not translation_paths:
+        return []
+    if questions_path is None:
+        raise ValueError("--questions is required when --translation is supplied")
+
+    translations: list[ValidatedMachineTranslation] = []
+    seen_ids: set[str] = set()
+    seen_passage_languages: set[tuple[str, str]] = set()
+    for translation_path in translation_paths:
+        source_curation_id = translation_source_curation_id(translation_path)
+        curation_path = curation_by_id.get(source_curation_id)
+        if curation_path is None:
+            raise ValueError(
+                f"Translation {translation_path} requires curation {source_curation_id!r}, "
+                "which is not selected for this build"
+            )
+        translation = load_validated_translation_from_documents(
+            documents=documents,
+            questions_path=questions_path,
+            curation_path=curation_path,
+            translation_path=translation_path,
+        )
+        if translation.translation_id in seen_ids:
+            raise ValueError(
+                f"Duplicate translation_id across build inputs: {translation.translation_id}"
+            )
+        seen_ids.add(translation.translation_id)
+        for passage in translation.passages:
+            key = (passage.passage_id, translation.target_language.casefold())
+            if key in seen_passage_languages:
+                raise ValueError(
+                    "Multiple machine translations for the same passage/target language: "
+                    f"{passage.passage_id}/{translation.target_language}"
+                )
+            seen_passage_languages.add(key)
+        translations.append(translation)
+    return translations
 
 
 def build_available_corpus(
@@ -119,6 +181,7 @@ def build_available_corpus(
     *,
     questions_path: Path | None = None,
     curation_root: Path | None = None,
+    translation_root: Path | None = None,
 ) -> None:
     """Builds one runtime corpus from every prepared source set currently available locally."""
     source_dirs = discover_prepared_source_dirs(source_root)
@@ -129,6 +192,16 @@ def build_available_corpus(
     selected_curations, skipped_curations = select_available_curations(
         documents=documents,
         curation_paths=discovered_curations,
+    )
+    available_passage_ids = frozenset(
+        passage_id
+        for curation_path in selected_curations
+        for passage_id in curation_passage_ids(curation_path)
+    )
+    discovered_translations = discover_translation_paths(translation_root)
+    selected_translations, skipped_translations = select_available_translations(
+        available_passage_ids=available_passage_ids,
+        translation_paths=discovered_translations,
     )
 
     print(
@@ -151,6 +224,21 @@ def build_available_corpus(
             )
             for path in skipped_curations:
                 print(f"  {path}", flush=True)
+    if translation_root is not None:
+        print(
+            f"Selected {len(selected_translations)} validated translation files from "
+            f"{translation_root}.",
+            flush=True,
+        )
+        for path in selected_translations:
+            print(f"  {path}", flush=True)
+        if skipped_translations:
+            print(
+                "Skipped translation files whose curated passages are not available locally:",
+                flush=True,
+            )
+            for path in skipped_translations:
+                print(f"  {path}", flush=True)
 
     build_corpus(
         config,
@@ -158,6 +246,7 @@ def build_available_corpus(
         output_dir,
         questions_path=questions_path,
         curation_paths=list(selected_curations),
+        translation_paths=list(selected_translations),
     )
 
 
@@ -193,9 +282,11 @@ def build_corpus(
     *,
     questions_path: Path | None = None,
     curation_paths: list[Path] | None = None,
+    translation_paths: list[Path] | None = None,
 ) -> None:
     """Builds, validates, and atomically publishes free-form plus optional guided runtime data."""
     curation_paths = list(curation_paths or [])
+    translation_paths = list(translation_paths or [])
     source_dirs = _normalize_source_dirs(source_dir)
     print("[1/5] Loading sources, passages, and guided curation...", flush=True)
     documents = load_prepared_source_sets(source_dirs)
@@ -204,10 +295,16 @@ def build_corpus(
         for document in documents
         for passage in split_document(document, config.passages)
     ]
-    question_catalog, curated_passages = _load_guided_inputs(
+    question_catalog, curated_passages, curation_by_id = _load_guided_inputs(
         documents=documents,
         questions_path=questions_path,
         curation_paths=curation_paths,
+    )
+    translations = _load_translation_inputs(
+        documents=documents,
+        questions_path=questions_path,
+        curation_by_id=curation_by_id,
+        translation_paths=translation_paths,
     )
 
     automatic_ids = {passage.passage_id for passage in passages}
@@ -227,11 +324,13 @@ def build_corpus(
         for hint in hint_generator.generate(passage, config.hints.hints_per_passage)
     ]
     guided_mapping_count = sum(len(passage.matches) for passage in curated_passages)
+    machine_translation_count = sum(len(item.passages) for item in translations)
 
     print(
         f"Prepared {len(documents)} works, {len(passages)} automatic passages, "
         f"{len(curated_passages)} curated passages, {len(hints)} embedding hints, "
-        f"{guided_mapping_count} guided mappings.",
+        f"{guided_mapping_count} guided mappings, "
+        f"{machine_translation_count} machine translations.",
         flush=True,
     )
     print("[2/5] Resolving embeddings...", flush=True)
@@ -253,6 +352,7 @@ def build_corpus(
             hints=hints,
             question_catalog=question_catalog,
             curated_passages=curated_passages,
+            translations=translations,
         )
         (staging_dir / "vectors.json").write_text(
             json.dumps(vectors, ensure_ascii=False, separators=(",", ":")),
@@ -266,6 +366,7 @@ def build_corpus(
             hint_count=len(hints),
             guided_question_count=(len(question_catalog.items) if question_catalog else 0),
             guided_mapping_count=guided_mapping_count,
+            machine_translation_count=machine_translation_count,
         )
 
         print("[4/5] Validating corpus...", flush=True)

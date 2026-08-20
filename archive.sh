@@ -19,8 +19,7 @@ zip -r "$archive_path" "$repo_name" \
   -x "*/.idea/*" \
      "*/.vscode/*" \
      "*/.git/*" \
-     "*/.venv/*" \
-     "*/.venv-ml/*" \
+     "*/.venv*/*" \
      "*/.kotlin/*" \
      "*/.gradle/*" \
      "*/.gradle-dist/*" \

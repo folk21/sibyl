@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "curation_id": "shakespeare-v1",
+  "question_catalog_id": "sibyl-guided-questions-ru-v1",
+  "curation_method": "large_llm",
+  "source_bundle_id": "cb_6893063b07fc69d5612a",
+  "passages": [
+    {
+      "passage_id": "cp_f0f87c7310fe65b80e68",
+      "work_id": "libru-engl-asyoulike-en",
+      "text_version_id": "libru-engl-asyoulike-en-libru",
+      "canonical_sha256": "301d9238839ab9ce5493229e4164c8f9f53d30267f67b8cd208c0ed181bf19bd",
+      "source_locator": "chars:51034:54885",
+      "text_sha256": "156a818fc260d7d602c0b728a780014e9b54825fa6f996d3a9503baae7e50f7b",
+      "word_count": 651,
+      "matches": [
+        {
+          "question_id": "limited_time",
+          "strength": 0.95
+        },
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.85
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_f8c82d4055a4fd5f2a89",
+      "work_id": "libru-engl-hamlet-en",
+      "text_version_id": "libru-engl-hamlet-en-libru",
+      "canonical_sha256": "897d583804ad3d2c7711f636709274bfce7d88dcb665f93efb696ca24b0e5538",
+      "source_locator": "chars:40723:42746",
+      "text_sha256": "a1a77a64a1147de0ee4baf066b40afd8556c6a217dabd986e1a7bdaacff16dd5",
+      "word_count": 333,
+      "matches": [
+        {
+          "question_id": "change_timing",
+          "strength": 0.75
+        },
+        {
+          "question_id": "limited_time",
+          "strength": 0.8
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_d9744778385227612b5d",
+      "work_id": "libru-engl-hamlet-en",
+      "text_version_id": "libru-engl-hamlet-en-libru",
+      "canonical_sha256": "897d583804ad3d2c7711f636709274bfce7d88dcb665f93efb696ca24b0e5538",
+      "source_locator": "chars:81018:86133",
+      "text_sha256": "c75beda3cdee4c518304e2b3b60cd723818c27641dd42a83b52a91d4fcab0557",
+      "word_count": 889,
+      "matches": [
+        {
+          "question_id": "fear_of_death",
+          "strength": 0.92
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.9
+        },
+        {
+          "question_id": "unfinished_life",
+          "strength": 0.82
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_1d97059625b010a645e2",
+      "work_id": "libru-engl-hamlet-en",
+      "text_version_id": "libru-engl-hamlet-en-libru",
+      "canonical_sha256": "897d583804ad3d2c7711f636709274bfce7d88dcb665f93efb696ca24b0e5538",
+      "source_locator": "chars:99738:100388",
+      "text_sha256": "f3d0d4d1f95297e8008a11e61ab1efbb9bf2be34620d4c02e73b8ad6b1c7af72",
+      "word_count": 115,
+      "matches": [
+        {
+          "question_id": "self_deception",
+          "strength": 0.75
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_3695f12b843e26b14329",
+      "work_id": "libru-engl-macbeth-en",
+      "text_version_id": "libru-engl-macbeth-en-libru",
+      "canonical_sha256": "8a15936a5fe7d5aac395cacd8dcc895213dd2344dc4d1422bc1b3aad5357fa04",
+      "source_locator": "chars:94670:97477",
+      "text_sha256": "4ff24a44c2051388001ea66f9fe0b107f7b51783d87b8e3b390a72b212c60941",
+      "word_count": 480,
+      "matches": [
+        {
+          "question_id": "inner_contradictions",
+          "strength": 0.9
+        },
+        {
+          "question_id": "self_forgiveness",
+          "strength": 0.95
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_b77b66d2a8516d57cc42",
+      "work_id": "libru-engl-macbeth-en",
+      "text_version_id": "libru-engl-macbeth-en-libru",
+      "canonical_sha256": "8a15936a5fe7d5aac395cacd8dcc895213dd2344dc4d1422bc1b3aad5357fa04",
+      "source_locator": "chars:104783:105417",
+      "text_sha256": "d1899dc04479e1a8c28d29a3a73db147eb9fa6d64ab1177e17ec0339d1716e4f",
+      "word_count": 104,
+      "matches": [
+        {
+          "question_id": "limited_time",
+          "strength": 0.95
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.9
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_0e373f35bcdcb614af61",
+      "work_id": "libru-engl-romeo-en",
+      "text_version_id": "libru-engl-romeo-en-libru",
+      "canonical_sha256": "64a3fa9db2f934aca51a63cbb5dffb330422b44f6dbd0683f56c51a98485883b",
+      "source_locator": "chars:147846:152739",
+      "text_sha256": "e8280628acc6f29bc22de05697bfa3058dbff85d40e19487dc073bc188c5cee1",
+      "word_count": 850,
+      "matches": [
+        {
+          "question_id": "love_without_possession",
+          "strength": 0.85
+        },
+        {
+          "question_id": "regret_about_past",
+          "strength": 0.8
+        }
+      ]
+    },
+    {
+      "passage_id": "cp_8b8a7a32f0c8993dee18",
+      "work_id": "libru-engl-tempest-en",
+      "text_version_id": "libru-engl-tempest-en-libru",
+      "canonical_sha256": "396e47431231345768b908e4bf21cd066829494c1831d853519aaa621a494104",
+      "source_locator": "chars:82618:83956",
+      "text_sha256": "d8ba9edf45b1f4432cab1bda40c7d421f3d7b6a01e8a08d994792ae047020557",
+      "word_count": 216,
+      "matches": [
+        {
+          "question_id": "meaning_of_life",
+          "strength": 0.9
+        },
+        {
+          "question_id": "mortality_and_values",
+          "strength": 0.8
+        }
+      ]
+    }
+  ]
+}

@@ -50,6 +50,13 @@ def register_commands(subparsers) -> None:
         default=[],
         help="Validated curated metadata to materialize; repeat for multiple curation sets",
     )
+    build.add_argument(
+        "--translation",
+        type=Path,
+        action="append",
+        default=[],
+        help="Validated machine-translation artifact; repeat for multiple translation sets",
+    )
     build.add_argument("--output", type=Path, required=True)
 
     available = subparsers.add_parser(
@@ -72,6 +79,11 @@ def register_commands(subparsers) -> None:
         "--curation-root",
         type=Path,
         help="Optional directory containing validated curated *.json metadata",
+    )
+    available.add_argument(
+        "--translation-root",
+        type=Path,
+        help="Optional directory containing local validated machine-translation *.json files",
     )
     available.add_argument("--output", type=Path, required=True)
 
@@ -100,6 +112,7 @@ def dispatch(args) -> bool:
             args.output,
             questions_path=args.questions,
             curation_paths=args.curation,
+            translation_paths=args.translation,
         )
         validate_corpus(args.output / "corpus.db")
         print(f"Built and validated corpus in {args.output}")
@@ -111,6 +124,7 @@ def dispatch(args) -> bool:
             args.output,
             questions_path=args.questions,
             curation_root=args.curation_root,
+            translation_root=args.translation_root,
         )
         validate_corpus(args.output / "corpus.db")
         print(f"Built and validated corpus from available local sources in {args.output}")

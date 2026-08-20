@@ -30,13 +30,24 @@ def _work_toml(manifest, selected_work, artifact) -> str:
         "Author public-domain status does not by itself approve this concrete electronic edition; "
         "review source reuse terms before enabling."
     )
+    direct_txt = selected_work.source_url.casefold().split("?", 1)[0].endswith(".txt")
     provenance = (
-        f"Discovered from {manifest.source_url}; acquired from the Lib.ru work page as "
+        f"Discovered from {manifest.source_url}; acquired directly from the Lib.ru catalog as "
         f"{artifact.artifact_kind} and normalized with {artifact.normalizer}."
+        if direct_txt
+        else (
+            f"Discovered from {manifest.source_url}; acquired from the Lib.ru work page as "
+            f"{artifact.artifact_kind} and normalized with {artifact.normalizer}."
+        )
     )
     source_locator = (
-        f"Lib.ru work page; resolved {artifact.artifact_kind} artifact; "
+        f"Lib.ru direct {artifact.artifact_kind.upper()} catalog artifact; "
         f"normalizer={artifact.normalizer}."
+        if direct_txt
+        else (
+            f"Lib.ru work page; resolved {artifact.artifact_kind} artifact; "
+            f"normalizer={artifact.normalizer}."
+        )
     )
     lines = [
         "schema_version = 1",
@@ -47,14 +58,18 @@ def _work_toml(manifest, selected_work, artifact) -> str:
         f"original_language = {_quote(manifest.original_language)}",
         "enabled = false",
         'review_status = "candidate"',
-        'russian_display_policy = "source_text"',
+        (
+            'russian_display_policy = "source_text"'
+            if manifest.language == "ru"
+            else 'russian_display_policy = "build_time_machine_translation"'
+        ),
         "",
         "[[text_versions]]",
         f"id = {_quote(version_id)}",
         f"language = {_quote(manifest.language)}",
         'role = "original"',
         'source_family = "libru"',
-        'source_name = "Lib.ru / Классика"',
+        f"source_name = {_quote(version.source_name)}",
         f"source_uri = {_quote(selected_work.source_url)}",
         f"source_locator = {_quote(source_locator)}",
         f"download_uri = {_quote(artifact.resolved_uri)}",
@@ -73,7 +88,7 @@ def _collection_toml(collection_id: str, title: str, work_ids: list[str]) -> str
         "schema_version = 1",
         f"id = {_quote(collection_id)}",
         f"title = {_quote(title)}",
-        'description = "Developer-reviewed selection discovered from a Lib.ru author page."',
+        'description = "Developer-reviewed selection discovered from a Lib.ru catalog."',
         "works = [",
     ]
     lines.extend(f"  {_quote(work_id)}," for work_id in work_ids)

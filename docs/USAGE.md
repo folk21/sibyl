@@ -25,10 +25,25 @@ Real Desktop mode validates corpus/model compatibility before retrieval. Intel m
 Creates an editable developer-review selection from a supported author/catalog URL.
 
 ```text
-sibyl-corpus discover --url <catalog-url> --output <selection.toml>
+sibyl-corpus discover \
+  --url <catalog-url> \
+  [--language <language>] \
+  [--original-language <language>] \
+  --output <selection.toml>
 ```
 
-Discovery performs no acquisition and grants no approval. For Lib.ru classification behavior, see [`SOURCES.md`](SOURCES.md).
+Discovery performs no acquisition and grants no approval. Lib.ru discovery supports both traditional `text_*.shtml` work pages and direct `.txt` catalog entries. Existing Russian catalogs default to `ru`; use `--language en` (or another explicit language) for foreign originals. When `--original-language` is omitted after a language override, it defaults to the discovered text language. Use a different original language only when the selected text itself is a translation.
+
+Shakespeare example:
+
+```bash
+sibyl-corpus discover \
+  --url "https://lib.ru/SHAKESPEARE/ENGL/" \
+  --language en \
+  --output data/work/shakespeare-selection.toml
+```
+
+The generated selection is a review artifact. Before `acquire`, edit wanted entries to `decision = "include"`; entries left as `review` are not acquired. For classification and provenance behavior, see [`SOURCES.md`](SOURCES.md).
 
 ### `acquire`
 
@@ -38,7 +53,17 @@ Processes only `decision = "include"` entries in a reviewed selection and caches
 sibyl-corpus acquire --selection <selection.toml> --cache <cache-dir> [--report <report.toml>]
 ```
 
-Batch failures are isolated per work. The command finishes the selection, writes a report, then exits non-zero if included works failed.
+Precondition: the selection must contain at least one `decision = "include"` entry. If every entry is still `review`/`exclude`, acquisition stops and asks for explicit review rather than implicitly approving anything.
+
+Shakespeare example:
+
+```bash
+sibyl-corpus acquire \
+  --selection data/work/shakespeare-selection.toml \
+  --cache data/raw
+```
+
+Batch failures are isolated per work. Successful artifacts remain cached even when other included works fail, and a later `acquire` run reuses valid cached artifacts instead of downloading them again. Lib.ru direct-TXT requests are paced and retried when a response cannot be normalized as literary content, because `.txt` URLs may be rendered as HTML and may occasionally return transient service pages during bursty access. The command finishes the selection, writes a report, then exits non-zero if included works still failed after their candidate attempts. Re-running the same command reuses already successful cached artifacts during the later preparation stage.
 
 ### `prepare-selection`
 

@@ -24,7 +24,7 @@ flowchart TD
 ## Current state
 
 - prepared sources already persist language, original language, and text role;
-- Project Gutenberg and reviewed local import can provide foreign originals;
+- Project Gutenberg, reviewed local import, and language-aware Lib.ru direct-TXT catalogs can provide foreign originals;
 - guided curation resolves exact canonical source ranges and persists locator/hash metadata;
 - corpus format v4 already supports `original`, `human_translation`, and `machine_translation` text versions and multiple `passage_text` rows for one logical passage;
 - Desktop repository hydration already reads all stored text versions, but shared UI currently selects only one preferred text;

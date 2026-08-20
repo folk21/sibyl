@@ -11,6 +11,7 @@ from pathlib import Path
 from sibyl_corpus_core.models import SourceDocument
 
 from ...curation import curation_source_keys
+from ...translation import translation_source_passage_ids
 
 
 def discover_prepared_source_dirs(source_root: Path) -> tuple[Path, ...]:
@@ -39,6 +40,39 @@ def discover_curation_paths(curation_root: Path | None) -> tuple[Path, ...]:
     if not curation_root.is_dir():
         raise ValueError(f"Curation root does not exist: {curation_root}")
     return tuple(sorted(curation_root.glob("*.json"), key=lambda path: path.name))
+
+
+def discover_translation_paths(translation_root: Path | None) -> tuple[Path, ...]:
+    """Finds local validated machine-translation JSON inputs when the root exists."""
+    if translation_root is None or not translation_root.exists():
+        return ()
+    if not translation_root.is_dir():
+        raise ValueError(f"Translation root is not a directory: {translation_root}")
+    return tuple(sorted(translation_root.glob("*.json"), key=lambda path: path.name))
+
+
+def select_available_translations(
+    *,
+    available_passage_ids: frozenset[str],
+    translation_paths: tuple[Path, ...],
+) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+    """Selects translations fully backed by selected curated passages and rejects partial sets."""
+    selected: list[Path] = []
+    skipped: list[Path] = []
+    for path in translation_paths:
+        required = translation_source_passage_ids(path)
+        present = required.intersection(available_passage_ids)
+        if not present:
+            skipped.append(path)
+            continue
+        missing = required - available_passage_ids
+        if missing:
+            raise ValueError(
+                f"Translation {path} is only partially available; missing curated passage IDs: "
+                f"{sorted(missing)}"
+            )
+        selected.append(path)
+    return tuple(selected), tuple(skipped)
 
 
 def select_available_curations(

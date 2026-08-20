@@ -57,17 +57,30 @@ For a new Lib.ru author, run the following from `corpus-builder/`.
 
 ### 1.1 Discover the author catalog
 
+For the usual Russian Lib.ru/Классика catalog:
+
 ```bash
 sibyl-corpus discover \
   --url "<reviewed-author-catalog-url>" \
   --output data/work/tolstoy-selection.toml
 ```
 
-`discover` writes an editable review manifest. It neither downloads nor approves works.
+`discover` writes an editable review manifest. It neither downloads nor approves works. Lib.ru discovery also supports same-catalog direct `.txt` entries. When the discovered text is not Russian, pass its language explicitly; if `--original-language` is omitted it defaults to the selected `--language`.
+
+For example, the English Shakespeare catalog on Lib.ru:
+
+```bash
+sibyl-corpus discover \
+  --url "https://lib.ru/SHAKESPEARE/ENGL/" \
+  --language en \
+  --output data/work/shakespeare-selection.toml
+```
+
+Review the resulting selection exactly as for a Russian author. Discovery is intentionally conservative: foreign direct-TXT entries may remain `decision = "review"` until a developer decides what belongs in the corpus.
 
 ### 1.2 Review the selection
 
-Open `data/work/tolstoy-selection.toml`. Keep only intentional `decision = "include"` entries; leave uncertain material as `review` or mark it `exclude`. Set stable `registry_work_id` values before permanent registration when known.
+Open the generated `selection.toml`. Before acquisition, mark every wanted work explicitly as `decision = "include"`; leave uncertain material as `review` or mark it `exclude`. `acquire` requires at least one included work and never treats `review` as implicit approval. Set stable `registry_work_id` values before permanent registration when known.
 
 ### 1.3 Acquire included works
 
@@ -77,7 +90,7 @@ sibyl-corpus acquire \
   --cache data/raw
 ```
 
-Review the generated acquisition report. Successful works remain cached even if another included work fails. Source-specific fallback/normalization rules are owned by [`SOURCES.md`](SOURCES.md).
+Review the generated acquisition report. Successful works remain cached even if another included work fails, and a later `acquire` run reuses valid cached artifacts instead of downloading them again. Lib.ru direct-TXT acquisition is paced and retries transient unusable representations; a work reported as failed has exhausted those attempts and can be retried later without losing successful cached works. Source-specific fallback/normalization rules are owned by [`SOURCES.md`](SOURCES.md).
 
 ### 1.4 Materialize canonical input
 
@@ -96,7 +109,9 @@ Selection decisions and source-version rights status are independent. `decision 
 
 ### 1.5 Foreign originals such as Shakespeare
 
-Foreign originals use the same prepared-source boundary; there is no separate runtime engine. When no author-catalog discovery adapter exists, add/review a concrete source record under `corpus-sources/` (for example a Project Gutenberg text version) or import a reviewed local UTF-8 artifact, then use the registry flow:
+Foreign originals use the same prepared-source boundary; there is no separate runtime engine. If a supported catalog is available, prefer normal discovery with an explicit language. For Lib.ru's English Shakespeare catalog, use the `discover` example in section 1.1, then follow the same **review → acquire → prepare-selection** stages above. Full copy-paste command examples and option details belong to [`USAGE.md`](USAGE.md).
+
+For foreign sources without a supported catalog adapter, add/review a concrete source record under `corpus-sources/` (for example a Project Gutenberg text version) or import a reviewed local UTF-8 artifact, then use the registry flow:
 
 ```bash
 sibyl-corpus fetch \

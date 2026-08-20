@@ -21,11 +21,21 @@ from .registry import RegistryTextVersion
 FetchedCandidate = GutenbergCandidate | LibRuCandidate
 
 
-def discover_source(url: str) -> SelectionManifest:
-    """Discovers a review manifest for a supported catalog URL without acquiring works."""
+def discover_source(
+    url: str,
+    *,
+    language: str | None = None,
+    original_language: str | None = None,
+) -> SelectionManifest:
+    """Discovers a review manifest with optional text/original-language overrides."""
     host = urlparse(url).netloc.casefold()
     if host in {"az.lib.ru", "lib.ru", "www.lib.ru"}:
-        return discover_libru_author_page(url, download(url, accept="text/html"))
+        return discover_libru_author_page(
+            url,
+            download(url, accept="text/html"),
+            language=language or "ru",
+            original_language=original_language,
+        )
     raise ValueError(f"No discovery adapter for URL: {url}")
 
 

@@ -127,8 +127,13 @@ def prepare_selection_sources(*, selection_path: Path, cache_dir: Path, output_d
                     "translation_model": None,
                     "source_uri": version.source_uri,
                     "source_locator": (
-                        f"Lib.ru {artifact.artifact_kind} artifact resolved from work page; "
+                        f"Lib.ru direct {artifact.artifact_kind.upper()} artifact; "
                         f"normalizer={artifact.normalizer}"
+                        if selected_work.source_url.casefold().split("?", 1)[0].endswith(".txt")
+                        else (
+                            f"Lib.ru {artifact.artifact_kind} artifact resolved from work page; "
+                            f"normalizer={artifact.normalizer}"
+                        )
                     ),
                     "source_artifact_sha256": artifact.raw_sha256,
                     "canonical_text_sha256": artifact.canonical_sha256,

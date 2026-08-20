@@ -17,6 +17,7 @@ def write_manifest(
     hint_count: int,
     guided_question_count: int = 0,
     guided_mapping_count: int = 0,
+    machine_translation_count: int = 0,
 ) -> None:
     """Writes format/embedding compatibility metadata and guided diagnostics."""
     embedding_manifest: dict[str, object] = {
@@ -47,6 +48,7 @@ def write_manifest(
             "hints": hint_count,
             "guided_questions": guided_question_count,
             "guided_mappings": guided_mapping_count,
+            "machine_translations": machine_translation_count,
         },
         "artifacts": {"corpus": "corpus.db", "vectors": "vectors.json"},
     }

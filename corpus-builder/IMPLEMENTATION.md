@@ -91,9 +91,9 @@ sources/adapters/
     fb2.py
 ```
 
-`libru/discovery.py` parses an author catalog and classifies entries into conservative `include` / `review` / `exclude` decisions. It does not acquire work bodies.
+`libru/discovery.py` parses Lib.ru catalogs, recognizes both traditional `text_*.shtml` work pages and same-catalog direct `.txt` entries, and classifies them into conservative `include` / `review` / `exclude` decisions. Discovery accepts explicit text/original-language metadata for foreign originals and does not acquire work bodies.
 
-`libru/fetch.py` owns Lib.ru work-page artifact discovery and the resilient `TXT -> HTML -> FB2` fallback order.
+`libru/fetch.py` downloads direct TXT entries without work-page parsing. Direct-TXT requests are paced and may yield retry representations when an earlier response fails normalization, because Lib.ru can render `.txt` URLs as HTML and may return transient service pages under bursty access. Traditional work pages retain the resilient `TXT -> HTML -> FB2` fallback order. Selection acquisition first reuses a valid cached source artifact, so retrying a partially failed batch does not redownload already successful works.
 
 `libru/normalize.py` owns Lib.ru-specific decoding/body-boundary/site-chrome logic. It preserves literary wording and keeps normalizer versions stable because exact canonical hashes and character locators depend on its output.
 

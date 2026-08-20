@@ -14,6 +14,7 @@ This document records meaningful Sibyl product, architecture, data-contract, and
 
 ### Source ingestion and corpus preparation
 
+- added language-aware Lib.ru direct-TXT catalog ingestion, enabling foreign originals such as Shakespeare to use the normal discover/acquire/prepare workflow before curation and build-time translation;
 - added build-time large-LLM translation of validated curated foreign-language passages, with deterministic source bundles, strict source/hash/provenance import, local generated-text storage, and runtime materialization as labelled machine translations;
 - added author-centric Lib.ru discovery with editable selection, resilient TXT -> HTML -> FB2 acquisition, deterministic canonical preparation, and optional source registration;
 - added Project Gutenberg acquisition and reviewed local-file import paths;

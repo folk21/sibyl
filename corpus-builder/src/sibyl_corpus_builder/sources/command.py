@@ -43,6 +43,14 @@ def register_commands(subparsers) -> None:
         "discover", help="Discover source works from a supported author/catalog URL"
     )
     discover.add_argument("--url", required=True)
+    discover.add_argument(
+        "--language",
+        help="Override discovered text language, for example 'en' for a foreign original",
+    )
+    discover.add_argument(
+        "--original-language",
+        help="Override work original language; defaults to --language when that is supplied",
+    )
     discover.add_argument("--output", type=Path, required=True)
 
     acquire = subparsers.add_parser(
@@ -102,7 +110,12 @@ def dispatch(args) -> bool:
     if args.command not in _COMMANDS:
         return False
     if args.command == "discover":
-        manifest = discover_to_file(args.url, args.output)
+        manifest = discover_to_file(
+            args.url,
+            args.output,
+            language=args.language,
+            original_language=args.original_language,
+        )
         counts = {decision: 0 for decision in ("include", "review", "exclude")}
         for work in manifest.works:
             counts[work.decision] += 1

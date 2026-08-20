@@ -34,7 +34,7 @@ fi
   -i target -i '*/target/*' \
   -i dist -i '*/dist/*' \
   -i '*.egg-info' -i '*/*.egg-info/*' \
-  -i .venv -i .venv-ml -i venv -i env -i 'env*' \
+  -i .venv -i .venv-ml -i .venv-ml311 -i venv -i env -i 'env*' \
   -i '*/.venv/*' -i '*/.venv-ml/*' \
   -i .cache -i '*/.cache/*' \
   -i .huggingface -i '*/.huggingface/*' \

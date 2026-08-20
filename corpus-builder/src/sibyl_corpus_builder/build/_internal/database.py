@@ -9,11 +9,14 @@ The SQL schema is owned by ``corpus-format/schema.sql``. This writer mirrors tha
 schema and only persists literary wording supplied by exact prepared-source slices.
 """
 
+import hashlib
 import sqlite3
 from pathlib import Path
 
 from sibyl_corpus_builder.curation.models import QuestionCatalog, ValidatedCuratedPassage
+from sibyl_corpus_builder.translation.models import ValidatedMachineTranslation
 from sibyl_corpus_core.models import SourceDocument
+from sibyl_corpus_core.text import word_count
 
 from .models import PassageCandidate, SemanticHint
 
@@ -129,9 +132,11 @@ def create_database(
     hints: list[SemanticHint],
     question_catalog: QuestionCatalog | None = None,
     curated_passages: list[ValidatedCuratedPassage] | None = None,
+    translations: list[ValidatedMachineTranslation] | None = None,
 ) -> None:
     """Materializes the format-owned SQLite corpus from exact automatic and curated passages."""
     curated_passages = curated_passages or []
+    translations = translations or []
     if path.exists():
         path.unlink()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -307,3 +312,65 @@ def create_database(
                     for match in curated.matches
                 ],
             )
+
+        translation_text_versions: dict[tuple[str, str, str, str], str] = {}
+        for translation in translations:
+            for translated in translation.passages:
+                key = (
+                    translation.translation_id,
+                    translated.work_id,
+                    translated.source_text_version_id,
+                    translation.target_language.casefold(),
+                )
+                text_version_id = translation_text_versions.get(key)
+                if text_version_id is None:
+                    identity = ":".join(key)
+                    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+                    text_version_id = f"mt_{digest}"
+                    translation_text_versions[key] = text_version_id
+                    connection.execute(
+                        """
+                        INSERT INTO text_version(
+                            id, work_id, language, role, translator, translation_provider,
+                            translation_model, source_name, source_uri, source_locator,
+                            source_artifact_sha256, canonical_text_sha256, rights_status,
+                            rights_jurisdiction, provenance
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            text_version_id,
+                            translated.work_id,
+                            translation.target_language,
+                            "machine_translation",
+                            None,
+                            translation.translation_provider,
+                            translation.translation_model,
+                            "Sibyl build-time machine translation",
+                            None,
+                            f"translation:{translation.translation_id}",
+                            translation.artifact_sha256,
+                            None,
+                            None,
+                            None,
+                            (
+                                f"source_curation={translation.source_curation_id}; "
+                                f"source_bundle={translation.source_bundle_id}; "
+                                f"prompt_version={translation.prompt_version}"
+                            ),
+                        ),
+                    )
+                connection.execute(
+                    """
+                    INSERT INTO passage_text(
+                        passage_id, text_version_id, variant, text, word_count, source_locator
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        translated.passage_id,
+                        text_version_id,
+                        "standard",
+                        translated.text,
+                        word_count(translated.text),
+                        f"translation:{translation.translation_id}:{translated.passage_id}",
+                    ),
+                )

@@ -196,3 +196,161 @@ def test_acquire_selection_falls_back_and_isolates_failed_works(tmp_path: Path, 
         "failed",
         "skipped",
     }
+
+
+
+
+def test_acquire_selection_reuses_valid_cached_artifact(tmp_path: Path, monkeypatch):
+    selection_path, manifest = _selection(tmp_path)
+    cache = tmp_path / "raw"
+    selected = manifest.included()[0]
+    work, version = selection_registry_models(manifest, selected)
+    write_source_artifact(
+        cache_dir=cache,
+        work=work,
+        version=version,
+        raw=_HTML,
+        resolved_uri=selected.source_url,
+        artifact_kind="html",
+    )
+
+    def fail_candidates(_version):
+        raise AssertionError("cached acquisition must not fetch the source again")
+
+    monkeypatch.setattr(
+        "sibyl_corpus_builder.sources._internal.acquisition.iter_text_version_candidates",
+        fail_candidates,
+    )
+
+    report = acquire_selection(selection_path=selection_path, cache_dir=cache)
+
+    assert len(report.acquired) == 1
+    assert report.acquired[0].normalizer == "libru_html_v1"
+    assert not report.failed
+
+def test_acquire_foreign_direct_txt_retries_transient_service_html(
+    tmp_path: Path, monkeypatch
+):
+    from sibyl_corpus_builder.sources.adapters.libru import fetch
+
+    manifest = SelectionManifest(
+        source_family="libru",
+        source_url="https://lib.ru/SHAKESPEARE/ENGL/",
+        author="William Shakespeare",
+        language="en",
+        original_language="en",
+        category="literature",
+        works=(
+            SelectionWork(
+                id="libru-engl-dream-en",
+                title="A Midsummer Night's Dream",
+                source_url="https://lib.ru/SHAKESPEARE/ENGL/dream_en.txt",
+                decision="include",
+                reason="developer review",
+            ),
+        ),
+    )
+    selection_path = tmp_path / "shakespeare-selection.toml"
+    write_selection(manifest, selection_path)
+
+    responses = iter(
+        (
+            b"<html><head><title>Temporary page</title></head>"
+            b"<body><form><span>Please retry</span></form></body></html>",
+            (
+                b"A Midsummer Night's Dream\n\n"
+                b"ACT I\n\nNow, fair Hippolyta, our nuptial hour draws on apace."
+            ),
+        )
+    )
+    delays: list[float] = []
+    calls: list[str] = []
+
+    def fake_download(url: str, **_kwargs) -> bytes:
+        calls.append(url)
+        return next(responses)
+
+    monkeypatch.setattr(fetch, "download", fake_download)
+    monkeypatch.setattr(fetch, "sleep", delays.append)
+
+    report = acquire_selection(
+        selection_path=selection_path,
+        cache_dir=tmp_path / "raw",
+    )
+
+    assert len(report.acquired) == 1
+    assert not report.failed
+    assert calls == [manifest.works[0].source_url, manifest.works[0].source_url]
+    assert delays == [0.4, 1.0]
+    assert report.acquired[0].normalizer == "libru_txt_v1"
+
+def test_prepare_and_register_foreign_direct_txt_selection(tmp_path: Path):
+    manifest = SelectionManifest(
+        source_family="libru",
+        source_url="https://lib.ru/SHAKESPEARE/ENGL/",
+        author="William Shakespeare",
+        language="en",
+        original_language="en",
+        category="literature",
+        works=(
+            SelectionWork(
+                id="libru-engl-hamlet-en",
+                registry_work_id="shakespeare-hamlet-libru-en",
+                title="The Tragedy Of Hamlet, Prince Of Denmark",
+                source_url="https://lib.ru/SHAKESPEARE/ENGL/hamlet_en.txt",
+                decision="include",
+                reason="developer review",
+            ),
+        ),
+    )
+    selection_path = tmp_path / "shakespeare-selection.toml"
+    write_selection(manifest, selection_path)
+    cache = tmp_path / "raw"
+    selected = manifest.included()[0]
+    work, version = selection_registry_models(manifest, selected)
+    assert version.source_name == "Lib.ru"
+    assert "direct TXT" in version.source_locator
+
+    artifact = write_source_artifact(
+        cache_dir=cache,
+        work=work,
+        version=version,
+        raw=(
+            b"The Tragedy Of Hamlet, Prince Of Denmark\n\n"
+            b"ACT I\n\nWho's there?\n"
+        ),
+        resolved_uri=selected.source_url,
+        artifact_kind="txt",
+    )
+
+    prepared = tmp_path / "prepared"
+    prepare_selection_sources(
+        selection_path=selection_path,
+        cache_dir=cache,
+        output_dir=prepared,
+    )
+    prepared_manifest = json.loads((prepared / "manifest.json").read_text(encoding="utf-8"))
+    entry = prepared_manifest["works"][0]
+    assert entry["language"] == "en"
+    assert entry["original_language"] == "en"
+    assert entry["text_role"] == "original"
+    assert "direct TXT" in entry["source_locator"]
+
+    registry = tmp_path / "registry"
+    register_selection(
+        selection_path=selection_path,
+        cache_dir=cache,
+        registry_dir=registry,
+        collection_id="shakespeare-libru-en",
+    )
+    record = tomllib.loads(
+        (registry / "works" / "shakespeare-hamlet-libru-en.toml").read_text(encoding="utf-8")
+    )
+    text_version = record["text_versions"][0]
+    assert record["original_language"] == "en"
+    assert record["russian_display_policy"] == "build_time_machine_translation"
+    assert text_version["language"] == "en"
+    assert text_version["source_name"] == "Lib.ru"
+    assert text_version["download_uri"] == selected.source_url
+    assert "direct TXT" in text_version["source_locator"]
+    assert artifact.raw_sha256 == text_version["artifact_sha256"]

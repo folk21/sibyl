@@ -13,10 +13,13 @@ This module coordinates retries/fallbacks and per-work isolation. Source-family 
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
+
+from sibyl_corpus_core.hashing import sha256_bytes
 
 from ..models import SelectionManifest, SelectionWork
 from .adapters import iter_text_version_candidates
-from .artifacts import SourceArtifact, write_source_artifact
+from .artifacts import SourceArtifact, read_source_artifact, write_source_artifact
 from .registry import (
     RegistryTextVersion,
     RegistryWork,
@@ -27,21 +30,30 @@ from .reports import AcquisitionItem, AcquisitionReport, write_acquisition_repor
 from .selection import load_selection
 
 
+def _is_direct_txt_source(url: str) -> bool:
+    return urlparse(url).path.casefold().endswith(".txt")
+
+
 def selection_registry_models(
     manifest: SelectionManifest, selected_work: SelectionWork
 ) -> tuple[RegistryWork, RegistryTextVersion]:
     """Builds temporary registry-shaped models for a reviewed Lib.ru selection item."""
     version_id = f"{selected_work.id}-libru"
+    direct_txt = _is_direct_txt_source(selected_work.source_url)
     version = RegistryTextVersion(
         id=version_id,
         language=manifest.language,
         role="original",
         source_family=manifest.source_family,
-        source_name="Lib.ru / Классика",
+        source_name="Lib.ru" if direct_txt else "Lib.ru / Классика",
         source_uri=selected_work.source_url,
         source_locator=(
-            "Lib.ru work page; acquisition prefers TXT, then reviewed HTML extraction, then FB2. "
-            "Pin hashes before approval."
+            "Lib.ru direct TXT artifact discovered from catalog; pin hashes before approval."
+            if direct_txt
+            else (
+                "Lib.ru work page; acquisition prefers TXT, then reviewed HTML extraction, "
+                "then FB2. Pin hashes before approval."
+            )
         ),
         rights_status="review_required",
         rights_jurisdiction="RU",
@@ -73,7 +85,13 @@ def _write_first_valid_candidate(*, cache_dir: Path, work, version, candidates) 
                 artifact_kind=None if candidate.kind == "auto" else candidate.kind,
             )
         except Exception as error:  # noqa: BLE001 - source fallback is intentional
-            errors.append(f"{candidate.kind} {candidate.resolved_uri}: {error}")
+            detail = (
+                f"{candidate.kind} {candidate.resolved_uri} "
+                f"[response_bytes={len(candidate.raw)}, "
+                f"response_sha256={sha256_bytes(candidate.raw)}]: {error}"
+            )
+            if detail not in errors:
+                errors.append(detail)
     detail = "; ".join(errors) if errors else "no candidates"
     raise ValueError(f"No usable source artifact for {work.work_id}: {detail}")
 
@@ -132,7 +150,11 @@ def acquire_selection(
     if manifest.source_family != "libru":
         raise ValueError(f"Selection acquisition is not implemented for {manifest.source_family!r}")
     if not manifest.included():
-        raise ValueError("Selection has no works with decision = 'include'")
+        raise ValueError(
+            "Selection has no works with decision = 'include'. "
+            'Review the selection file and mark at least one work as decision = "include" '
+            "before acquisition."
+        )
 
     items: list[AcquisitionItem] = []
     for selected_work in manifest.works:
@@ -149,12 +171,15 @@ def acquire_selection(
 
         work, version = selection_registry_models(manifest, selected_work)
         try:
-            artifact = _write_first_valid_candidate(
-                cache_dir=cache_dir,
-                work=work,
-                version=version,
-                candidates=iter_text_version_candidates(version),
-            )
+            try:
+                artifact = read_source_artifact(cache_dir, work.work_id, version.id)
+            except ValueError:
+                artifact = _write_first_valid_candidate(
+                    cache_dir=cache_dir,
+                    work=work,
+                    version=version,
+                    candidates=iter_text_version_candidates(version),
+                )
             items.append(
                 AcquisitionItem(
                     work_id=selected_work.id,
